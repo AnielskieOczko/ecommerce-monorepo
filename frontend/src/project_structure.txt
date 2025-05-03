@@ -1,0 +1,29 @@
+
+src--
+    ├───components
+    │   ├───admin
+    │   ├───cart
+    │   ├───customer
+    │   ├───guards
+    │   └───user
+    ├───contexts
+    ├───hooks
+    ├───layouts
+    ├───middleware
+    ├───pages
+    │   ├───admin
+    │   │   ├───categories
+    │   │   ├───orders
+    │   │   ├───products
+    │   │   └───users
+    │   ├───auth
+    │   └───customer
+    │       ├───account
+    │       ├───cart
+    │       └───products
+    ├───routes
+    ├───services
+    ├───styles
+    ├───template_example
+    ├───types
+    └───utils

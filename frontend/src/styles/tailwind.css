@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --color-primary: 0 0 0; /* Black */
+    --color-secondary: 107 114 128; /* Gray-500 */
+
+    /* Text Colors */
+    --color-text-primary: 17 24 39; /* Gray-900 */
+    --color-text-secondary: 75 85 99; /* Gray-600 */
+    --color-text-disabled: 156 163 175; /* Gray-400 */
+
+    /* Background Colors */
+    --color-bg-primary: 255 255 255; /* White */
+    --color-bg-secondary: 249 250 251; /* Gray-50 */
+    --color-bg-tertiary: 243 244 246; /* Gray-100 */
+
+    /* Status Colors */
+    --color-success: 34 197 94; /* Green-500 */
+    --color-error: 239 68 68; /* Red-500 */
+    --color-warning: 234 179 8; /* Yellow-500 */
+    --color-info: 59 130 246; /* Blue-500 */
+  }
+}
+
+@layer components {
+  /* Typography */
+  .h1 {
+    @apply text-4xl font-bold text-gray-900;
+  }
+
+  .h2 {
+    @apply text-3xl font-semibold text-gray-900;
+  }
+
+  .h3 {
+    @apply text-2xl font-semibold text-gray-900;
+  }
+
+  .h4 {
+    @apply text-xl font-semibold text-gray-900;
+  }
+
+  .body-large {
+    @apply text-lg text-gray-700;
+  }
+
+  .body {
+    @apply text-base text-gray-700;
+  }
+
+  .body-small {
+    @apply text-sm text-gray-600;
+  }
+
+  .caption {
+    @apply text-xs text-gray-500;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

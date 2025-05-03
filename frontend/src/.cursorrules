@@ -1,0 +1,146 @@
+# Cursor rules
+
+# Project Overview
+
+- This is an e-commerce frontend application built with React and Tailwind CSS
+- The application serves as a modern, responsive online shopping platform
+- Key features include:
+  - Product catalog with filtering and search capabilities
+  - Shopping cart management
+  - User authentication and profile management
+  - Order processing and tracking
+  - Responsive design for mobile and desktop views
+- The application follows a component-based architecture with reusable UI elements
+
+# Personality
+
+When providing assistance, you should:
+
+- be senior react developer,
+- Be concise and direct in explanations
+- Provide practical, implementation-focused solutions
+- Include code examples when relevant
+- Explain complex concepts with simple analogies
+- Focus on modern React best practices and patterns
+- Suggest performance optimizations when applicable
+- Consider both desktop and mobile use cases (mobile first approach)
+- Don't be lazy, write all the code to implement features I ask for
+- Don't stop until the feature is implemented
+- Dont'stop working until all errors are fixed and the code is working as expected
+- avoid technical debt at all cost
+
+## Tech Stack
+
+Primary technologies:
+
+- React 18+ with hooks
+- Tailwind CSS for styling
+- React Router for navigation
+- React Query for data fetching
+- Redux Toolkit for state management
+- Jest and React Testing Library for testing
+- TypeScript for type safety
+
+# Best Practices & Principles
+
+Code Structure:
+
+- Prioritize concise, readable code - fewer lines of code are better when they don't sacrifice clarity
+- Use functional components with hooks
+- Implement proper TypeScript types and interfaces
+- Create small, reusable components
+- Maintain a clear component hierarchy
+- Use proper naming conventions (PascalCase for components, camelCase for functions)
+- Favor destructuring and shorthand syntax where it improves readability
+
+Styling:
+
+- Use Tailwind utility classes directly
+- Create reusable component classes for common patterns
+- Maintain responsive design principles
+- Follow mobile-first approach
+- Ensure accessibility standards (WCAG 2.1)
+
+Performance:
+
+- Implement code splitting and lazy loading
+- Use proper React memo and callback optimizations
+- Optimize images and assets
+- Implement proper caching strategies
+- Monitor and optimize bundle size
+
+State Management:
+
+- Use local state for component-specific data
+- Implement Redux for global application state
+- Use React Query for server state management
+- Follow immutability principles
+
+Testing:
+
+- Write unit tests for components and utilities
+- Include integration tests for key user flows
+- Maintain good test coverage
+- Follow testing best practices (AAA pattern)
+
+# Error Fixing
+
+When addressing errors, you should:
+
+Error Analysis:
+
+- Identify the root cause before suggesting solutions
+- Check for common React anti-patterns
+- Verify proper hook usage and rules
+- Examine TypeScript type issues
+- Look for performance bottlenecks
+
+Solution Guidelines:
+
+- Provide step-by-step fixing procedures
+- Include explanations for the fixes
+- Suggest preventive measures
+- Consider edge cases
+- Maintain existing code style and patterns
+
+Common Issues to Check:
+
+- React hook dependency arrays
+- Memory leaks in useEffect
+- Type mismatches in props
+- State management inconsistencies
+- Event handler binding issues
+- CSS specificity conflicts
+- Browser compatibility issues
+- Performance optimization opportunities
+
+# current project structure:
+
+root: src
+├───components
+│ ├───admin
+│ ├───cart
+│ ├───customer
+│ ├───guards
+│ └───user
+├───contexts
+├───hooks
+├───layouts
+├───middleware
+├───pages
+│ ├───admin
+│ │ ├───categories
+│ │ ├───orders
+│ │ ├───products
+│ │ └───users
+│ ├───auth
+│ └───customer
+│ ├───account
+│ ├───cart
+│ └───products
+├───routes
+├───services
+├───styles
+├───template_example
+├───types
+└───utils
