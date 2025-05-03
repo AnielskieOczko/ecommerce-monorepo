@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: ecommerce-email-service
+  config:
+    activate:
+      on-profile: dev  # Default profile for development
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    username: ${SPRING_RABBITMQ_USERNAME}
+    password: ${SPRING_RABBITMQ_PASSWORD}
+    port: 5672
+    # Add configuration for response queue
+    template:
+      reply-timeout: 5000  # timeout for waiting for reply
+  mail:
+    host: mailhog     # MailHog service name in Docker network
+    port: 1025        # MailHog SMTP port
+    properties:
+      smtp:
+        auth: false   # Disabled for MailHog
+        starttls:
+          enable: false
+  thymeleaf:
+    cache: false              # Disable template caching for development
+
+---
+
+# Local profile (email service running locally, RabbitMQ/MailHog in Docker)
+spring:
+  config:
+    activate:
+      on-profile: ${SPRING_PROFILES_ACTIVE:local}
+  docker:
+    compose:
+      enabled: false
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}      # Docker RabbitMQ
+    port: 5672
+    username: ${SPRING_RABBITMQ_USERNAME:guest}  # Default credentials
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    template:
+      reply-timeout: 5000
+  mail:
+    host: localhost           # Docker MailHog
+    port: 1025
+    properties:
+      smtp:
+        auth: false
+        starttls:
+          enable: false
+  thymeleaf:
+    cache: false              # Disable template caching for development
+server:
+  port: 8090  # Must be at root level under the profile
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod  # Production profile
+  mail:
+    host: smtp.yourprovider.com
+    port: 587
+    username: ${EMAIL_USER}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      smtp:
+        auth: true
+        starttls:
+          enabled: true
+
+thymeleaf:
+  prefix: classpath:/email-templates/
+  suffix: .html
+  cache: false

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .message-box {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0fff0;
+            border-left: 4px solid #4CAF50;
+            border-radius: 3px;
+        }
+        .payment-details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Payment Confirmation</h1>
+    </div>
+
+    <div class="message-box">
+        <p>Thank you for your payment! Your order is now being processed.</p>
+    </div>
+
+    <div class="payment-details">
+        <h2>Payment Details</h2>
+        <p><strong>Order Number:</strong> <span th:text="${orderId}">ORD-12345</span></p>
+        <p th:if="${paymentId != null}"><strong>Payment ID:</strong> <span th:text="${paymentId}">PAY-12345</span></p>
+        <p th:if="${paymentAmount != null}"><strong>Amount:</strong> <span th:text="${paymentAmount != null ? (paymentAmount.amount + ' ' + paymentAmount.currencyCode) : ''}">$100.00</span></p>
+        <p><strong>Status:</strong> <span th:text="${paymentStatus}">SUCCEEDED</span></p>
+        <p><strong>Date:</strong> <span th:text="${#temporals.format(timestamp, 'MMMM dd, yyyy')}">January 1, 2025</span></p>
+    </div>
+
+    <div th:if="${receiptUrl != null}" style="text-align: center; margin: 20px 0;">
+        <a th:href="${receiptUrl}" class="button">View Receipt</a>
+    </div>
+
+    <p>Your order is now being prepared for shipping. You will receive another email when your order ships.</p>
+
+    <div class="footer">
+        <p>If you have any questions about your order, please contact our customer service team.</p>
+        <p>&copy; 2025 Your Ecommerce Store. All rights reserved.</p>
+    </div>
+</body>
+</html>

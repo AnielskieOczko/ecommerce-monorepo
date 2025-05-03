@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Test Email Template</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .content { margin: 20px 0; }
+        .footer { color: #7f8c8d; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Test Email Template</h1>
+</div>
+
+<div class="content">
+    <p>This is a test email sent to: <strong th:text="${email}">user@example.com</strong></p>
+    <p>Generated at: <span th:text="${#dates.format(#dates.createNow(), 'dd MMM yyyy HH:mm:ss')}"></span></p>
+</div>
+
+<div class="footer">
+    <p th:text="${Footer}">Default footer text</p>
+    <p>This is an automated message, please do not reply</p>
+</div>
+</body>
+</html>
