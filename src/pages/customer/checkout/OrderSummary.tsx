@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useCartContext } from '../../../contexts/CartContext';
 import { Input, Button } from '../../../components/ui';
+import { PayButton } from '../../../components/payment/PayButton';
+// Payment is now handled directly in the confirmation step
+import { userService } from '../../../services/userService';
+import { stripeService } from '../../../services/stripeService';
+// Payment status is now handled in the confirmation step
 
-enum PaymentMethod {
-  CREDIT_CARD = 'CREDIT_CARD',
-  PAYPAL = 'PAYPAL',
-  BANK_TRANSFER = 'BANK_TRANSFER',
-  BLIK = 'BLIK',
-}
+// Payment methods are now handled by Stripe
 
 enum ShippingMethod {
   INPOST = 'INPOST',
@@ -29,7 +29,7 @@ interface ShippingFormData {
   nip?: string;
 }
 
-type CheckoutStep = 'summary' | 'shipping' | 'payment' | 'confirmation';
+type CheckoutStep = 'summary' | 'shipping' | 'confirmation';
 
 const SHIPPING_METHODS = [
   {
@@ -48,12 +48,7 @@ const SHIPPING_METHODS = [
   },
 ];
 
-const PAYMENT_METHODS = [
-  { id: PaymentMethod.CREDIT_CARD, name: 'Karta płatnicza', icon: '💳' },
-  { id: PaymentMethod.BLIK, name: 'BLIK', icon: '📱' },
-  { id: PaymentMethod.BANK_TRANSFER, name: 'Przelew bankowy', icon: '🏦' },
-  { id: PaymentMethod.PAYPAL, name: 'PayPal', icon: '🌐' },
-];
+// Payment method is now handled by Stripe
 
 const OrderSummary: React.FC = () => {
   const navigate = useNavigate();
@@ -72,19 +67,47 @@ const OrderSummary: React.FC = () => {
   });
   const [wantInvoice, setWantInvoice] = useState(false);
   const [selectedShipping, setSelectedShipping] = useState<ShippingMethod>(ShippingMethod.INPOST);
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.CREDIT_CARD);
+  // Always use credit card (Stripe) for payment
   const [orderId, setOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadUserData();
+    }
+  }, [user]);
+
+  // No need to check payment status automatically anymore
+
+  const loadUserData = async () => {
+    try {
+      const userData = await userService.getProfile(user!.id);
+      setFormData(prevData => ({
+        ...prevData,
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        email: userData.email || user?.email || '',
+        phone: userData.phoneNumber?.value || '',
+        street: userData.address?.street || '',
+        city: userData.address?.city || '',
+        postalCode: userData.address?.zipCode || '',
+        country: userData.address?.country || 'Polska',
+      }));
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      // Keep the existing form data if loading fails
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id || !cart) return;
+  const createOrder = async () => {
+    if (!user?.id || !cart) return null;
 
     setError(null);
     setIsSubmitting(true);
@@ -103,12 +126,12 @@ const OrderSummary: React.FC = () => {
           companyName: formData.companyName,
           nip: formData.nip,
         },
-        paymentMethod: selectedPayment,
+        // Payment method will be determined by Stripe
         shippingMethod: selectedShipping,
         cart: cart,
       };
 
-      const response = await fetch(`http://localhost:8080/api/v1/users/${user.id}/orders`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/v1/users/${user.id}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,8 +146,62 @@ const OrderSummary: React.FC = () => {
       }
 
       const data = await response.json();
-      setOrderId(data.id);
-      setCurrentStep('confirmation');
+      return data.id;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Nie udało się utworzyć zamówienia. Spróbuj ponownie.'
+      );
+      return null;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Function to start the expiration timer
+  const startExpirationTimer = (expiresAt: string) => {
+    const expirationDate = new Date(expiresAt);
+
+    const updateTimer = () => {
+      const now = new Date();
+      const timeDiff = expirationDate.getTime() - now.getTime();
+
+      if (timeDiff <= 0) {
+        setTimeRemaining('Expired');
+        return;
+      }
+
+      // Calculate minutes and seconds
+      const minutes = Math.floor(timeDiff / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+      setTimeRemaining(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+    };
+
+    // Update immediately
+    updateTimer();
+
+    // Then update every second
+    const intervalId = setInterval(updateTimer, 1000);
+
+    // Clean up on component unmount
+    return () => clearInterval(intervalId);
+  };
+
+  // Payment is now handled by the PayButton component
+
+  // Create order after shipping selection
+  const handleCreateOrder = async () => {
+    setIsSubmitting(true);
+
+    try {
+      const newOrderId = await createOrder();
+      if (newOrderId) {
+        setOrderId(newOrderId);
+        setCurrentStep('confirmation');
+      }
     } catch (error) {
       console.error('Error creating order:', error);
       setError(
@@ -147,10 +224,6 @@ const OrderSummary: React.FC = () => {
     return itemsTotal + shippingCost;
   };
 
-  const getShippingPrice = (method: ShippingMethod) => {
-    return SHIPPING_METHODS.find((m) => m.id === method)?.price ?? 0;
-  };
-
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pl-PL', {
       style: 'currency',
@@ -162,7 +235,7 @@ const OrderSummary: React.FC = () => {
   const renderStepIndicator = () => (
     <div className="mb-8">
       <div className="flex items-center justify-center space-x-4">
-        {['Koszyk', 'Dane dostawy', 'Metoda wysyłki', 'Płatność', 'Potwierdzenie'].map(
+        {['Koszyk', 'Dane dostawy', 'Metoda wysyłki', 'Potwierdzenie'].map(
           (step, index) => (
             <React.Fragment key={step}>
               <div className="flex items-center">
@@ -175,7 +248,7 @@ const OrderSummary: React.FC = () => {
                 </div>
                 <span className="ml-2">{step}</span>
               </div>
-              {index < 4 && (
+              {index < 3 && (
                 <div
                   className={`w-16 h-0.5 ${index < getStepNumber() ? 'bg-black' : 'bg-gray-200'}`}
                 />
@@ -193,10 +266,8 @@ const OrderSummary: React.FC = () => {
         return 0;
       case 'shipping':
         return 1;
-      case 'payment':
-        return 2;
       case 'confirmation':
-        return 3;
+        return 2;
       default:
         return 0;
     }
@@ -380,79 +451,15 @@ const OrderSummary: React.FC = () => {
         <Button variant="outline" onClick={() => setCurrentStep('summary')}>
           Wstecz
         </Button>
-        <Button onClick={() => setCurrentStep('payment')}>Dalej</Button>
+        <Button onClick={handleCreateOrder}>Dalej</Button>
       </div>
     </div>
   );
 
-  const renderPaymentStep = () => (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Wybierz metodę płatności</h2>
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
 
-      <div className="space-y-4">
-        {PAYMENT_METHODS.map((method) => (
-          <label
-            key={method.id}
-            className={`block p-4 border rounded-lg cursor-pointer transition-colors ${
-              selectedPayment === method.id
-                ? 'border-black bg-gray-50'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
-          >
-            <div className="flex items-center">
-              <input
-                type="radio"
-                name="payment"
-                value={method.id}
-                checked={selectedPayment === method.id}
-                onChange={(e) => setSelectedPayment(e.target.value as PaymentMethod)}
-                className="text-black focus:ring-black"
-              />
-              <div className="ml-3 flex items-center">
-                <span className="mr-2">{method.icon}</span>
-                <span className="font-medium">{method.name}</span>
-              </div>
-            </div>
-          </label>
-        ))}
-      </div>
-
-      <div className="mt-8 flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep('shipping')}>
-          Wstecz
-        </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? 'Przetwarzanie...' : 'Zamawiam i płacę'}
-        </Button>
-      </div>
-
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <div className="text-lg font-semibold mb-2">Podsumowanie</div>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>Wartość produktów</span>
-            <span>{formatPrice(calculateTotal() - getShippingPrice(selectedShipping))}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Koszt dostawy</span>
-            <span>{formatPrice(getShippingPrice(selectedShipping))}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-lg pt-2 border-t">
-            <span>Łącznie do zapłaty</span>
-            <span>{formatPrice(calculateTotal())}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderConfirmationStep = () => (
+  const renderConfirmationStep = () => {
+    return (
     <div className="max-w-2xl mx-auto text-center">
       <div className="mb-8">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -494,21 +501,54 @@ const OrderSummary: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-yellow-50 p-4 rounded-lg mb-8">
-        <p className="text-yellow-800">
-          Status płatności: <span className="font-semibold">Oczekująca</span>
+      <div className="p-4 bg-blue-50 rounded-lg mb-8">
+        <h3 className="font-semibold text-blue-800 mb-2">Płatność</h3>
+        <p className="text-blue-800 mb-4">
+          Aby dokończyć zamówienie, kliknij przycisk poniżej i dokonaj płatności.
         </p>
-        <p className="text-sm mt-2">Link do płatności zostanie wkrótce udostępniony.</p>
+
+        {timeRemaining && (
+          <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800 text-sm flex items-center">
+              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"></path>
+              </svg>
+              Sesja płatności wygaśnie za: <span className="font-medium ml-1">{timeRemaining}</span>
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 mb-4">
+            <p className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+              </svg>
+              {error}
+            </p>
+          </div>
+        )}
+
+        {orderId && (
+          <PayButton
+            orderId={orderId}
+            paymentStatus={'PENDING'}
+            className="py-1"
+          />
+        )}
       </div>
 
-      <div className="flex justify-center space-x-4">
+      <div className="flex justify-center space-x-4 mt-6">
         <Button variant="outline" onClick={() => navigate('/customer/orders')}>
           Moje zamówienia
         </Button>
-        <Button onClick={() => navigate('/')}>Kontynuuj zakupy</Button>
+        <Button variant="outline" onClick={() => navigate('/')}>
+          Kontynuuj zakupy
+        </Button>
       </div>
     </div>
   );
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -516,7 +556,6 @@ const OrderSummary: React.FC = () => {
 
       {currentStep === 'summary' && renderSummaryStep()}
       {currentStep === 'shipping' && renderShippingStep()}
-      {currentStep === 'payment' && renderPaymentStep()}
       {currentStep === 'confirmation' && renderConfirmationStep()}
     </div>
   );

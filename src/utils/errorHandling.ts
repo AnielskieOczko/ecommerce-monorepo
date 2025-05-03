@@ -1,4 +1,4 @@
-export type ErrorType = 'API' | 'NETWORK' | 'AUTH' | 'VALIDATION';
+export type ErrorType = 'API' | 'NETWORK' | 'AUTH' | 'VALIDATION' | 'PAYMENT';
 
 export interface AppError {
   type: ErrorType;
@@ -26,8 +26,16 @@ export const createAuthError = (message = 'Authentication failed'): AppError => 
   message
 });
 
+export const createPaymentError = (message: string, data?: unknown): AppError => ({
+  type: 'PAYMENT',
+  status: 400,
+  message,
+  data
+});
+
 export const errors = {
   api: createApiError,
   network: createNetworkError,
-  auth: createAuthError
+  auth: createAuthError,
+  payment: createPaymentError
 };

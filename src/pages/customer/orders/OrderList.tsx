@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Button } from '../../../components/ui';
+import { PayButton } from '../../../components/payment/PayButton';
+import { PaymentStatus } from '../../../types/stripe';
 
 enum OrderStatus {
   PENDING = 'PENDING',
@@ -180,6 +182,36 @@ const OrderList: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Map OrderStatus to PaymentStatus for the PayButton component
+  const mapToPaymentStatus = (status: OrderStatus): PaymentStatus => {
+    switch (status) {
+      case OrderStatus.DELIVERED:
+      case OrderStatus.SHIPPED:
+      case OrderStatus.CONFIRMED:
+        return 'COMPLETED';
+      case OrderStatus.PENDING:
+      case OrderStatus.PROCESSING:
+        return 'PENDING';
+      case OrderStatus.CANCELLED:
+        return 'CANCELED';
+      case OrderStatus.FAILED:
+      case OrderStatus.REFUNDED:
+        return 'FAILED';
+      default:
+        return 'PENDING';
+    }
+  };
+
+  // Check if an order needs payment
+  const needsPayment = (order: Order): boolean => {
+    // Orders that are pending or failed and don't have a transaction ID need payment
+    return (
+      (order.orderStatus === OrderStatus.PENDING ||
+       order.orderStatus === OrderStatus.FAILED) &&
+      !order.paymentTransactionId
+    );
   };
 
   const translateStatus = (status: OrderStatus) => {
@@ -449,6 +481,21 @@ const OrderList: React.FC = () => {
                   Adres: {order.shippingAddress.street}, {order.shippingAddress.zipCode}{' '}
                   {order.shippingAddress.city}
                 </div>
+
+                {/* Add Pay button for orders that need payment */}
+                {needsPayment(order) && (
+                  <div
+                    className="mt-4"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation to order details
+                    }}
+                  >
+                    <PayButton
+                      orderId={order.id.toString()}
+                      paymentStatus={mapToPaymentStatus(order.orderStatus)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))

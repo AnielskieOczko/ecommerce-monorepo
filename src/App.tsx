@@ -12,6 +12,9 @@ import AdminLayout from './pages/admin/AdminLayout';
 // Public Pages
 import HomePage from './pages/HomePage';
 import { ProductList as PublicProductList } from './pages/customer/products';
+import StripePayment from './pages/payment/StripePayment';
+import DirectStripePayment from './pages/payment/DirectStripePayment';
+import PaymentConfirmation from './pages/payment/PaymentConfirmation';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -47,6 +50,11 @@ function App() {
             <Route element={<PublicLayout />}>
               <Route index element={<HomePage />} />
               <Route path="/products" element={<PublicProductList />} />
+              <Route path="/payment/stripe" element={<StripePayment />} />
+              <Route path="/payment/direct-stripe" element={<DirectStripePayment />} />
+              <Route path="/payment/confirmation" element={<PaymentConfirmation />} />
+              <Route path="/checkout/success" element={<PaymentConfirmation />} />
+              <Route path="/checkout/cancel" element={<PaymentConfirmation />} />
             </Route>
 
             {/* Customer Routes */}

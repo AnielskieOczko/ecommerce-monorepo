@@ -72,3 +72,5 @@ yarn.lock
 .env.production.local
 .env.local
 /src/template_example
+.env.development
+.env.production
