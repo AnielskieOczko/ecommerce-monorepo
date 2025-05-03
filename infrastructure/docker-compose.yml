@@ -1,0 +1,234 @@
+# docker-compose.yml
+# version: "3.8"
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce_db_dev
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_ACTIVE_PROFILE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend_network
+
+  # Spring Boot Backend Service
+  app_backend:
+    build:
+      context: ../ecommerce_backend
+      dockerfile: Dockerfile_dev
+    container_name: ecommerce_backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    volumes:
+      - ../ecommerce_backend:/app
+      - product_images:/app/product-images
+    depends_on:
+      - mysql
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_ACTIVE_PROFILE}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      STORAGE_LOCATION: ${STORAGE_LOCATION}
+      STORAGE_BASE_URL: ${STORAGE_BASE_URL}
+      STORAGE_CLEANUP_SCHEDULE: ${STORAGE_CLEANUP_SCHEDULE}
+      STORAGE_MAX_FILE_SIZE: ${STORAGE_MAX_FILE_SIZE}
+      STORAGE_SECRET_SALT: ${STORAGE_SECRET_SALT}
+      JAVA_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 # Enable remote debugging
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
+      PAYMENT_SERVICE_URL=http: ${PAYMENT_SERVICE_URL}
+    networks:
+      - backend_network
+      - frontend_network
+    profiles:
+      - "container"
+
+  app_frontend:
+    build:
+      context: ../ecommerce_frontend/
+      dockerfile: Dockerfile_dev
+    container_name: ecommerce_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../ecommerce_frontend/:/app
+      - /app/node_modules
+    depends_on:
+      - app_backend
+    environment:
+      - HOST=0.0.0.0
+      # - REACT_APP_API_URL=http://app_backend:8080
+      - REACT_APP_API_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    networks:
+      - frontend_network
+    profiles:
+      - container
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - backend_network
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - backend_network
+
+  app_email_service:
+    build:
+      context: ../ecommerce-email-service
+      dockerfile: Dockerfile_dev
+    container_name: ecommerce_email_service
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - mailhog
+    networks:
+      - backend_network
+    ports:
+      - "8081:8080"
+      - "5006:5005" # Debug port (first port is local port, second port is container port REMEMBER THIS !!)
+
+  app_payment_service:
+    build:
+      context: ../ecommerce-payment-service
+      dockerfile: Dockerfile_dev
+    container_name: ecommerce_payment_service
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+    restart: unless-stopped
+    networks:
+      - backend_network
+    ports:
+      - 8010:8010
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-local
+    environment:
+      - SPRING_BOOT_APP_PASSWORD_PROMETHEUS=${SPRING_BOOT_APP_PASSWORD_PROMETHEUS}
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/config/prometheus.containerized.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/config/web-config.yml:/etc/prometheus/web-config.yml:ro
+      - ./prometheus/certs:/etc/prometheus/certs:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.config.file=/etc/prometheus/web-config.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.listen-address=:9090"
+    user: "nobody:nobody" # Run as non-root user
+    restart: always
+    networks:
+      - backend_network
+    profiles:
+      - local
+  prometheus-containerized: # NEW Prometheus service for containerized app profile
+    image: prom/prometheus:latest
+    container_name: prometheus-container
+    environment:
+      - SPRING_BOOT_APP_PASSWORD_PROMETHEUS=${SPRING_BOOT_APP_PASSWORD_PROMETHEUS}
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/config/prometheus.containerized.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/config/web-config.yml:/etc/prometheus/web-config.yml:ro
+      - ./prometheus/certs:/etc/prometheus/certs:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.config.file=/etc/prometheus/web-config.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.listen-address=:9090"
+    user: "nobody:nobody" # Run as non-root user
+    restart: always
+    networks:
+      - backend_network
+    profiles:
+      - container # Activated only with 'containerized-app' profile
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-local
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_SERVER_ROOT_URL=http://localhost:3030
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: always
+    networks:
+      - backend_network
+    profiles:
+      - local
+
+  grafana-containerized:
+    image: grafana/grafana:latest
+    container_name: grafana-container
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_SERVER_ROOT_URL=http://localhost:3030
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus-containerized
+    restart: always
+    networks:
+      - backend_network
+    profiles:
+      - container
+# Define named volumes for persistence
+volumes:
+  mysql_data:
+  product_images:
+  grafana_data:
+
+# Define networks for service isolation
+networks:
+  backend_network:
+    driver: bridge
+  frontend_network:
+    driver: bridge
