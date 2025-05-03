@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Our Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        .welcome-message {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .coupon-box {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 2px dashed #4CAF50;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .coupon-code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .features {
+            margin: 20px 0;
+        }
+        .feature {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .feature:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: #4285f4;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome to Our Store!</h1>
+    </div>
+    
+    <div class="welcome-message">
+        <h2>Hello <span th:text="${customerName}">Friend</span>!</h2>
+        <p>Thank you for joining our online store. We're excited to have you as part of our community!</p>
+    </div>
+    
+    <p>We're thrilled that you've decided to shop with us. As a token of our appreciation, we'd like to offer you a special discount on your first purchase.</p>
+    
+    <div class="coupon-box" th:if="${couponCode != null}">
+        <h3>Special Welcome Offer</h3>
+        <p>Enjoy <strong>15% OFF</strong> your first purchase with this coupon:</p>
+        <div class="coupon-code" th:text="${couponCode}">WELCOME15</div>
+        <p>Valid until <span th:text="${additionalData != null && additionalData.couponExpiry != null ? #temporals.format(additionalData.couponExpiry, 'MMMM dd, yyyy') : '30 days from now'}">Expiry Date</span></p>
+    </div>
+    
+    <div class="features">
+        <h3>What You Can Expect From Us:</h3>
+        <div class="feature">Quality products carefully selected for you</div>
+        <div class="feature">Fast shipping and easy returns</div>
+        <div class="feature">Dedicated customer support</div>
+        <div class="feature">Exclusive offers for our members</div>
+    </div>
+    
+    <div style="text-align: center;">
+        <a href="#" class="cta-button">Start Shopping Now</a>
+    </div>
+    
+    <div class="footer">
+        <div class="social-links">
+            <a href="#" class="social-link">Facebook</a>
+            <a href="#" class="social-link">Instagram</a>
+            <a href="#" class="social-link">Twitter</a>
+        </div>
+        <p>If you have any questions, feel free to contact our customer service team.</p>
+        <p>&copy; 2025 Your Ecommerce Store. All rights reserved.</p>
+    </div>
+</body>
+</html>

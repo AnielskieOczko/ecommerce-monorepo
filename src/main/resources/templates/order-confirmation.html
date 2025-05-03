@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        .order-details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .order-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .order-items th, .order-items td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .order-items th {
+            background-color: #f2f2f2;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .shipping-info {
+            margin: 20px 0;
+        }
+        .thank-you {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 18px;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order!</p>
+    </div>
+
+    <p>Hello <span th:text="${customer != null ? (customer.fullName() != null ? customer.fullName() : customer.email) : 'Valued Customer'}">Customer</span>,</p>
+
+    <p>We're pleased to confirm that your order has been received and is being processed.</p>
+
+    <div class="order-details">
+        <h2>Order Details</h2>
+        <p><strong>Order Number:</strong> <span th:text="${orderNumber != null ? orderNumber : orderId}">ORD-12345</span></p>
+        <p><strong>Order Date:</strong> <span th:text="${#temporals.format(orderDate, 'MMMM dd, yyyy')}">January 1, 2025</span></p>
+        <p><strong>Order Status:</strong> <span th:text="${orderStatus}">CONFIRMED</span></p>
+        <p th:if="${paymentMethod != null}"><strong>Payment Method:</strong> <span th:text="${paymentMethod}">CREDIT_CARD</span></p>
+    </div>
+
+    <h2>Order Summary</h2>
+    <table class="order-items">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.productName}">Product Name</td>
+                <td th:text="${item.quantity}">1</td>
+                <td th:text="${item.unitPrice != null ? (item.unitPrice.amount + ' ' + item.unitPrice.currencyCode) : ''}">$10.00</td>
+                <td th:text="${item.totalPrice != null ? (item.totalPrice.amount + ' ' + item.totalPrice.currencyCode) : ''}">$10.00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="total">
+        <p>Total: <span th:text="${totalAmount != null ? (totalAmount.amount + ' ' + totalAmount.currencyCode) : ''}">$10.00</span></p>
+    </div>
+
+    <div class="shipping-info" th:if="${shippingAddress != null}">
+        <h2>Shipping Information</h2>
+        <p><strong>Shipping Method:</strong> <span th:text="${shippingMethod != null ? shippingMethod : 'Standard Shipping'}">Standard Shipping</span></p>
+        <p><strong>Shipping Address:</strong></p>
+        <p th:text="${shippingAddress.street}">123 Main St</p>
+        <p th:text="${shippingAddress.city + ', ' + shippingAddress.zipCode}">City, 12345</p>
+        <p th:text="${shippingAddress.country}">Country</p>
+    </div>
+
+    <div class="thank-you">
+        <p>Thank you for shopping with us!</p>
+    </div>
+
+    <div class="footer">
+        <p>If you have any questions about your order, please contact our customer service team.</p>
+        <p>&copy; 2025 Your Ecommerce Store. All rights reserved.</p>
+    </div>
+</body>
+</html>
