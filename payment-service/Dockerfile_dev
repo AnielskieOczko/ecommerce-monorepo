@@ -1,0 +1,10 @@
+FROM openjdk:21-jdk
+LABEL authors="RJ"
+
+WORKDIR /app
+
+COPY target/*.jar /app/app.jar
+
+EXPOSE 8010
+#CMD ["./mvnw", "spring-boot:run"]
+CMD ["java", "-jar", "app.jar"]

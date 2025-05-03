@@ -1,0 +1,79 @@
+spring:
+  rabbitmq:
+#    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    port: 5672
+    template:
+      replay-timeout: 5000
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
+    connection-timeout: 5000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+---
+spring:
+  application:
+    name: payment-service
+  config:
+    activate:
+      on-profile: ${SPRING_PROFILES_ACTIVE:local}
+  docker:
+    compose:
+      enabled: false
+  logging:
+    level:
+      .web: DEBUG
+      com.rj.payment_service: DEBUG
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8010
+  error:
+    include-message: always
+    include-binding-errors: always
+
+stripe:
+  secret:
+    key: ${STRIPE_SECRET_KEY}
+    publishable: ${STRIPE_PUBLISHABLE_KEY}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET}
+---
+# dev container profile
+spring:
+  application:
+    name: payment-service
+  config:
+    activate:
+      on-profile: ${SPRING_PROFILES_ACTIVE:dev}
+  docker:
+    compose:
+      enabled: false
+  logging:
+    level:
+      .web: DEBUG
+      com.rj.payment_service: DEBUG
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8010
+  error:
+    include-message: always
+    include-binding-errors: always
+
+stripe:
+  secret:
+    key: ${STRIPE_SECRET_KEY}
+    publishable: ${STRIPE_PUBLISHABLE_KEY}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET}
