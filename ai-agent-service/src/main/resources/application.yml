@@ -1,0 +1,92 @@
+spring:
+  rabbitmq:
+    #    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    port: 5672
+    template:
+      replay-timeout: 5000
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
+    connection-timeout: 5000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+  datasource:
+    url: ${DATASOURCE_URL_AI_AGENT:jdbc:postgresql://localhost:5432/ecommerce_ai_agent}
+    username: ${DB_USERNAME_AI_AGENT:ai_agent_user}
+    password: ${DB_PASSWORD_AI_AGENT:ai_agent_pass}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      auto-commit: true
+      isolation-level: TRANSACTION_READ_COMMITTED
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+  flyway:
+    url: ${DATASOURCE_URL_AI_AGENT:jdbc:postgresql://localhost:5432/ecommerce_ai_agent}
+    user: ${DB_USERNAME_AI_AGENT:ai_agent_user}
+    password: ${DB_PASSWORD_AI_AGENT:ai_agent_pass}
+    baseline-on-migrate: true
+    validate-on-migrate: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+
+
+
+---
+# dev local profile
+spring:
+  application:
+    name: ai-agent
+  config:
+    activate:
+      on-profile: ${SPRING_PROFILES_ACTIVE:local}
+  docker:
+    compose:
+      enabled: false
+  logging:
+    level:
+      .web: DEBUG
+      com.rj.ecommerce_ai_agent: DEBUG
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8020
+  error:
+    include-message: always
+    include-binding-errors: always
+---
+# dev container profile
+spring:
+  application:
+    name: ai-agent
+  config:
+    activate:
+      on-profile: ${SPRING_PROFILES_ACTIVE:container}
+  docker:
+    compose:
+      enabled: false
+  logging:
+    level:
+      .web: DEBUG
+      com.rj.ecommerce_ai_agent: DEBUG
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8020
+  error:
+    include-message: always
+    include-binding-errors: always
