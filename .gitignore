@@ -1,0 +1,42 @@
+# Java specific
+*.class
+*.jar
+*.war
+*.ear
+*.logs
+.mtj.tmp/
+
+# Maven/Gradle
+target/
+.mvn/
+.gradle/
+build/
+
+# Frontend/React specific
+node_modules/
+build/
+dist/
+.cache/
+coverage/
+
+# Environment files
+.env
+.env.*
+application-local.properties
+application-dev.properties
+secrets.properties
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+.settings/
+.classpath
+.project
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
