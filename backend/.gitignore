@@ -1,0 +1,49 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+src/main/resources/secrets.properties
+.github/workflows/backup.yml
+.github/workflows/backupWorking.yml
+.github/workflows/ci=cd-working2.yml
+/src/main/resources/static/product-images
+
+# Flyway ignores
+*.user.toml
+*.artifact
+report.html
+report.json
+
+# Flyway scripts
+flyway-repair.ps1
+flyway-repair-env.ps1
+commands.txt
