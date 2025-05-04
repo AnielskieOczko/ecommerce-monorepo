@@ -14,9 +14,15 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Serve product images from storage location
         registry.addResourceHandler("/api/v1/public/products/images/**")
                 .addResourceLocations("file:" + uploadDir + "/")
-                .setCachePeriod(3600); // Optional: add caching
+                .setCachePeriod(3600);
+
+        // Also serve product images from static resources
+        registry.addResourceHandler("/product-images/**")
+                .addResourceLocations("classpath:/static/product-images/")
+                .setCachePeriod(3600);
     }
 
 

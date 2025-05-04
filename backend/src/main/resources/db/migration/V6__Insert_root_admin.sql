@@ -2,7 +2,7 @@
 INSERT INTO users (email, password, first_name, last_name, created_at, updated_at, is_active)
 VALUES (
     'admin@ecommerce.com',
-    '$2a$10$5Q/UQNN27YkJqonO5z.YU.yBxMeNnxqWvU0hnJyPQ5xgvZOXxJH7C', -- this is BCrypt hash of 'admin123'
+    '$2a$12$zmy6VgZ114gKTK5/fvHTGeEY/u1WiZlUaaBXnBwrF6hvt2E9EmRAO', -- this is BCrypt hash of 'admin'
     'Root',
     'Admin',
     CURRENT_TIMESTAMP,

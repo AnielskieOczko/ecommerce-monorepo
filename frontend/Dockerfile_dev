@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat python3 make g++
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files FROM THE 'frontend' SUBDIRECTORY of the build context
 COPY package*.json ./
 
 # Install dependencies with current recommended settings
@@ -18,7 +18,7 @@ RUN npm cache clean --force && \
     NODE_ENV=development npm install --no-package-lock --verbose && \
     npm install --save-dev @babel/plugin-proposal-private-property-in-object
 
-# Copy project files
+# Copy project files FROM THE 'frontend' SUBDIRECTORY of the build context
 COPY . .
 
 # Build the application with explicit environment

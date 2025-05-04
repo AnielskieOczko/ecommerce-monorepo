@@ -53,8 +53,7 @@ services:
       - "8080:8080"
       - "5005:5005"
     volumes:
-      - ../ecommerce_backend:/app
-      - product_images:/app/product-images
+      - ../backend/:/app
     depends_on:
       - mysql
     environment:
@@ -89,7 +88,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ../ecommerce_frontend/:/app
+      - ../frontend/:/app
       - /app/node_modules
     # depends_on:
     #   - app_backend
@@ -129,7 +128,7 @@ services:
 
   app_email_service:
     build:
-      context: ../email-service
+      context: ../email-service/
       dockerfile: Dockerfile_dev
     container_name: ecommerce_email_service
     environment:
@@ -153,18 +152,24 @@ services:
 
   app_payment_service:
     build:
-      context: ../payment-service
+      context: ../payment-service/
       dockerfile: Dockerfile_dev
     container_name: ecommerce_payment_service
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
     restart: unless-stopped
+    depends_on:
+      - rabbitmq
     networks:
       - backend_network
     ports:
-      - 8010:8010
+      - "8010:8010"
     profiles:
       - container
 
