@@ -1,0 +1,411 @@
+# Create this new file
+openapi: 3.0.3
+info:
+  title: E-commerce Shared Contracts & API
+  version: 1.0.0
+  description: Defines shared DTOs and API schemas for the E-commerce application services (Backend, Email, Payment).
+paths: {} # Define actual API paths later if needed
+components:
+  schemas:
+    # --- 1. Core Shared Components (Value Object Equivalents & Basic Types) ---
+    Money:
+      description: Represents a monetary value with currency.
+      type: object
+      required: [amount, currencyCode]
+      properties:
+        amount: { type: number, format: double, description: "Monetary amount (e.g., 19.99). Represents BigDecimal." }
+        currencyCode: { type: string, pattern: "^[A-Z]{3}$", description: "ISO 4217 Currency Code (e.g., USD)." }
+    Address:
+      description: Represents a postal address.
+      type: object
+      required: [street, city, zipCode, country]
+      properties:
+        street: { type: string }
+        city: { type: string }
+        zipCode: { type: string, description: "Postal or Zip code." }
+        country: { type: string }
+    PhoneNumber:
+      description: Represents a phone number.
+      type: object
+      required: [value]
+      properties:
+        value: { type: string }
+    ImageInfo: # Renamed from ImageDTO to avoid clash if used elsewhere
+      description: Represents metadata for an image.
+      type: object
+      required: [path, mimeType, altText]
+      properties:
+        id: { type: integer, format: int64, readOnly: true, description: "Internal DB ID, may not be relevant for all contexts." }
+        path: { type: string, description: "URL or path to the image." }
+        altText: { type: string, description: "Alternative text for accessibility." }
+        mimeType: { type: string, example: "image/jpeg" }
+
+    # --- 2. Shared Enums ---
+    OrderStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED, RETURNED, FAILED] # Consolidated
+      description: The status of an order.
+    PaymentStatus:
+      type: string
+      enum: [PENDING, PAID, UNPAID, FAILED, REFUNDED, OPEN, COMPLETE, EXPIRED, NO_PAYMENT_REQUIRED] # Consolidated & Mapped from Stripe
+      description: The status of a payment or payment session.
+    PaymentMethod:
+      type: string
+      enum: [CREDIT_CARD, PAYPAL, BANK_TRANSFER, BLIK] # From frontend/backend
+      description: Method used for payment.
+    ShippingMethod:
+      type: string
+      enum: [INPOST, DHL, STANDARD, EXPRESS] # Consolidated
+      description: Method used for shipping.
+    EmailTemplate:
+      type: string
+      enum: [ORDER_CONFIRMATION, WELCOME_EMAIL, PAYMENT_SUCCESS, PAYMENT_FAILURE, ORDER_STATUS_UPDATE]
+      description: Identifier for the email template to use.
+    EmailStatus:
+      type: string
+      enum: [PENDING, SENT, DELIVERED, FAILED, BOUNCED]
+      description: Delivery status of an email message.
+
+    # --- 3. Shared Contextual DTOs (Composed from Core Components) ---
+    CustomerInfo:
+      description: Basic information about a customer/user.
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string, description: "User ID (Using String for cross-service consistency)." }
+        firstName: { type: string, nullable: true }
+        lastName: { type: string, nullable: true }
+        email: { type: string, format: email }
+        phoneNumber: { $ref: '#/components/schemas/PhoneNumber', nullable: true }
+    ProductSummary:
+      description: Core identifying information for a product. Used for composition, not directly generated unless needed.
+      type: object
+      required: [id, name, unitPrice]
+      properties:
+        id: { type: string, description: "Product ID (Using String for cross-service consistency)." }
+        sku: { type: string, nullable: true, description: "Stock Keeping Unit, if applicable." }
+        name: { type: string }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+    OrderItem:
+      description: Represents an item within an order or cart.
+      type: object
+      required: [product, quantity, lineTotal]
+      properties:
+        # Flattened ProductSummary for OrderItem context
+        product:
+          type: object
+          required: [id, name, unitPrice]
+          properties:
+            id: { type: string, description: "Product ID (Using String for cross-service consistency)." }
+            sku: { type: string, nullable: true, description: "Stock Keeping Unit, if applicable." }
+            name: { type: string }
+            unitPrice: { $ref: '#/components/schemas/Money' }
+        quantity: { type: integer, format: int32, minimum: 1 }
+        lineTotal: { $ref: '#/components/schemas/Money', description: "Total price for this line (unitPrice * quantity)." }
+
+    # --- 4. Backend API Specific DTOs ---
+    Category: # Combined Create/Update/Response for simplicity, use contextually
+      type: object
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        name: { type: string }
+        description: { type: string, nullable: true }
+    Product: # Flattened structure (includes ProductSummary fields)
+      description: Represents a product returned by the API.
+      type: object
+      required: [id, name, unitPrice] # Required fields from ProductSummary + any Product specific ones
+      properties:
+        # Properties from ProductSummary copied here:
+        id: { type: string, description: "Product ID (Using String for cross-service consistency)." }
+        sku: { type: string, nullable: true, description: "Stock Keeping Unit, if applicable." }
+        name: { type: string }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        # Original Product properties:
+        description: { type: string }
+        quantityInStock: { type: integer, format: int32 }
+        categories: { type: array, items: { $ref: '#/components/schemas/Category' } }
+        images: { type: array, items: { $ref: '#/components/schemas/ImageInfo' } }
+    ProductCreateRequest:
+      type: object
+      required: [name, description, unitPrice, quantityInStock]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        quantityInStock: { type: integer, format: int32 }
+        categoryIds: { type: array, items: { type: integer, format: int64 }, nullable: true }
+        images: { type: array, items: { $ref: '#/components/schemas/ImageInfo' }, nullable: true, description: "Image metadata only, upload handled separately." }
+    ProductUpdateRequest:
+      type: object # All fields optional
+      properties:
+        name: { type: string }
+        description: { type: string }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        quantityInStock: { type: integer, format: int32 }
+        categoryIds: { type: array, items: { type: integer, format: int64 } }
+        images: { type: array, items: { $ref: '#/components/schemas/ImageInfo' } }
+    CartItem:
+      description: An item within a shopping cart.
+      type: object
+      required: [id, product, quantity]
+      properties:
+        id: { type: integer, format: int64 } # Cart Item ID
+        # Flattened ProductSummary for CartItem context
+        product:
+          type: object
+          required: [id, name, unitPrice]
+          properties:
+            id: { type: string, description: "Product ID (Using String for cross-service consistency)." }
+            sku: { type: string, nullable: true, description: "Stock Keeping Unit, if applicable." }
+            name: { type: string }
+            unitPrice: { $ref: '#/components/schemas/Money' }
+        quantity: { type: integer, format: int32 }
+    Cart:
+      description: Represents a user's shopping cart.
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        items: { type: array, items: { $ref: '#/components/schemas/CartItem' } }
+        # Consider adding cart total MoneyDTO here if calculated frequently
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    CartItemAddRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: integer, format: int64 } # Use backend's Long ID here
+        quantity: { type: integer, format: int32, minimum: 1 }
+    Order:
+      description: Represents a completed order.
+      type: object
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        userId: { type: integer, format: int64 }
+        customerEmail: { type: string, format: email }
+        items: { type: array, items: { $ref: '#/components/schemas/OrderItem' } } # Use shared OrderItem
+        totalAmount: { $ref: '#/components/schemas/Money' }
+        shippingAddress: { $ref: '#/components/schemas/Address' }
+        billingAddress: { $ref: '#/components/schemas/Address', nullable: true }
+        shippingMethod: { $ref: '#/components/schemas/ShippingMethod' }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        orderStatus: { $ref: '#/components/schemas/OrderStatus' }
+        paymentStatus: { $ref: '#/components/schemas/PaymentStatus', nullable: true }
+        paymentTransactionId: { type: string, nullable: true }
+        checkoutSessionUrl: { type: string, format: uri, nullable: true }
+        receiptUrl: { type: string, format: uri, nullable: true }
+        orderDate: { type: string, format: date-time, readOnly: true }
+        # Timestamps like createdAt, updatedAt might be internal details
+    OrderCreateRequest:
+      description: Request to create an order, typically from a cart.
+      type: object
+      required: [userId, shippingAddress, paymentMethod, shippingMethod]
+      properties:
+        userId: { type: integer, format: int64 }
+        shippingAddress: { $ref: '#/components/schemas/Address' }
+        billingAddress: { $ref: '#/components/schemas/Address', nullable: true }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod' }
+        shippingMethod: { $ref: '#/components/schemas/ShippingMethod' }
+    OrderStatusUpdateRequest:
+      type: object
+      required: [newStatus]
+      properties:
+        newStatus: { $ref: '#/components/schemas/OrderStatus' }
+    UserInfo:
+      description: Detailed user information for API responses.
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string, format: email }
+        address: { $ref: '#/components/schemas/Address', nullable: true }
+        phoneNumber: { $ref: '#/components/schemas/PhoneNumber', nullable: true }
+        dateOfBirth: { type: string, format: date, nullable: true }
+        authorities: { type: array, items: { type: string } }
+        isActive: { type: boolean }
+    UserCreateRequest:
+      description: Request to create a new user.
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        address: { $ref: '#/components/schemas/Address', nullable: true }
+        phoneNumber: { $ref: '#/components/schemas/PhoneNumber', nullable: true }
+        dateOfBirth: { type: string, format: date, nullable: true }
+        authorities: { type: array, items: { type: string }, nullable: true, description: "Typically assigned post-creation or defaults" }
+    UserUpdateRequest:
+      description: Request to update user details (can be used by user or admin contextually).
+      type: object # All fields optional
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        # email: { type: string, format: email } # Email change often needs separate flow
+        address: { $ref: '#/components/schemas/Address' }
+        phoneNumber: { $ref: '#/components/schemas/PhoneNumber' }
+        dateOfBirth: { type: string, format: date }
+        authorities: { type: array, items: { type: string }, description: "Admin only" }
+        isActive: { type: boolean, description: "Admin only" }
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string, format: password }
+        newPassword: { type: string, format: password }
+    AuthResponse:
+      description: Response containing authentication tokens.
+      type: object
+      properties:
+        token: { type: string }
+        refreshToken: { type: string, nullable: true }
+        userId: { type: integer, format: int64 }
+        email: { type: string, format: email }
+        roles: { type: array, items: { type: string } }
+
+    # --- 5. Messaging Contract Specific DTOs ---
+    # BaseEmailRequest is no longer defined as a separate schema, its fields are copied below
+    OrderEmailRequest:
+      description: Request to send an order-related email.
+      type: object
+      # Required fields from BaseEmailRequest + OrderEmailRequest specific ones
+      required: [messageId, version, to, template, timestamp, orderId, customer, items, totalAmount, shippingAddress]
+      properties:
+        # Properties from BaseEmailRequest copied here:
+        messageId: { type: string, format: uuid }
+        version: { type: string, example: "1.0" }
+        to: { type: string, format: email }
+        subject: { type: string, nullable: true }
+        template: { $ref: '#/components/schemas/EmailTemplate' }
+        additionalData: { type: object, additionalProperties: true, nullable: true, description: "Context-specific data for the template." }
+        timestamp: { type: string, format: date-time }
+        # Original OrderEmailRequest properties:
+        orderId: { type: string } # Use consistent ID type (String for messaging)
+        orderNumber: { type: string, nullable: true }
+        customer: { $ref: '#/components/schemas/CustomerInfo' }
+        items: { type: array, items: { $ref: '#/components/schemas/OrderItem' } } # Use shared OrderItem
+        totalAmount: { $ref: '#/components/schemas/Money' }
+        shippingAddress: { $ref: '#/components/schemas/Address' }
+        billingAddress: { $ref: '#/components/schemas/Address', nullable: true }
+        shippingMethod: { $ref: '#/components/schemas/ShippingMethod', nullable: true }
+        paymentMethod: { $ref: '#/components/schemas/PaymentMethod', nullable: true }
+        orderStatus: { $ref: '#/components/schemas/OrderStatus', nullable: true }
+    PaymentEmailRequest:
+      description: Request to send a payment status email.
+      type: object
+      # Required fields from BaseEmailRequest + PaymentEmailRequest specific ones
+      required: [messageId, version, to, template, timestamp, orderId, paymentStatus]
+      properties:
+        # Properties from BaseEmailRequest copied here:
+        messageId: { type: string, format: uuid }
+        version: { type: string, example: "1.0" }
+        to: { type: string, format: email }
+        subject: { type: string, nullable: true }
+        template: { $ref: '#/components/schemas/EmailTemplate' }
+        additionalData: { type: object, additionalProperties: true, nullable: true, description: "Context-specific data for the template." }
+        timestamp: { type: string, format: date-time }
+        # Original PaymentEmailRequest properties:
+        orderId: { type: string }
+        paymentId: { type: string, nullable: true }
+        paymentStatus: { $ref: '#/components/schemas/PaymentStatus' } # Use Enum
+        paymentAmount: { $ref: '#/components/schemas/Money', nullable: true }
+    # --- Define other specific email requests (Welcome, OrderStatusUpdate) similarly by copying BaseEmailRequest fields ---
+    WelcomeEmailRequest:
+      description: Request to send a welcome email.
+      type: object
+      required: [messageId, version, to, template, timestamp, customerName]
+      properties:
+        # Properties from BaseEmailRequest copied here:
+        messageId: { type: string, format: uuid }
+        version: { type: string, example: "1.0" }
+        to: { type: string, format: email }
+        subject: { type: string, nullable: true }
+        template: { $ref: '#/components/schemas/EmailTemplate' }
+        additionalData: { type: object, additionalProperties: true, nullable: true, description: "Context-specific data for the template." }
+        timestamp: { type: string, format: date-time }
+        # Original WelcomeEmailRequest properties:
+        customerName: { type: string }
+    OrderStatusUpdateEmailRequest: # Assuming a DTO for this template exists
+      description: Request to send an order status update email.
+      type: object
+      required: [messageId, version, to, template, timestamp, orderId, newStatus]
+      properties:
+        # Properties from BaseEmailRequest copied here:
+        messageId: { type: string, format: uuid }
+        version: { type: string, example: "1.0" }
+        to: { type: string, format: email }
+        subject: { type: string, nullable: true }
+        template: { $ref: '#/components/schemas/EmailTemplate' }
+        additionalData: { type: object, additionalProperties: true, nullable: true, description: "Context-specific data for the template." }
+        timestamp: { type: string, format: date-time }
+        # Original OrderStatusUpdate properties:
+        orderId: { type: string }
+        orderNumber: { type: string, nullable: true }
+        previousStatus: { $ref: '#/components/schemas/OrderStatus', nullable: true }
+        newStatus: { $ref: '#/components/schemas/OrderStatus' }
+        reason: { type: string, nullable: true }
+
+    EmailDeliveryStatusNotification:
+      description: Notification about the delivery status of a sent email.
+      type: object
+      required: [messageId, version, status, timestamp]
+      properties:
+        messageId: { type: string, format: uuid, description: "ID of this status message." }
+        version: { type: string }
+        originalMessageId: { type: string, format: uuid, nullable: true, description: "ID of the email this status refers to." }
+        status: { $ref: '#/components/schemas/EmailStatus' }
+        recipientEmail: { type: string, format: email, nullable: true }
+        errorMessage: { type: string, nullable: true }
+        providerStatusDetails: { type: object, additionalProperties: true, nullable: true, description: "Raw status from email provider." }
+        timestamp: { type: string, format: date-time }
+
+    # --- 6. Payment Service Contract Specific DTOs ---
+    PaymentLineItem:
+      description: Represents a single item in a payment request.
+      type: object
+      required: [name, unitAmountCents, quantity, currencyCode]
+      properties:
+        name: { type: string }
+        description: { type: string, nullable: true }
+        unitAmountCents: { type: integer, format: int64, description: "Price in smallest currency unit (e.g., cents)." }
+        quantity: { type: integer, format: int32 }
+        currencyCode: { type: string, pattern: "^[A-Z]{3}$" }
+    PaymentRequest:
+      description: Request from Backend to Payment Service to initiate payment.
+      type: object
+      required: [orderId, customerEmail, successUrl, cancelUrl, lineItems]
+      properties:
+        orderId: { type: string } # Use consistent ID type
+        customerEmail: { type: string, format: email }
+        successUrl: { type: string, format: uri }
+        cancelUrl: { type: string, format: uri }
+        lineItems: { type: array, items: { $ref: '#/components/schemas/PaymentLineItem' } }
+        metadata: { type: object, additionalProperties: { type: string }, nullable: true, description: "Data to pass through payment provider (e.g., orderId)." }
+    PaymentResponse:
+      description: Response from Payment Service to Backend after initiating payment.
+      type: object
+      required: [sessionId, orderId, sessionStatus, paymentStatus, checkoutUrl]
+      properties:
+        sessionId: { type: string, description: "Payment provider's session ID." }
+        orderId: { type: string }
+        sessionStatus: { $ref: '#/components/schemas/PaymentStatus', description: "Status of the checkout session itself." }
+        paymentStatus: { $ref: '#/components/schemas/PaymentStatus', description: "Status of the underlying payment intent." }
+        checkoutUrl: { type: string, format: uri, description: "URL for user to complete payment." }
+        # Include other relevant details like amount, currency if needed for confirmation
+        expiresAt: { type: string, format: date-time, nullable: true }
+        metadata: { type: object, additionalProperties: { type: string }, nullable: true }
+    PaymentNotification:
+      description: Asynchronous notification (webhook) from Payment Service to Backend about payment events.
+      type: object
+      required: [eventId, eventType, orderId, paymentId, status]
+      properties:
+        eventId: { type: string, description: "Unique ID for this event from the provider." }
+        eventType: { type: string, description: "Type of event (e.g., payment_intent.succeeded)." }
+        orderId: { type: string, description: "Your internal order ID (often retrieved from metadata)." }
+        paymentId: { type: string, description: "Payment provider's transaction/intent ID." }
+        status: { $ref: '#/components/schemas/PaymentStatus' }
+        amount: { $ref: '#/components/schemas/Money', nullable: true } # Use MoneyDTO
+        paidAt: { type: string, format: date-time, nullable: true }
+        rawProviderPayload: { type: object, additionalProperties: true, nullable: true, description: "Full event payload from provider for auditing/debugging." }
