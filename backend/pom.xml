@@ -168,55 +168,50 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.8.0</version>
+                <!-- Check for the latest version: https://mvnrepository.com/artifact/org.openapitools/openapi-generator-maven-plugin -->
+                <version>7.5.0</version> <!-- Use a recent version -->
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <!-- Location of your OpenAPI spec file -->
                             <inputSpec>${project.basedir}/../api-specifications/ecommerce-openapi.v1.yaml</inputSpec>
-                            <!-- No longer needed as we use configOptions primarily -->
-                            <!-- <configurationFile>${project.basedir}/openapi-generator-config.json</configurationFile> -->
-                            <!-- Change generatorName and add library -->
-                            <generatorName>java</generatorName>
-<!--                            <library>spring-boot</library>-->
-                            <output>${project.build.directory}/generated-sources/openapi</output> <!-- Keep output path -->
-                            <!-- Define distinct packages for generated code -->
-                            <apiPackage>com.rj.ecommerce_backend.generated.api</apiPackage> <!-- Keep package names -->
-                            <modelPackage>com.rj.ecommerce_backend.generated.model</modelPackage> <!-- Keep package names -->
-                            <!-- Remove spring generator specific options -->
-                            <!-- <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate> -->
-                            <!-- <globalProperties>...</globalProperties> -->
+                            <!-- Java generator -->
+                            <generatorName>spring</generatorName>
+                            <!-- Output directory for generated code -->
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <!-- Target package for generated models (DTOs) -->
+                            <modelPackage>com.rj.ecommerce_backend.shared.dto.generated</modelPackage>
+                            <!-- Target package for generated APIs (if any) -->
+                            <apiPackage>com.rj.ecommerce_backend.shared.api.generated</apiPackage>
+                            <!-- Configuration Options -->
                             <configOptions>
-                                <!-- Keep relevant options -->
-                                <useSpringBoot3>true</useSpringBoot3>
+                                <!-- *** THIS IS THE KEY FOR RECORDS *** -->
+                                <useRecordTypes>true</useRecordTypes>
+
+                                <!-- Use Jakarta EE dependencies (for Spring Boot 3+) -->
                                 <useJakartaEe>true</useJakartaEe>
-                                <openApiNullable>false</openApiNullable>
-                                <sourceFolder>src/gen/java</sourceFolder> <!-- Standard source folder name -->
-                                <generateModels>true</generateModels>
-                                <generateApis>false</generateApis> <!-- Assuming you only want models -->
-                                <generateApiTests>false</generateApiTests>
-                                <generateModelTests>false</generateModelTests>
-                                <useBeanValidation>true</useBeanValidation>
-                                <serializationLibrary>jackson</serializationLibrary>
-                                <useRecords>true</useRecords> <!-- Keep this! -->
-                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <!-- Use Java 8+ Date/Time types (LocalDate, OffsetDateTime) -->
                                 <dateLibrary>java8</dateLibrary>
-                                <java8>true</java8> <!-- Keep if using java8 dateLibrary -->
-                                <!-- Remove options specific to 'spring' generator or less relevant for 'java' generator -->
-                                <!-- <delegatePattern>true</delegatePattern> -->
-                                <!-- <interfaceOnly>true</interfaceOnly> -->
-                                <!-- <useTags>true</useTags> -->
-                                <!-- <useOptional>true</useOptional> --> <!-- Can keep if desired, but test without first -->
-                                <!-- <skipDefaultInterface>true</skipDefaultInterface> -->
-                                <!-- <useSwaggerUI>false</useSwaggerUI> -->
-                                <!-- <useSpringfox>false</useSpringfox> -->
-                                <!-- <recordWithEqualsHashCode>true</recordWithEqualsHashCode> --> <!-- useRecords implies this -->
+                                <!-- Use Spring Boot features/annotations -->
+<!--                                <library>spring-boot</library>-->
+                                <!-- Use Bean Validation annotations (@NotNull, @Size etc.) -->
+                                <useBeanValidation>true</useBeanValidation>
+                                <!-- Handle 'nullable' properly -->
+                                <openApiNullable>false</openApiNullable> <!-- Check behavior, 'true' might use JsonNullable wrapper -->
+                                <!-- Don't generate interfaces for default methods -->
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <!-- Only generate Models and API interfaces (no controllers) -->
+                                <interfaceOnly>true</interfaceOnly>
+                                <!-- Use standard Jackson annotations -->
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <!-- Hide generation timestamp for reproducible builds -->
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                <!-- Specify source folder within the output directory -->
+                                <sourceFolder>src/main/java</sourceFolder>
                             </configOptions>
-                            <!-- Specify only the models this service needs -->
-                            <modelsToGenerate>Money,Address,PhoneNumber,ImageInfo,OrderStatus,PaymentStatus,PaymentMethod,ShippingMethod,CustomerInfo,ProductSummary,OrderItem,Category,Product,ProductCreateRequest,ProductUpdateRequest,CartItem,Cart,CartItemAddRequest,Order,OrderCreateRequest,OrderStatusUpdateRequest,UserInfo,UserCreateRequest,UserUpdateRequest,ChangePasswordRequest,AuthResponse,PaymentRequest,PaymentResponse,PaymentNotification,PaymentLineItem</modelsToGenerate>
-                            <modelNameSuffix>DTO</modelNameSuffix> <!-- Keep suffix -->
                         </configuration>
                     </execution>
                 </executions>
@@ -224,7 +219,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version> <!-- Use the latest stable version -->
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>add-openapi-generated-source</id>
@@ -234,7 +229,6 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <!-- Adjust path if generator output changes -->
                                 <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
                             </sources>
                         </configuration>
