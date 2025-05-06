@@ -53,6 +53,7 @@ public class CartMapper {
         // Don't set cartItems here directly. Handle them in the service layer to manage
         // the bidirectional relationship properly
 
+
         return Cart.builder()
                 .id(cartDTO.id())
                 // .user(userService.findById(cartDTO.userId())) // Fetch user from database in your service
