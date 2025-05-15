@@ -1,14 +1,15 @@
-package order.mapper
+package com.rj.ecommerce_backend.order.mapper
 
 import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
+import com.rj.ecommerce.api.shared.core.ZipCode
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductSummary
-import com.rj.ecommerce.api.shared.enums.PaymentStatus
+import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
-import com.rj.ecommerce_backend.order.enums.Currency
+import com.rj.ecommerce_backend.product.domain.Product // Assuming Product has productName property
+import com.rj.ecommerce.api.shared.enums.Currency // Use this one
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
@@ -16,115 +17,132 @@ import java.math.BigDecimal
 class OrderMapper {
 
     fun toDto(order: Order?): OrderDTO? {
-        if (order == null) {
-            return null
+        return order?.let { o ->
+            val orderItemDTOs = o.orderItems.mapNotNull { orderItem -> toDto(orderItem) }
+
+            val shippingAddressDTO = o.shippingAddress?.let { sa ->
+                Address(
+                    street = sa.street,
+                    city = sa.city,
+                    zipCode = sa.zipCode?.let { ZipCode(it.value) },
+                    country = sa.country
+                )
+            }
+
+            OrderDTO(
+                id = o.id,
+                userId = o.user?.id,
+                customerEmail = o.user?.email?.value,
+                items = orderItemDTOs,
+                totalAmount = o.totalAmount?.let { Money(it, o.currency) },
+                shippingAddress = shippingAddressDTO,
+                shippingMethod = o.shippingMethod,
+                paymentMethod = o.paymentMethod,
+                orderStatus = o.orderStatus,
+                paymentStatus = o.paymentStatus,
+                paymentTransactionId = o.paymentTransactionId,
+                orderDate = o.orderDate,
+                checkoutSessionUrl = o.checkoutSessionUrl,
+                checkoutSessionExpiresAt = o.checkoutSessionExpiresAt,
+                receiptUrl = o.receiptUrl
+            )
         }
-
-        val orderItemDTOs = order.orderItems.map { orderItem: OrderItem -> toDto(orderItem) }
-
-        val addressDTO = Address(
-            order.shippingAddress.street,
-            order.shippingAddress.city,
-            order.shippingAddress.zipCode,
-            order.shippingAddress.country
-        )
-
-        return OrderDTO(
-            id = order.id,
-            userId = order.user.id,
-            customerEmail = order.user.email.value,
-            items = orderItemDTOs,
-            totalAmount = Money(order.totalPrice, order.currency.name),
-            shippingAddress = addressDTO,
-            shippingMethod = order.shippingMethod,
-            paymentMethod = order.paymentMethod,
-            orderStatus = order.orderStatus,
-            paymentStatus = order.paymentStatus,
-            paymentTransactionId = order.paymentTransactionId,
-            orderDate = order.orderDate,
-            checkoutSessionUrl = order.checkoutSessionUrl,
-            checkoutSessionExpiresAt = order.checkoutSessionExpiresAt,
-            receiptUrl = order.receiptUrl
-        )
-
-
     }
 
     fun toDto(orderItem: OrderItem?): OrderItemDTO? {
-        if (orderItem == null) {
-            return null
+        return orderItem?.let { oi ->
+            val productEntity: Product? = oi.product
+
+            val productNameValue: String? = productEntity?.name?.value
+            if (productNameValue == null && productEntity != null) {
+                // Log warning or decide on a default if critical
+                // For now, let it be null if product/name is null
+            }
+
+
+            val productSummary = ProductSummaryDTO(
+                id = productEntity?.id,
+                sku = null,
+                name = productNameValue,
+                unitPrice = oi.price?.let { price ->
+                    Money(
+                        amount = price,
+                        currencyCode = oi.order?.currency ?: Currency.PLN
+                    )
+                }
+            )
+
+            OrderItemDTO(
+                product = productSummary,
+                quantity = oi.quantity,
+                lineTotal = getLineTotal(oi)
+            )
         }
-        val product = orderItem.product
-        val productName: String =
-            (if (product != null && product.getProductName() != null) product.getProductName().value else null)!!
-
-        val productSummary = ProductSummary(
-            id = product.id,
-            sku = null,
-            name = productName,
-            unitPrice = Money(
-                amount = orderItem.price,
-                currencyCode = orderItem.order.currency.name)
-        )
-
-        return OrderItemDTO(
-            product = productSummary,
-            quantity = orderItem.quantity,
-            lineTotal = getLineTotal(orderItem)
-        )
     }
 
     fun toEntity(orderDTO: OrderDTO?): Order? {
-        if (orderDTO == null) {
-            return null
+        return orderDTO?.let { dto ->
+            val shippingAddressEntity = dto.shippingAddress?.let { saDto ->
+                Address(
+                    street = saDto.street,
+                    city = saDto.city,
+                    zipCode = saDto.zipCode,
+                    country = saDto.country
+                )
+            }
+
+            Order(
+                id = dto.id,
+                user = null,
+                totalAmount = dto.totalAmount?.amount,
+                currency = dto.totalAmount?.currencyCode?.let {
+                    try {
+                        Currency.valueOf(it.name)
+                    } catch (e: IllegalArgumentException) {
+                        Currency.PLN
+                    }
+                } ?: Currency.PLN,
+                shippingAddress = shippingAddressEntity,
+                shippingMethod = dto.shippingMethod,
+                paymentMethod = dto.paymentMethod,
+                paymentTransactionId = dto.paymentTransactionId,
+                checkoutSessionUrl = dto.checkoutSessionUrl,
+                checkoutSessionExpiresAt = dto.checkoutSessionExpiresAt,
+                receiptUrl = dto.receiptUrl,
+                paymentStatus = dto.paymentStatus,
+                orderStatus = dto.orderStatus
+            ).also { orderEntity ->
+                dto.items.forEach { itemDto ->
+                    toEntity(itemDto)?.let { orderItemEntity ->
+                        orderEntity.addOrderItem(orderItemEntity)
+                    }
+                }
+            }
         }
-
-        // Create Address value object from AddressDTO
-        val address = Address(
-            street = orderDTO.shippingAddress.street,
-            city = orderDTO.shippingAddress.city,
-            zipCode = orderDTO.shippingAddress.zipCode,
-            country = orderDTO.shippingAddress.country
-        )
-
-        return Order.builder()
-            .id(orderDTO.id)
-            .user(null)
-            .totalPrice(orderDTO.totalAmount.amount)
-            .currency(Currency.valueOf(orderDTO.totalAmount.currencyCode))
-            .shippingAddress(address)
-            .shippingMethod(orderDTO.shippingMethod)
-            .paymentMethod(orderDTO.paymentMethod)
-            .paymentTransactionId(orderDTO.paymentTransactionId)
-            .checkoutSessionUrl(orderDTO.checkoutSessionUrl)
-            .receiptUrl(orderDTO.receiptUrl)
-            .paymentStatus(orderDTO.paymentStatus)
-            .orderDate(orderDTO.orderDate)
-            .orderStatus(orderDTO.orderStatus)
-            .build()
     }
 
     fun toEntity(orderItemDTO: OrderItemDTO?): OrderItem? {
-        if (orderItemDTO == null) {
-            return null
+        return orderItemDTO?.let { dto ->
+            OrderItem(
+                id = null,
+                quantity = dto.quantity,
+                price = dto.product.unitPrice?.amount
+            )
         }
-
-        return OrderItem.builder()
-            .id(orderItemDTO.product.id)
-            .quantity(orderItemDTO.quantity)
-            .price(orderItemDTO.lineTotal.amount)
-            .build()
     }
 
     companion object {
         private fun getLineTotal(orderItem: OrderItem): Money {
+            val itemPrice = orderItem.price ?: BigDecimal.ZERO
+            val quantity = BigDecimal.valueOf(orderItem.quantity.toLong())
+            val lineAmount = itemPrice.multiply(quantity)
 
-            val lineAmount = orderItem.price.multiply(
-                BigDecimal.valueOf(orderItem.quantity.toLong()))
+            // Handle null order or null currency on order
+            val currencyCode = orderItem.order?.currency ?: Currency.PLN
 
             return Money(
                 amount = lineAmount,
-                currencyCode = orderItem.order.currency.name
+                currencyCode = currencyCode
             )
         }
     }

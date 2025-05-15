@@ -1,11 +1,11 @@
 package com.rj.ecommerce_backend.product.domain
 
-import com.rj.ecommerce_backend.product.valueobject.ProductDescription
-import com.rj.ecommerce_backend.product.valueobject.ProductName
-import com.rj.ecommerce_backend.product.valueobject.ProductPrice
-import com.rj.ecommerce_backend.product.valueobject.StockQuantity
+import com.rj.ecommerce.api.shared.core.Money
+import com.rj.ecommerce.api.shared.core.ProductDescription
+import com.rj.ecommerce.api.shared.core.ProductName
+import com.rj.ecommerce.api.shared.core.QuantityInStock
 import jakarta.persistence.*
-import lombok.*
+import jakarta.validation.Valid
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
@@ -14,59 +14,97 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@Builder
+@Table(name = "products")
 @EntityListeners(AuditingEntityListener::class)
-class Product {
+data class Product(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
+    var id: Long? = null,
 
     @Embedded
-    @AttributeOverride(name = "value", column = Column(name = "name"))
-    var productName: ProductName? = null
+    @AttributeOverride(name = "value", column = Column(name = "name", nullable = false))
+    var name: ProductName? = null,
 
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "description"))
-    var productDescription: ProductDescription? = null
+    var description: ProductDescription? = null,
 
     @Embedded
-    @AttributeOverride(name = "value", column = Column(name = "price"))
-    var productPrice: ProductPrice? = null
+    @AttributeOverrides(
+        AttributeOverride(name = "amount", column = Column(name = "price_amount", precision = 19, scale = 2)),
+        AttributeOverride(name = "currencyCode.name", column = Column(name = "price_currency", length = 3))
+    )
+    @field:Valid
+    var unitPrice: Money,
 
     @Embedded
-    @AttributeOverride(name = "value", column = Column(name = "quantity"))
-    var stockQuantity: StockQuantity? = null
+    @AttributeOverride(name = "value", column = Column(name = "quantity", nullable = false))
+    var quantityInStock: QuantityInStock? = null,
 
-    @Builder.Default
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "product_category",
         joinColumns = [JoinColumn(name = "product_id")],
         inverseJoinColumns = [JoinColumn(name = "category_id")]
     )
-    var categories: MutableList<Category?> = ArrayList<Category?>()
+    val categories: MutableSet<Category> = mutableSetOf(),
 
     @OneToMany(
         mappedBy = "product",
-        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
-        orphanRemoval = true
+        cascade = [CascadeType.ALL], // CascadeType.ALL includes PERSIST, MERGE, REFRESH, REMOVE
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
     )
-    var imageList: MutableList<Image?> = ArrayList<Image?>()
-
+    val images: MutableList<Image> = mutableListOf(),
+) {
     @CreationTimestamp
-    private var createdAt: LocalDateTime? = null
+    @Column(nullable = false, updatable = false)
+    var createdAt: LocalDateTime? = null
 
     @UpdateTimestamp
-    private var updatedAt: LocalDateTime? = null
+    @Column(nullable = false)
+    var updatedAt: LocalDateTime? = null
 
     @CreatedBy
-    private var createdBy: String? = null
+    @Column(updatable = false)
+    var createdBy: String? = null
 
     @LastModifiedBy
-    private var lastModifiedBy: String? = null
+    var lastModifiedBy: String? = null
+
+    // Helper methods for bidirectional management of collections
+    fun addCategory(category: Category) {
+        categories.add(category)
+        category.products.add(this) // Assuming Category has a 'products' collection
+    }
+
+    fun removeCategory(category: Category) {
+        categories.remove(category)
+        category.products.remove(this)
+    }
+
+    fun addImage(image: Image) {
+        images.add(image)
+        image.product = this
+    }
+
+    fun removeImage(image: Image) {
+        images.remove(image)
+        image.product = null
+    }
+
+    // If using data class, default equals/hashCode will include collections.
+    // This can be problematic. Consider overriding if needed, e.g., based on ID.
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Product
+        return id != null && id == other.id
+    }
+
+    override fun hashCode(): Int = id?.hashCode() ?: javaClass.hashCode()
+
+    override fun toString(): String {
+        return "Product(id=$id, productName=${name?.value}, stockQuantity=${quantityInStock?.value})"
+    }
 }

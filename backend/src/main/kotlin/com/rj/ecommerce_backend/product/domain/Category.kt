@@ -10,28 +10,48 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
-@Data
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "categories")
 @EntityListeners(AuditingEntityListener::class)
-class Category {
+data class Category(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private var id: Long? = null
+    var id: Long? = null,
 
-    private var name: String? = null
+    @Column(nullable = false, unique = true)
+    var name: String? = null,
 
+    // For ManyToMany with Product
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    val products: MutableSet<Product> = mutableSetOf(),
+) {
     @CreationTimestamp
-    private var createdAt: LocalDateTime? = null
+    @Column(nullable = false, updatable = false)
+    var createdAt: LocalDateTime? = null
 
     @UpdateTimestamp
-    private var updatedAt: LocalDateTime? = null
+    @Column(nullable = false)
+    var updatedAt: LocalDateTime? = null
 
     @CreatedBy
-    private var createdBy: String? = null
+    @Column(updatable = false)
+    var createdBy: String? = null
 
     @LastModifiedBy
-    private var lastModifiedBy: String? = null
+    var lastModifiedBy: String? = null
+
+    // Consider overriding equals/hashCode based on ID or natural key (name)
+    // Default data class equals/hashCode will include 'products' collection, which is usually bad.
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Category
+        // Prefer ID-based equality after persistence, or natural key if ID is null
+        return if (id != null) id == other.id else name != null && name == other.name
+    }
+
+    override fun hashCode(): Int = id?.hashCode() ?: name?.hashCode() ?: javaClass.hashCode()
+
+    override fun toString(): String {
+        return "Category(id=$id, name=$name)"
+    }
 }

@@ -2,10 +2,6 @@ package com.rj.ecommerce_backend.order.domain
 
 import com.rj.ecommerce_backend.product.domain.Product
 import jakarta.persistence.*
-import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Data
-import lombok.NoArgsConstructor
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
@@ -16,37 +12,38 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "order_items")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @EntityListeners(AuditingEntityListener::class)
-class OrderItem {
+data class OrderItem(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private var id: Long? = null
+    var id: Long? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private var order: Order? = null
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    var order: Order? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private var product: Product? = null
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    var product: Product? = null,
 
-    private var quantity = 0
+    var quantity: Int = 0,
 
-    private var price: BigDecimal? = null
+    var price: BigDecimal? = null,
 
+) {
     @CreationTimestamp
-    private var createdAt: LocalDateTime? = null
+    @Column(nullable = false, updatable = false)
+    var createdAt: LocalDateTime? = null
 
     @UpdateTimestamp
-    private var updatedAt: LocalDateTime? = null
+    @Column(nullable = false)
+    var updatedAt: LocalDateTime? = null
 
     @CreatedBy
-    private var createdBy: String? = null
+    @Column(updatable = false)
+    var createdBy: String? = null
 
     @LastModifiedBy
-    private var lastModifiedBy: String? = null
+    var lastModifiedBy: String? = null
+
 }

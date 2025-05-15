@@ -1,7 +1,6 @@
-package com.rj.ecommerce_backend.product.dto
+package com.rj.ecommerce_backend.product.search
 
 import com.rj.ecommerce_backend.product.domain.Product
-import com.rj.ecommerce_backend.product.search.ProductSpecifications
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.jpa.domain.Specification
 import java.math.BigDecimal

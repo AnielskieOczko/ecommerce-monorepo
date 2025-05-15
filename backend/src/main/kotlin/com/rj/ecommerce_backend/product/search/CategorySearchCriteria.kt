@@ -1,7 +1,6 @@
-package com.rj.ecommerce_backend.product.dto
+package com.rj.ecommerce_backend.product.search
 
 import com.rj.ecommerce_backend.product.domain.Category
-import com.rj.ecommerce_backend.product.search.CategorySpecifications
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.jpa.domain.Specification
 

@@ -1,421 +1,358 @@
 package com.rj.ecommerce_backend.order.service
 
+import com.rj.ecommerce.api.shared.core.Address
+import com.rj.ecommerce.api.shared.core.ShippingAddressDTO
+import com.rj.ecommerce.api.shared.core.ZipCode
 import com.rj.ecommerce.api.shared.dto.cart.CartDTO
 import com.rj.ecommerce.api.shared.dto.cart.CartItemDTO
+import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
+import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce_backend.messaging.common.excepion.MessagePublishException
-import com.rj.ecommerce_backend.messaging.email.EmailRequestFactory
-import com.rj.ecommerce_backend.messaging.email.EmailServiceClient
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EcommerceEmailRequest
-import com.rj.ecommerce_backend.messaging.payment.dto.CheckoutSessionResponseDTO
+import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailRequestFactory
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
-import com.rj.ecommerce_backend.order.domain.OrderItem.price
-import com.rj.ecommerce_backend.order.domain.OrderItem.quantity
-import com.rj.ecommerce_backend.order.dtos.OrderCreationRequest
-import com.rj.ecommerce_backend.order.dtos.OrderDTO
-import com.rj.ecommerce_backend.order.dtos.ShippingAddressDTO
-import com.rj.ecommerce_backend.order.enums.*
-import com.rj.ecommerce_backend.order.enums.Currency
+import com.rj.ecommerce.api.shared.enums.*
+import com.rj.ecommerce.api.shared.messaging.email.EcommerceEmailRequest
+import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
+import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailServiceClient
 import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException
 import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException
 import com.rj.ecommerce_backend.order.exceptions.OrderServiceException
 import com.rj.ecommerce_backend.order.mapper.OrderMapper
 import com.rj.ecommerce_backend.order.repository.OrderRepository
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
-import com.rj.ecommerce_backend.product.domain.Product
 import com.rj.ecommerce_backend.product.exceptions.InsufficientStockException
 import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException
 import com.rj.ecommerce_backend.product.service.ProductService
-import com.rj.ecommerce_backend.securityconfig.SecurityContextImpl
+import com.rj.ecommerce_backend.securityconfig.SecurityContext
 import com.rj.ecommerce_backend.user.domain.User
-import com.rj.ecommerce_backend.user.exceptions.UserNotFoundException
-import com.rj.ecommerce_backend.user.services.AdminService
-import com.rj.ecommerce_backend.user.valueobject.Address
-import com.rj.ecommerce_backend.user.valueobject.ZipCode
-import jakarta.transaction.Transactional
-import lombok.RequiredArgsConstructor
-import lombok.extern.slf4j.Slf4j
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.time.LocalDateTime
-import java.util.*
-import java.util.function.Function
-import java.util.function.Supplier
 
-@RequiredArgsConstructor
+private val logger = KotlinLogging.logger {}
+
 @Service
-@Slf4j
-class OrderServiceImpl : OrderService {
-    private val orderRepository: OrderRepository? = null
-    private val securityContext: SecurityContextImpl? = null
-    private val productService: ProductService? = null
-    private val adminService: AdminService? = null
-    private val orderMapper: OrderMapper? = null
-    private val emailServiceclient: EmailServiceClient? = null
-    private val emailRequestFactory: EmailRequestFactory? = null
-
+class OrderServiceImpl( // Constructor Injection (replaces @RequiredArgsConstructor)
+    private val orderRepository: OrderRepository,
+    private val securityContext: SecurityContext,
+    private val productService: ProductService,
+    private val orderMapper: OrderMapper,
+    private val emailServiceClient: EmailServiceClient,
+    private val emailRequestFactory: EmailRequestFactory
+) : OrderService {
 
     @Transactional
-    override fun createOrder(userId: Long?, orderCreationRequest: OrderCreationRequest): OrderDTO? {
+    override fun createOrder(userId: Long, orderCreateRequestDTO: OrderCreateRequestDTO): OrderDTO {
         try {
-            // First create and save the order to get an ID
-            val order = createInitialOrder(userId, orderCreationRequest)
+            val order = createInitialOrder(userId, orderCreateRequestDTO)
 
-            // Try to send notification, but don't let email failure prevent order creation
             try {
-                val request: EcommerceEmailRequest = emailRequestFactory!!.createOrderConfirmationRequest(order)
-                emailServiceclient!!.sendEmailRequest(request)
+                val emailRq: EcommerceEmailRequest = emailRequestFactory.createOrderConfirmationRequest(order)
+                emailServiceClient.sendEmailRequest(emailRq)
             } catch (e: MessagePublishException) {
-                // Log the email failure but don't roll back the transaction
-                OrderServiceImpl.log.error(
-                    "Failed to send order confirmation email for order ID: {}. Order was created successfully.",
-                    order.id, e
-                )
+                logger.error(e) { "Failed to send order confirmation email for order ID: ${order.id}. Order was created successfully." }
+            }
+            // orderMapper.toDto should ideally not return null if input 'order' is non-null
+            return orderMapper.toDto(order) ?: throw OrderServiceException("Failed to map created order to DTO for order ID: ${order.id}")
+        } catch (e: OrderServiceException) {
+            throw e // Rethrow specific exceptions
+        }
+        catch (e: Exception) { // Catch broader exceptions last
+            logger.error(e) { "Error creating order for user $userId" }
+            throw OrderServiceException("Error creating order for user $userId", e)
+        }
+    }
+
+    @Transactional(readOnly = true) // Good for read operations
+    override fun getOrderByIdAdmin(orderId: Long): Order? {
+        securityContext.ensureAdmin() // Renamed for clarity
+
+        val order = orderRepository.findById(orderId).orElse(null) // Fetch and convert Optional to nullable
+
+        if (order == null) {
+            logger.info { "Admin: Order not found with ID: $orderId" }
+            return null
+        }
+
+        // The original code had a checkAccess for the order's user, which is odd for an admin fetch.
+        // If an admin is fetching any order, they usually don't need to pass the user's access check.
+        // If the intent was to log which user's order an admin is accessing, that's different.
+        // For now, assuming admin can access any order by its ID.
+        logger.info { "Admin successfully retrieved order with ID: $orderId belonging to user ID: ${order.user?.id}" }
+        return order
+    }
+
+    @Transactional(readOnly = true)
+    override fun getOrderById(userId: Long, orderId: Long): Order? {
+        securityContext.ensureAccess(userId)
+
+        val order = orderRepository.findById(orderId).orElse(null)
+            ?: run {
+                logger.info { "Order not found with ID: $orderId for user ID: $userId" }
+                return null
             }
 
-            return orderMapper!!.toDto(order)
-        } catch (e: Exception) {
-            OrderServiceImpl.log.error("Error creating order for user {}", userId, e)
-            throw OrderServiceException("Error creating order", e)
+        // Ensure the fetched order actually belongs to the user requesting it
+        if (order.user?.id != userId) {
+            logger.warn { "User $userId attempted to access order $orderId belonging to user ${order.user?.id}" }
+            throw AccessDeniedException("User $userId is not authorized to access order $orderId")
         }
+        return order
+    }
+
+    @Transactional(readOnly = true)
+    override fun getOrderByIdWithOrderItems(orderId: Long): Order? {
+        // Assuming orderRepository.findByIdWithOrderItems handles user authorization internally
+        // or that this method is intended for cases where user context is already established (e.g. current user)
+        val currentUser = securityContext.getCurrentUser()
+        securityContext.ensureAccess(currentUser.id)
+
+
+        // Original logic used findByIdWithOrderItems(orderId, userId) - let's assume that's still desired
+        return orderRepository.findByIdWithOrderItems(orderId, currentUser.id).orElse(null)
+            ?: run {
+                logger.info { "Order not found or not accessible (with items) with ID: $orderId for user ID: ${currentUser.id}" }
+                null
+            }
+    }
+
+    @Transactional(readOnly = true)
+    override fun getOrdersForUser(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO> {
+        criteria.userId?.let { securityContext.ensureAccess(it) }
+            ?: throw IllegalArgumentException("User ID must be provided in criteria for fetching user-specific orders.")
+
+        logger.debug { "Fetching orders for user ID: ${criteria.userId}" }
+        val spec: Specification<Order> = criteria.toSpecification()
+
+        val pageOfOrders: Page<Order> = orderRepository.findAll(spec, pageable)
+        val dtoList: List<OrderDTO> = pageOfOrders.content.mapNotNull { order -> orderMapper.toDto(order) }
+
+        return PageImpl(dtoList,pageable, pageOfOrders.totalElements)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getAllOrders(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO> {
+        securityContext.ensureAdmin()
+        // Removed the inverted admin check logic
+        logger.debug { "Admin fetching all orders with criteria." }
+        val spec: Specification<Order> = criteria.toSpecification()
+
+        val pageOfOrders: Page<Order> = orderRepository.findAll(spec, pageable)
+        val dtoList: List<OrderDTO> = pageOfOrders.content.mapNotNull { order -> orderMapper.toDto(order) }
+
+        return PageImpl(dtoList,pageable, pageOfOrders.totalElements)
     }
 
     @Transactional
-    override fun getOrderByIdAdmin(orderId: Long?): Optional<Order?> {
-        securityContext!!.isAdmin()
+    override fun updateOrderStatus(orderId: Long, newStatus: OrderStatus): OrderDTO {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { OrderNotFoundException(orderId) }
 
-        if (orderId == null) {
-            OrderServiceImpl.log.warn("Attempted to retrieve order with null ID")
-            return Optional.empty<Order?>()
-        }
-
-        // Use the repository method that eagerly fetches order items
-        val orderOptional = orderRepository!!.findById(orderId)
-
-        // Handle case where order doesn't exist
-        if (orderOptional.isEmpty()) {
-            OrderServiceImpl.log.info("Order not found with ID: {}", orderId)
-            return Optional.empty<Order?>()
-        }
-
-        val order = orderOptional.get()
-
-        // Check user access permissions
-        try {
-            val orderUser = order.user
-            securityContext.checkAccess(orderUser!!.getId())
-
-            OrderServiceImpl.log.info("Successfully retrieved order with ID: {}", orderId)
-            return Optional.of<Order?>(order)
-        } catch (e: AccessDeniedException) {
-            OrderServiceImpl.log.warn("Access denied for order ID: {} for user", orderId)
-            throw e
-        } catch (e: Exception) {
-            OrderServiceImpl.log.error("Unexpected error retrieving order with ID: {}", orderId, e)
-            throw OrderServiceException("Error processing order retrieval", e)
-        }
-    }
-
-    @Transactional
-    override fun getOrderById(userId: Long?, orderId: Long?): Optional<Order?> {
-        securityContext!!.checkAccess(userId)
-
-        if (orderId == null) {
-            OrderServiceImpl.log.warn("Attempted to retrieve order with null ID")
-            return Optional.empty<Order?>()
-        }
-
-        val orderOptional = orderRepository!!.findById(orderId)
-
-        // Handle case where order doesn't exist
-        if (orderOptional.isEmpty()) {
-            OrderServiceImpl.log.info("Order not found with ID: {}", orderId)
-            return Optional.empty<Order?>()
-        }
-
-        val order = orderOptional.get()
-
-        return Optional.of<Order?>(order)
-    }
-
-    @Transactional
-    override fun getOrderByIdWithOrderItems(orderId: Long?): Optional<Order?> {
-        val userId = securityContext!!.getCurrentUser().getId()
-        securityContext.checkAccess(userId)
-
-        if (orderId == null) {
-            OrderServiceImpl.log.warn("Attempted to retrieve order with null ID")
-            return Optional.empty<Order?>()
-        }
-
-        val orderOptional = orderRepository!!.findByIdWithOrderItems(orderId, userId)
-
-        // Handle case where order doesn't exist
-        if (orderOptional.isEmpty()) {
-            OrderServiceImpl.log.info("Order not found with ID: {}", orderId)
-            return Optional.empty<Order?>()
-        }
-
-        val order = orderOptional.get()
-
-        return Optional.of<Order?>(order)
-    }
-
-    @Transactional
-    override fun getOrdersForUser(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO?> {
-        val spec = criteria.toSpecification()
-
-        securityContext!!.checkAccess(criteria.userId)
-        OrderServiceImpl.log.debug("Fetching orders for user ID: {}", criteria.userId)
-        return orderRepository!!.findAll(spec, pageable)
-            .map<U?>(Function { order: Order? -> orderMapper!!.toDto(order) })
-    }
-
-    @Transactional
-    override fun getAllOrders(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO?> {
-        // Verify admin permissions
-        if (securityContext!!.isAdmin()) {
-            OrderServiceImpl.log.warn("Unauthorized access attempt to all orders")
-            throw AccessDeniedException("Admin access required")
-        }
-
-        val orderSpecification = criteria.toSpecification()
-
-        val orders = orderRepository!!.findAll(orderSpecification, pageable)
-
-        // Convert to DTOs
-        return orders.map<U?>(Function { order: Order? -> orderMapper!!.toDto(order) })
-    }
-
-    @Transactional
-    override fun updateOrderStatus(orderId: Long, newStatus: OrderStatus?): OrderDTO? {
-        val order = orderRepository!!.findById(orderId)
-            .orElseThrow<OrderNotFoundException?>(Supplier { OrderNotFoundException(orderId) })
+        // Potentially add logic here: can any admin update any order? Or only specific roles?
+        // securityContext.ensureAdmin() or some other role check might be needed.
 
         order.orderStatus = newStatus
-        val updatedOrder = orderRepository.save<Order>(order)
-
-        OrderServiceImpl.log.info("Order {} status updated to {}", orderId, newStatus)
-        return orderMapper!!.toDto(updatedOrder)
+        val updatedOrder = orderRepository.save(order)
+        logger.info { "Order $orderId status updated to $newStatus" }
+        return orderMapper.toDto(updatedOrder) ?: throw OrderServiceException("Failed to map updated order $orderId to DTO.")
     }
 
     @Transactional
-    override fun cancelOrder(userId: Long?, orderId: Long) {
-        val order = orderRepository!!.findById(orderId)
-            .orElseThrow<OrderNotFoundException?>(Supplier { OrderNotFoundException(orderId) })
+    override fun cancelOrder(userId: Long, orderId: Long) {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { OrderNotFoundException(orderId) }
 
-        // Validate order belongs to user
-        if (order.user!!.getId() != userId) {
-            throw AccessDeniedException("User " + userId + " is not authorized to cancel order " + orderId)
+        if (order.user?.id != userId) {
+            logger.warn { "User $userId attempted to cancel order $orderId belonging to user ${order.user?.id}" }
+            throw AccessDeniedException("User $userId is not authorized to cancel order $orderId")
         }
 
-        // Validate order status
-        if (order.orderStatus != OrderStatus.PENDING) {
-            throw OrderCancellationException("Cannot cancel order with status: " + order.orderStatus)
+        if (order.orderStatus != OrderStatus.PENDING && order.orderStatus != OrderStatus.CONFIRMED /*Allow cancel if confirmed but not shipped?*/) {
+            // Business logic: What statuses are cancellable by a user?
+            throw OrderCancellationException("User cannot cancel order $orderId with status: ${order.orderStatus}")
         }
 
         order.orderStatus = OrderStatus.CANCELLED
-        orderRepository.save<Order?>(order)
-
-        OrderServiceImpl.log.info("Order {} cancelled by user {}", orderId, userId)
+        // order.paymentStatus = PaymentStatus.REFUND_REQUESTED or CANCELLED?
+        orderRepository.save(order)
+        logger.info { "Order $orderId cancelled by user $userId" }
+        // TODO: Trigger refund process if payment was made
+        // TODO: Send cancellation email
     }
 
     @Transactional
     override fun cancelOrderAdmin(orderId: Long) {
-        val order = orderRepository!!.findById(orderId)
-            .orElseThrow<OrderNotFoundException?>(Supplier { OrderNotFoundException(orderId) })
+        securityContext.ensureAdmin()
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { OrderNotFoundException(orderId) }
+
+        // Admin might be able to cancel orders in more states than a user
+        if (order.orderStatus == OrderStatus.SHIPPED || order.orderStatus == OrderStatus.DELIVERED) {
+            throw OrderCancellationException("Admin cannot cancel order $orderId already in status: ${order.orderStatus}. Consider refund/return process.")
+        }
 
         order.orderStatus = OrderStatus.CANCELLED
-        orderRepository.save<Order?>(order)
-
-        OrderServiceImpl.log.info("Order {} cancelled by admin", orderId)
+        // order.paymentStatus = PaymentStatus.REFUNDED or CANCELLED?
+        orderRepository.save(order)
+        logger.info { "Order $orderId cancelled by admin" }
+        // TODO: Trigger refund process if payment was made
+        // TODO: Send cancellation email (possibly different template for admin cancellation)
     }
 
+    override fun calculateOrderTotal(cartItems: List<CartItemDTO>): BigDecimal {
+        // Ensure CartItemDTO.price is non-null or handle it. Let's assume it's a BigDecimal.
+        // Your original DTO has CartItemDTO.price as Money, which has amount: BigDecimal?
+        // This needs clarification. Assuming item.unitPrice.amount for now.
+        return cartItems.sumOf { item ->
+            val price = item.product.unitPrice?.amount ?: BigDecimal.ZERO
+            val quantity = BigDecimal.valueOf(item.quantity.toLong())
+            price.multiply(quantity)
+        }
+    }
+
+    // This method was not in the interface, making it public implicitly.
+    // If it's only used internally, it should be private.
+    // If it's part of a separate flow (e.g., payment webhook), it might belong to another service
+    // or be exposed carefully. For now, keeping it as an internal helper or part of updateOrderWithCheckoutSession.
     @Transactional
-    override fun calculateOrderTotal(cartItems: MutableList<CartItemDTO?>): BigDecimal? {
-        return cartItems.stream()
-            .map<Any?> { item: CartItemDTO? -> item.price().multiply(BigDecimal.valueOf(item.quantity())) }
-            .reduce(BigDecimal.ZERO, BigDecimal::add)
-    }
-
-    fun markOrderPaymentFailed(orderId: Long) {
-        val order = orderRepository!!.findById(orderId)
-            .orElseThrow<OrderNotFoundException?>(Supplier { OrderNotFoundException(orderId) })
+    fun markOrderPaymentFailed(orderId: Long) { // Should this be part of updateOrderWithCheckoutSession?
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { OrderNotFoundException(orderId) }
 
         order.paymentStatus = PaymentStatus.FAILED
-        order.orderStatus = OrderStatus.FAILED
-        orderRepository.save<Order?>(order)
+        order.orderStatus = OrderStatus.FAILED // Redundant if updateOrderWithCheckoutSession handles this
+        orderRepository.save(order)
+        logger.info { "Marked payment as FAILED for order $orderId" }
     }
 
     @Transactional
-    override fun updateOrderWithCheckoutSession(response: CheckoutSessionResponseDTO) {
-        val orderId = response.orderId.toLong()
+    override fun updateOrderWithCheckoutSession(response: PaymentResponseDTO) {
+        val orderId = response.orderId.toLong() // Consider safe conversion or ensure orderId is always valid Long
         val paymentStatus = response.paymentStatus
 
-        // Use the repository method that eagerly fetches order items
-        val order = orderRepository!!.findById(orderId)
-            .orElseThrow<OrderNotFoundException?>(Supplier { OrderNotFoundException(orderId) })
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { OrderNotFoundException(orderId) }
 
-        // Update payment status
         order.paymentStatus = paymentStatus
+        response.sessionId?.let { order.paymentTransactionId = it }
+        response.checkoutUrl?.let { order.checkoutSessionUrl = it }
+        response.expiresAt?.let { order.checkoutSessionExpiresAt = it }
+        response.metadata?.get("receiptUrl")?.let { order.receiptUrl = it }
 
-        // Update session ID if available
-        if (response.sessionId != null) {
-            order.paymentTransactionId = response.sessionId
+        when (paymentStatus) {
+            PaymentStatus.COMPLETE, PaymentStatus.PAID -> {
+                order.orderStatus = OrderStatus.CONFIRMED
+                // TODO: Send payment success / order confirmation email if not already sent robustly
+            }
+            PaymentStatus.FAILED -> {
+                order.orderStatus = OrderStatus.FAILED
+                // TODO: Send payment failed email
+            }
+            PaymentStatus.PENDING, PaymentStatus.EXPIRED, PaymentStatus.UNKNOWN -> {
+                if (order.orderStatus == OrderStatus.PENDING) {
+                    // Potentially no change or to a more specific pending state
+                }
+            } else -> {
+                // Log or handle unexpected payment status
+            }
         }
 
-        // Update checkout URL if available
-        if (response.checkoutUrl != null) {
-            order.checkoutSessionUrl = response.checkoutUrl
-        }
-
-        if (response.expiresAt != null) {
-            order.checkoutSessionExpiresAt = response.expiresAt
-        }
-
-        // Store receipt URL if available in additional details
-        if (response.additionalDetails != null && response.additionalDetails.containsKey("receiptUrl")) {
-            order.receiptUrl = response.additionalDetails.get("receiptUrl")
-        }
-
-        // Update order status based on payment status
-        if (paymentStatus == PaymentStatus.SUCCEEDED || paymentStatus == PaymentStatus.PAID) {
-            order.orderStatus = OrderStatus.CONFIRMED
-        } else if (paymentStatus == PaymentStatus.FAILED) {
-            order.orderStatus = OrderStatus.FAILED
-        }
-
-        order.updatedAt = LocalDateTime.now()
-        orderRepository.save<Order?>(order)
-
-        // Log with available information
-        if (response.sessionId != null) {
-            OrderServiceImpl.log.info(
-                "Updated order {} with payment status {}, session ID: {}",
-                orderId, paymentStatus, response.sessionId
-            )
-        } else {
-            OrderServiceImpl.log.info("Updated order {} with payment status {}", orderId, paymentStatus)
-        }
-
-        // Log receipt URL if available
-        if (response.additionalDetails != null && response.additionalDetails.containsKey("receiptUrl")) {
-            OrderServiceImpl.log.info(
-                "Receipt URL for order {}: {}",
-                orderId,
-                response.additionalDetails.get("receiptUrl")
-            )
-        }
+        orderRepository.save(order)
+        logger.info { "Updated order $orderId with payment status $paymentStatus, session ID: ${response.sessionId}" }
+        response.metadata?.get("receiptUrl")?.let { logger.info { "Receipt URL for order $orderId: $it" } }
     }
 
+    @Transactional // This was not in the interface, assumed to be part of the payment flow.
     override fun updatePaymentDetailsOnInitiation(order: Order) {
-        // Update payment fields
         order.paymentStatus = PaymentStatus.PENDING
-        order.updatedAt = LocalDateTime.now()
-        orderRepository!!.save<Order?>(order)
+        // order.updatedAt is handled by @UpdateTimestamp
+        orderRepository.save(order)
+        logger.info { "Initialized payment details for order ${order.id}, status set to PENDING." }
     }
 
-    @Transactional
-    private fun createInitialOrder(userId: Long?, request: OrderCreationRequest): Order {
-        // Validate user access and existence
-        securityContext!!.checkAccess(userId)
-        val user = adminService!!.getUserForValidation(userId)
-            .orElseThrow<UserNotFoundException?>(Supplier { UserNotFoundException("User not found") })
+    @Transactional // Keep this private helper
+    private fun createInitialOrder(userId: Long, request: OrderCreateRequestDTO): Order {
+        securityContext.ensureAccess(userId) // Ensure user performing action is the one in path
+        val user: User = securityContext.getCurrentUser();
 
-        // Validate product stock before processing
         validateCartAvailability(request.cart)
 
-        // Create order entity
-        val order = createOrderEntity(
-            user,
-            request.shippingAddress,
-            request.shippingMethod,
-            request.paymentMethod,
-            request.cart
-        )
+        val newOrder = Order( // Using data class constructor
+            user = user,
+            shippingAddress = request.shippingAddress,
+            shippingMethod = request.shippingMethod,
+            paymentMethod = request.paymentMethod,
+            currency = Currency.PLN,
+            // totalAmount will be calculated and set after items are processed or from cart
+            // orderItems = mutableListOf() // Initialized by default in Order data class
+            // Other fields will be set by auditing or explicitly below
+        ).apply {
+            // Set initial status by OrderService, not relying on entity defaults if they differ for new orders
+            this.paymentStatus = PaymentStatus.PENDING
+            this.orderStatus = OrderStatus.PENDING
+            // this.orderDate = LocalDateTime.now() // Handled by @CreationTimestamp on Order entity
+            // this.createdBy = user.email?.value // Handled by @CreatedBy
+        }
 
-        // Set initial status
-        order.paymentStatus = PaymentStatus.PENDING
-        order.orderStatus = OrderStatus.PENDING
-        order.orderDate = LocalDateTime.now()
-        order.updatedAt = LocalDateTime.now()
-        order.lastModifiedBy = user.getEmail().value
+        // Save order first to get an ID, which is necessary if OrderItems need it before being added to the list
+        // However, with CascadeType.ALL, you can build the graph and save once.
+        // Let's build the full graph.
 
-        // Create order items
-        val orderItems = createOrderItems(order, request.cart)
-        order.setOrderItems(orderItems)
+        val orderItems = createOrderItemsAndReduceStock(newOrder, request.cart)
+        orderItems.forEach { newOrder.addOrderItem(it) } // Use helper to set bidirectional link
 
-        // Save and return
-        return orderRepository!!.save<Order>(order)
+        newOrder.totalAmount = calculateOrderTotal(request.cart.items) // Recalculate server-side for safety
+
+        return orderRepository.save(newOrder)
     }
 
-    private fun createOrderEntity(
-        user: User,
-        shippingAddress: ShippingAddressDTO,
-        shippingMethod: ShippingMethod?,
-        paymentMethod: PaymentMethod?,
-        cartDTO: CartDTO
-    ): Order {
-        val order = Order()
-        order.user = user
-        order.createdBy = user.getEmail().value
-
-
-        // Create Address from DTO
-        val deliveryAddress = Address(
-            shippingAddress.street,
-            shippingAddress.city,
-            ZipCode(shippingAddress.zipCode),
-            shippingAddress.country
+    private fun mapShippingAddressDtoToEntity(shippingAddressDTO: ShippingAddressDTO): Address {
+        // Assuming com.rj.ecommerce_backend.user.valueobject.Address and ZipCode
+        return Address(
+            street = shippingAddressDTO.street, // Assuming DTO fields are non-nullable based on common patterns
+            city = shippingAddressDTO.city,
+            zipCode = ZipCode(shippingAddressDTO.zipCode), // Assuming ZipCode VO takes String
+            country = shippingAddressDTO.country
         )
-
-        order.shippingAddress = deliveryAddress
-        order.shippingMethod = shippingMethod
-        order.paymentMethod = paymentMethod
-
-        // Calculate total price
-        val totalPrice = calculateOrderTotal(cartDTO.cartItems())
-        order.currency = Currency.PLN
-        order.totalAmount = totalPrice
-
-        return order
     }
 
     private fun validateCartAvailability(cartDTO: CartDTO) {
-        for (item in cartDTO.cartItems()) {
-            val product = productService!!.getProductEntityForValidation(item.productId())
-                .orElseThrow<ProductNotFoundException?>(Supplier { ProductNotFoundException(item.productId()) })
+        cartDTO.items.forEach { item ->
+            val product = productService.getProductEntityForValidation(item.product.id).orElseThrow(
+                { ProductNotFoundException(item.product.id) }
+            )
 
-            if (product.getStockQuantity().value < item.quantity()) {
-                throw InsufficientStockException("Insufficient stock for product: " + product.getProductName())
+            if ((product.quantityInStock?.value ?: 0) < item.quantity) { // Safe access to stock quantity
+                throw InsufficientStockException("Insufficient stock for product: ${product.name?.value ?: item.product.id}")
             }
         }
     }
 
-    private fun createOrderItems(order: Order?, cartDTO: CartDTO): MutableList<OrderItem?> {
-        return cartDTO.cartItems().stream()
-            .map({ cartItemDTO ->
-                val product = productService!!.getProductEntityForValidation(cartItemDTO.productId())
-                    .orElseThrow<ProductNotFoundException?>(Supplier { ProductNotFoundException(cartItemDTO.productId()) })
-                // Reduce inventory atomically
-                productService.reduceProductQuantity(
-                    product.getId(),
-                    cartItemDTO.quantity()
-                )
-                createOrderItem(order, product, cartItemDTO)
-            })
-            .toList()
-    }
+    private fun createOrderItemsAndReduceStock(order: Order, cartDTO: CartDTO): List<OrderItem> {
+        return cartDTO.items.map { cartItemDTO ->
+            val product = productService.getProductEntityForValidation(cartItemDTO.product.id).orElseThrow(
+                { ProductNotFoundException(cartItemDTO.product.id) }
+            )
 
-    private fun createOrderItem(order: Order?, product: Product, cartItemDTO: CartItemDTO): OrderItem {
-        val orderItem = OrderItem()
-        orderItem.order = order
-        orderItem.product = product
-        orderItem.quantity = cartItemDTO.quantity()
-        orderItem.price = product.getProductPrice().amount.value
-        return orderItem
+            productService.reduceProductQuantity(
+                product.id, // Product ID should be non-null here
+                cartItemDTO.quantity
+            )
+
+            OrderItem( // Using data class constructor
+                order = order, // Will be set by order.addOrderItem() if preferred for bidirectionality
+                product = product,
+                quantity = cartItemDTO.quantity,
+                price = product.unitPrice?.amount?.value // Get price from authoritative Product source
+                    ?: throw OrderServiceException("Product ${product.id} is missing price information.")
+            )
+        }
     }
 }
