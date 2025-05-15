@@ -19,13 +19,13 @@ import com.rj.ecommerce.api.shared.core.Money
  * - id, name, unitPrice, description, and quantityInStock are required
  * - sku, categories, and images are optional
  */
-data class Product(
+data class ProductDTO(
     val id: String,
     val sku: String? = null,
     val name: String,
     val unitPrice: Money,
     val description: String,
     val quantityInStock: Int,
-    val categories: List<Category> = emptyList(),
+    val categories: List<CategoryDTO> = emptyList(),
     val images: List<ImageInfo> = emptyList()
 )

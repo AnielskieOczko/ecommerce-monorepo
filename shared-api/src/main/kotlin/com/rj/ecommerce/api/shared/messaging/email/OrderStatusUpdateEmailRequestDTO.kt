@@ -25,7 +25,7 @@ import java.util.UUID
  * - messageId, version, to, template, timestamp, orderId, and newStatus are required
  * - subject, additionalData, orderNumber, previousStatus, and reason are optional
  */
-data class OrderStatusUpdateEmailRequest(
+data class OrderStatusUpdateEmailRequestDTO(
     val messageId: UUID,
     val version: String,
     val to: String,

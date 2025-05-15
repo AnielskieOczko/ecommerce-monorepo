@@ -1,32 +1,70 @@
 package com.rj.ecommerce.api.shared.messaging.email
 
-import com.rj.ecommerce.api.shared.enums.EmailStatus
+import com.rj.ecommerce.api.shared.enums.EmailStatus // Assuming this is the correct Kotlin enum
 import java.time.LocalDateTime
 import java.util.UUID
 
-/**
- * Notification about the delivery status of a sent email.
- *
- * @property messageId ID of this status message.
- * @property version Message format version.
- * @property originalMessageId ID of the email this status refers to.
- * @property status Delivery status of the email.
- * @property recipientEmail Email address of the recipient.
- * @property errorMessage Error message if delivery failed.
- * @property providerStatusDetails Raw status details from the email provider.
- * @property timestamp Time when the status was updated.
- *
- * Requirements:
- * - messageId, version, status, and timestamp are required
- * - originalMessageId, recipientEmail, errorMessage, and providerStatusDetails are optional
- */
-data class EmailDeliveryStatusNotificationDTO(
-    val messageId: UUID,
+data class EmailDeliveryStatusDTO(
+    val messageId: String,
     val version: String,
-    val originalMessageId: UUID? = null,
+    val originalMessageId: String? = null, // Nullable if not always present
     val status: EmailStatus,
-    val recipientEmail: String? = null,
-    val errorMessage: String? = null,
-    val providerStatusDetails: Map<String, Any>? = null,
-    val timestamp: LocalDateTime
-)
+    val recipientEmail: String? = null, // Nullable
+    val errorMessage: String? = null,   // Nullable
+    val additionalData: Map<String, Any> = emptyMap(),
+    val timestamp: LocalDateTime = LocalDateTime.now()
+) {
+    init {
+        require(messageId.isNotBlank()) { "Message ID cannot be blank" }
+        require(version.isNotBlank()) { "Version cannot be blank" }
+        // originalMessageId, recipientEmail, errorMessage are nullable so no blank check needed here unless specifically required not to be blank if present.
+    }
+
+    companion object {
+        @JvmStatic
+        fun success(originalMessageId: String, recipientEmail: String): EmailDeliveryStatusDTO {
+            return EmailDeliveryStatusDTO(
+                messageId = UUID.randomUUID().toString(),
+                version = "1.0",
+                originalMessageId = originalMessageId,
+                status = EmailStatus.SENT, // Or DELIVERED depending on definition of success
+                recipientEmail = recipientEmail,
+                timestamp = LocalDateTime.now()
+            )
+        }
+
+        @JvmStatic
+        fun failure(originalMessageId: String?, recipientEmail: String?, errorMessage: String?): EmailDeliveryStatusDTO {
+            return EmailDeliveryStatusDTO(
+                messageId = UUID.randomUUID().toString(),
+                version = "1.0",
+                originalMessageId = originalMessageId,
+                status = EmailStatus.FAILED,
+                recipientEmail = recipientEmail,
+                errorMessage = errorMessage,
+                timestamp = LocalDateTime.now()
+            )
+        }
+
+        // Default builder-like factory
+        @JvmStatic
+        fun build(
+            status: EmailStatus,
+            originalMessageId: String? = null,
+            recipientEmail: String? = null,
+            errorMessage: String? = null,
+            additionalData: Map<String, Any> = emptyMap()
+        ): EmailDeliveryStatusDTO {
+            return EmailDeliveryStatusDTO(
+                messageId = UUID.randomUUID().toString(),
+                version = "1.0",
+                originalMessageId = originalMessageId,
+                status = status,
+                recipientEmail = recipientEmail,
+                errorMessage = errorMessage,
+                additionalData = additionalData,
+                timestamp = LocalDateTime.now()
+            )
+        }
+    }
+}

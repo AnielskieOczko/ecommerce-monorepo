@@ -11,7 +11,7 @@ package com.rj.ecommerce.api.shared.dto.product
  * - id and name are required
  * - description is optional
  */
-data class Category(
+data class CategoryDTO(
     val id: Long,
     val name: String,
     val description: String? = null

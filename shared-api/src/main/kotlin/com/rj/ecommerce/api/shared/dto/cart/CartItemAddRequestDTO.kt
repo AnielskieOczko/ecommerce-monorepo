@@ -10,7 +10,7 @@ package com.rj.ecommerce.api.shared.dto.cart
  * - productId and quantity are required
  * - quantity must be at least 1
  */
-data class CartItemAddRequest(
+data class CartItemAddRequestDTO(
     val productId: Long,
     val quantity: Int
 ) {

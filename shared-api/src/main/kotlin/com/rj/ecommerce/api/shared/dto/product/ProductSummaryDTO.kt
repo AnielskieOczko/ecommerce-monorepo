@@ -14,7 +14,7 @@ import com.rj.ecommerce.api.shared.core.Money
  * - id, name, and unitPrice are required
  * - sku is optional
  */
-data class ProductSummary(
+data class ProductSummaryDTO(
     val id: Long? = null,
     val sku: String? = null,
     val name: String? = null,

@@ -15,7 +15,7 @@ import com.rj.ecommerce.api.shared.core.PhoneNumber
  * - id and email are required
  * - firstName, lastName, and phoneNumber are optional
  */
-data class CustomerInfo(
+data class CustomerInfoDTO(
     val id: String,
     val firstName: String? = null,
     val lastName: String? = null,

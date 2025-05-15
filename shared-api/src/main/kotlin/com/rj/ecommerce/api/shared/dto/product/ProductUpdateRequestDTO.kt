@@ -16,7 +16,7 @@ import com.rj.ecommerce.api.shared.core.Money
  * Requirements:
  * - All fields are optional, allowing partial updates
  */
-data class ProductUpdateRequest(
+data class ProductUpdateRequestDTO(
     val name: String? = null,
     val description: String? = null,
     val unitPrice: Money? = null,

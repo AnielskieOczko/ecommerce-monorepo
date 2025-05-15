@@ -18,7 +18,7 @@ import java.time.LocalDateTime
  * - sessionId, orderId, sessionStatus, paymentStatus, and checkoutUrl are required
  * - expiresAt and metadata are optional
  */
-data class PaymentResponse(
+data class PaymentResponseDTO(
     val sessionId: String,
     val orderId: String,
     val sessionStatus: PaymentStatus,

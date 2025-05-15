@@ -14,7 +14,7 @@ data class Password(val value: @NotEmpty String?) {
 
         private fun validatePassword(password: String) {
             // Add your password validation logic here
-            require(!(password == null || password.isEmpty() || password.length < 8)) { "Password must be at least 8 characters long" }
+            require(!(password.isEmpty() || password.length < 8)) { "Password must be at least 8 characters long" }
         }
     }
 }

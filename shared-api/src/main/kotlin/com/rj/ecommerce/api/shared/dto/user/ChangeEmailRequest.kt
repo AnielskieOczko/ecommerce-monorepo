@@ -1,9 +1,12 @@
 package com.rj.ecommerce.api.shared.dto.user
 
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-@JvmRecord
 data class ChangeEmailRequest(
-    val currentPassword: @NotNull String?,
-    val newEmail: @NotNull String?
+    @field:NotBlank
+    val currentPassword: String,
+    @field:NotBlank @field:Email
+    val newEmail: String
 )

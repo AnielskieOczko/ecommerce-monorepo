@@ -20,7 +20,7 @@ import java.time.LocalDateTime
  * - eventId, eventType, orderId, paymentId, and status are required
  * - amount, paidAt, and rawProviderPayload are optional
  */
-data class PaymentNotification(
+data class PaymentNotificationDTO(
     val eventId: String,
     val eventType: String,
     val orderId: String,

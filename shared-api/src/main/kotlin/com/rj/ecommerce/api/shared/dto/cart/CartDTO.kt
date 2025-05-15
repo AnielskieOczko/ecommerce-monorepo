@@ -15,10 +15,10 @@ import java.time.LocalDateTime
  * - id, userId, and items are required
  * - createdAt and updatedAt are typically auto-generated
  */
-data class Cart(
+data class CartDTO(
     val id: Long,
     val userId: Long,
-    val items: List<CartItem>,
+    val items: List<CartItemDTO>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )

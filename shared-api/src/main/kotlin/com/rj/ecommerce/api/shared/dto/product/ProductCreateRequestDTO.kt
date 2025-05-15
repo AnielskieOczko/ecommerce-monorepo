@@ -17,7 +17,7 @@ import com.rj.ecommerce.api.shared.core.Money
  * - name, description, unitPrice, and quantityInStock are required
  * - categoryIds and images are optional
  */
-data class ProductCreateRequest(
+data class ProductCreateRequestDTO(
     val name: String,
     val description: String,
     val unitPrice: Money,

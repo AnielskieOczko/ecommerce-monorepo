@@ -1,12 +1,10 @@
 package com.rj.ecommerce.api.shared.dto.security
 
-import lombok.AllArgsConstructor
+import java.time.LocalDateTime
 
-@Data
-@AllArgsConstructor
-class TokenInfo {
-    private val token: String? = null
-    private val blacklistedAt: LocalDateTime? = null
-    private val expiresAt: LocalDateTime? = null
-    private val blacklistedBy: String? = null
-}
+data class TokenInfo(
+    val token: String,
+    val blacklistedAt: LocalDateTime? = null,
+    val expiresAt: LocalDateTime,
+    val blacklistedBy: String? = null
+)

@@ -1,6 +1,6 @@
 package com.rj.ecommerce.api.shared.dto.cart
 
-import com.rj.ecommerce.api.shared.dto.product.ProductSummary
+import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO
 
 /**
  * An item within a shopping cart.
@@ -13,9 +13,9 @@ import com.rj.ecommerce.api.shared.dto.product.ProductSummary
  * - id, product, and quantity are required
  * - quantity must be at least 1
  */
-data class CartItem(
+data class CartItemDTO(
     val id: Long,
-    val product: ProductSummary,
+    val product: ProductSummaryDTO,
     val quantity: Int
 ) {
     init {

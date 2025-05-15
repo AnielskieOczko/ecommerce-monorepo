@@ -12,7 +12,7 @@ package com.rj.ecommerce.api.shared.dto.user
  * Requirements:
  * - All fields are required
  */
-data class AuthResponse(
+data class AuthResponseDTO(
     val token: String,
     val refreshToken: String,
     val userId: Long,

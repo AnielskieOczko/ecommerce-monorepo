@@ -1,6 +1,7 @@
 package com.rj.ecommerce.api.shared.dto.order
 
 import com.rj.ecommerce.api.shared.core.Address
+import com.rj.ecommerce.api.shared.dto.cart.CartDTO
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
 import com.rj.ecommerce.api.shared.enums.ShippingMethod
 
@@ -17,10 +18,11 @@ import com.rj.ecommerce.api.shared.enums.ShippingMethod
  * - userId, shippingAddress, paymentMethod, and shippingMethod are required
  * - billingAddress is optional
  */
-data class OrderCreateRequest(
+data class OrderCreateRequestDTO(
     val userId: Long,
-    val shippingAddress: Address,
+    val shippingAddress: Address? = null,
     val billingAddress: Address? = null,
     val paymentMethod: PaymentMethod,
-    val shippingMethod: ShippingMethod
+    val shippingMethod: ShippingMethod,
+    val cart: CartDTO
 )

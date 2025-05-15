@@ -4,11 +4,10 @@ import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.PhoneNumber
 import java.time.LocalDate
 
-@JvmRecord
 data class UpdateBasicDetailsRequest(
-    val firstName: String?,
-    val lastName: String?,
-    val address: Address?,
-    val phoneNumber: PhoneNumber?,
-    val dateOfBirth: LocalDate?
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val address: Address? = null,
+    val phoneNumber: PhoneNumber? = null,
+    val dateOfBirth: LocalDate? = null
 )

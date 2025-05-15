@@ -2,7 +2,7 @@ package com.rj.ecommerce.api.shared.dto.order
 
 import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.product.OrderItem
+import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
 import com.rj.ecommerce.api.shared.enums.PaymentStatus
@@ -32,20 +32,21 @@ import java.time.LocalDateTime
  * - id, userId, customerEmail, items, totalAmount, shippingAddress, shippingMethod, paymentMethod, orderStatus, and orderDate are required
  * - billingAddress, paymentStatus, paymentTransactionId, checkoutSessionUrl, and receiptUrl are optional
  */
-data class Order(
-    val id: Long,
-    val userId: Long,
-    val customerEmail: String,
-    val items: List<OrderItem>,
-    val totalAmount: Money,
-    val shippingAddress: Address,
+data class OrderDTO(
+    val id: Long? = null,
+    val userId: Long?= null,
+    val customerEmail: String? = null,
+    val items: List<OrderItemDTO?> = mutableListOf(),
+    val totalAmount: Money? = null,
+    val shippingAddress: Address? = null,
     val billingAddress: Address? = null,
-    val shippingMethod: ShippingMethod,
-    val paymentMethod: PaymentMethod,
-    val orderStatus: OrderStatus,
+    val shippingMethod: ShippingMethod? = null,
+    val paymentMethod: PaymentMethod? = null,
+    val orderStatus: OrderStatus? = null,
     val paymentStatus: PaymentStatus? = null,
     val paymentTransactionId: String? = null,
     val checkoutSessionUrl: String? = null,
     val receiptUrl: String? = null,
-    val orderDate: LocalDateTime
+    val orderDate: LocalDateTime? = null,
+    val checkoutSessionExpiresAt: LocalDateTime? = null
 )

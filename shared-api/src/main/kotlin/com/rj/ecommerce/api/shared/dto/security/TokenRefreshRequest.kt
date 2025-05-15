@@ -1,8 +1,8 @@
 package com.rj.ecommerce.api.shared.dto.security
 
-import lombok.Data
+import jakarta.validation.constraints.NotBlank
 
-@Data
-class TokenRefreshRequest {
-    private val refreshToken: @jakarta.validation.constraints.NotBlank kotlin.String? = null
-}
+data class TokenRefreshRequest(
+    @field:NotBlank(message = "Refresh token must not be blank")
+    val refreshToken: String
+)

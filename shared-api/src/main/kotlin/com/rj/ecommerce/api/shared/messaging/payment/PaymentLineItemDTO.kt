@@ -16,7 +16,7 @@ package com.rj.ecommerce.api.shared.messaging.payment
  * - unitAmountCents must be a positive integer
  * - quantity must be at least 1
  */
-data class PaymentLineItem(
+data class PaymentLineItemDTO(
     val name: String,
     val description: String? = null,
     val unitAmountCents: Long,

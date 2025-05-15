@@ -1,57 +1,107 @@
 package com.rj.ecommerce.api.shared.messaging.email
 
-import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.customer.CustomerInfo
+import com.rj.ecommerce.api.shared.core.ShippingAddressDTO
+import com.rj.ecommerce.api.shared.dto.customer.CustomerInfoDTO
+import com.rj.ecommerce.api.shared.dto.order.MessagingOrderItemDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
 import com.rj.ecommerce.api.shared.enums.ShippingMethod
+import jakarta.validation.constraints.NotEmpty
 import java.time.LocalDateTime
 import java.util.UUID
 
-/**
- * Request to send an order-related email.
- *
- * @property messageId Unique ID for this message.
- * @property version Message format version.
- * @property to Email address of the recipient.
- * @property subject Optional subject line (may be generated from template).
- * @property template Email template to use.
- * @property additionalData Additional context-specific data for the template.
- * @property timestamp Time when the message was created.
- * @property orderId ID of the order this email relates to.
- * @property orderNumber Human-readable order number.
- * @property customer Customer information.
- * @property items List of items in the order.
- * @property totalAmount Total amount of the order.
- * @property shippingAddress Shipping address for the order.
- * @property billingAddress Billing address for the order.
- * @property shippingMethod Method used for shipping.
- * @property paymentMethod Method used for payment.
- * @property orderStatus Current status of the order.
- *
- * Requirements:
- * - messageId, version, to, template, timestamp, orderId, customer, items, totalAmount, and shippingAddress are required
- * - subject, additionalData, orderNumber, billingAddress, shippingMethod, paymentMethod, and orderStatus are optional
- */
-data class OrderEmailRequest(
-    val messageId: UUID,
-    val version: String,
-    val to: String,
-    val subject: String? = null,
-    val template: EmailTemplate,
-    val additionalData: Map<String, Any>? = null,
-    val timestamp: LocalDateTime,
+data class OrderEmailRequestDTO(
+    override val messageId: String,
+    override val version: String,
+    override val to: String,
+    override val subject: String, // Will be set by companion object or init
+    override val template: EmailTemplate,
     val orderId: String,
     val orderNumber: String? = null,
-    val customer: CustomerInfo,
-    val items: List<OrderItemDTO>,
+    val customer: CustomerInfoDTO? = null, // Make nullable if optional for some templates
+    @field:NotEmpty // Ensure list is not empty
+    val items: List<MessagingOrderItemDTO>, // Use the messaging-specific OrderItemDTO
     val totalAmount: Money,
-    val shippingAddress: Address,
-    val billingAddress: Address? = null,
-    val shippingMethod: ShippingMethod? = null,
+    val shippingAddress: ShippingAddressDTO? = null,
+    val shippingMethod: ShippingMethod? = null, // Corrected import
     val paymentMethod: PaymentMethod? = null,
-    val orderStatus: OrderStatus? = null
-)
+    val paymentTransactionId: String? = null,
+    val orderDate: LocalDateTime,
+    val orderStatus: OrderStatus,
+    val additionalData: Map<String, Any> = emptyMap(),
+    override val timestamp: LocalDateTime = LocalDateTime.now()
+) : EcommerceEmailRequest {
+
+    init {
+        require(messageId.isNotBlank()) { "Message ID cannot be blank" }
+        require(version.isNotBlank()) { "Version cannot be blank" }
+        require(to.isNotBlank()) { "Recipient email cannot be blank" }
+        require(orderId.isNotBlank()) { "Order ID cannot be blank" }
+        require(items.isNotEmpty()) { "Order must have at least one item" }
+        // Subject is handled by factory method or constructor logic
+    }
+
+
+    override fun getTemplateData(): Map<String, Any> {
+        return buildMap {
+            put("orderId", orderId)
+            orderNumber?.let { put("orderNumber", it) }
+            customer?.let { put("customer", it) }
+            put("items", items)
+            put("totalAmount", totalAmount)
+            shippingAddress?.let { put("shippingAddress", it) }
+            shippingMethod?.let { put("shippingMethod", it.name) } // Send enum name
+            paymentMethod?.let { put("paymentMethod", it.name) }   // Send enum name
+            paymentTransactionId?.let { put("paymentTransactionId", it) }
+            put("orderDate", orderDate)
+            put("orderStatus", orderStatus.name) // Send enum name
+            putAll(additionalData)
+        }
+    }
+
+    companion object {
+        private fun generateSubject(template: EmailTemplate, orderNumber: String?): String {
+            val orderRef = if (!orderNumber.isNullOrBlank()) " #$orderNumber" else ""
+            return when (template) {
+                EmailTemplate.ORDER_CONFIRMATION -> "Your Order$orderRef Confirmation"
+                EmailTemplate.ORDER_SHIPMENT -> "Your Order$orderRef Has Been Shipped"
+                EmailTemplate.ORDER_CANCELLED -> "Your Order$orderRef Has Been Cancelled"
+                EmailTemplate.ORDER_REFUNDED -> "Your Order$orderRef Has Been Refunded"
+                else -> "Information About Your Order$orderRef" // Handles CUSTOMER_WELCOME etc. if template is passed
+            }
+        }
+
+        // Factory function to ensure subject is generated
+        @JvmStatic
+        fun create(
+            to: String,
+            template: EmailTemplate,
+            orderId: String,
+            items: List<MessagingOrderItemDTO>,
+            totalAmount: Money,
+            orderDate: LocalDateTime,
+            orderStatus: OrderStatus,
+            messageId: String = UUID.randomUUID().toString(),
+            version: String = "1.0",
+            orderNumber: String? = null,
+            customer: CustomerInfoDTO? = null,
+            shippingAddress: ShippingAddressDTO? = null,
+            shippingMethod: ShippingMethod? = null,
+            paymentMethod: PaymentMethod? = null,
+            paymentTransactionId: String? = null,
+            additionalData: Map<String, Any> = emptyMap(),
+            timestamp: LocalDateTime = LocalDateTime.now(),
+            subjectOverride: String? = null // Allow overriding the generated subject
+        ): OrderEmailRequestDTO {
+            val finalSubject = subjectOverride ?: generateSubject(template, orderNumber)
+            return OrderEmailRequestDTO(
+                messageId, version, to, finalSubject, template, orderId, orderNumber,
+                customer, items, totalAmount, shippingAddress, shippingMethod, paymentMethod,
+                paymentTransactionId, orderDate, orderStatus, additionalData, timestamp
+            )
+        }
+    }
+}

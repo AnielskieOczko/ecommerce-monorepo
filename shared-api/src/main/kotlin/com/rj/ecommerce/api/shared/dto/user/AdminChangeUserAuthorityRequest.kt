@@ -1,4 +1,8 @@
 package com.rj.ecommerce.api.shared.dto.user
 
-@JvmRecord
-data class AdminChangeUserAuthorityRequest(val authorities: MutableSet<String?>?)
+import jakarta.validation.constraints.NotEmpty
+
+
+data class AdminChangeUserAuthorityRequest(
+    @field:NotEmpty
+    val authorities: Set<String>?)

@@ -10,6 +10,6 @@ import com.rj.ecommerce.api.shared.enums.OrderStatus
  * Requirements:
  * - newStatus is required
  */
-data class OrderStatusUpdateRequest(
+data class OrderStatusUpdateRequestDTO(
     val newStatus: OrderStatus
 )
