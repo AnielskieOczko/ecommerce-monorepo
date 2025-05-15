@@ -1,5 +1,7 @@
 package com.rj.ecommerce.api.shared.core
 
+import jakarta.persistence.Embeddable
+
 /**
  * Represents a postal address.
  *
@@ -11,9 +13,12 @@ package com.rj.ecommerce.api.shared.core
  * Requirements:
  * - All fields are required and cannot be blank
  */
+@Embeddable
 data class Address(
-    val street: String,
-    val city: String,
-    val zipCode: String,
-    val country: String
-)
+    val street: String? = null,
+    val city: String? = null,
+    val zipCode: ZipCode? = null,
+    val country: String? = null
+){
+
+}
