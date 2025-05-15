@@ -1,4 +1,4 @@
 package com.rj.ecommerce.api.shared.dto.user
 
-data class AccountStatusRequestDTO(
+data class ChangeAccountStatusDTO(
     val isActive: Boolean)

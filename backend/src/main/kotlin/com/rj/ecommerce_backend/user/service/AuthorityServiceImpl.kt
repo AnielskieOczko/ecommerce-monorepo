@@ -1,8 +1,10 @@
 package com.rj.ecommerce_backend.user.service
 
+import com.rj.ecommerce.api.shared.dto.user.AuthorityCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.AuthorityDTO
 import com.rj.ecommerce_backend.user.domain.Authority
 import com.rj.ecommerce_backend.user.exceptions.AuthorityAlreadyExistsException
+import com.rj.ecommerce_backend.user.exceptions.AuthorityNotFoundException
 import com.rj.ecommerce_backend.user.repository.AuthorityRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -19,15 +21,21 @@ class AuthorityServiceImpl(
     }
 
     @Transactional
-    override fun addNewAuthority(authority: Authority) {
+    override fun createAuthority(authorityCreateRequestDTO: AuthorityCreateRequestDTO): AuthorityDTO {
 
-        if (authorityRepository.findByName(authority.name) != null) {
-            logger.warn { "Attempt to add duplicate authority name: ${authority.name}" }
-            throw AuthorityAlreadyExistsException("Authority with name '${authority.name}' already exists.")
+        if (authorityRepository.findByName(authorityCreateRequestDTO.name) != null) {
+            logger.warn { "Attempt to add duplicate authority name: ${authorityCreateRequestDTO.name}" }
+            throw AuthorityAlreadyExistsException("Authority with name '${authorityCreateRequestDTO.name}' already exists.")
         }
+
+        val authority: Authority = Authority(
+            name = authorityCreateRequestDTO.name
+        )
 
         val savedAuthority = authorityRepository.save(authority)
         logger.info { "New authority added ${savedAuthority.name}" }
+
+        return AuthorityDTO(savedAuthority.id, savedAuthority.name)
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +65,19 @@ class AuthorityServiceImpl(
     override fun findAuthorityByRoleName(roleName: String): Authority? {
         logger.debug { "Finding authority by role name: $roleName" }
         return authorityRepository.findByName(roleName)
+    }
+
+    override fun getAuthorityById(authorityId: Long): AuthorityDTO? {
+
+        val authority = authorityRepository.findById(authorityId).orElseThrow {
+            throw AuthorityNotFoundException("Authority not found.")
+        }
+        val authorityDTO = AuthorityDTO(
+            id = authority.id,
+            name = authority.name
+        )
+
+        return authorityDTO
     }
 
 }

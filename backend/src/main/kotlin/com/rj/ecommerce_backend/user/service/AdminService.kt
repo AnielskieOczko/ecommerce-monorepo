@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.dto.user.AccountStatusRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
 import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequest
 import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequest
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
@@ -26,7 +26,7 @@ interface AdminService {
      */
     fun getUserEntityForValidation(userId: Long): User?
 
-    fun updateAccountStatus(userId: Long, request: AccountStatusRequestDTO): UserInfoDTO
+    fun updateAccountStatus(userId: Long, request: ChangeAccountStatusDTO): UserInfoDTO
     fun updateUserAuthorities(userId: Long, request: AdminChangeUserAuthorityRequest): UserInfoDTO
 
     // bulk operations

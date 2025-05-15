@@ -4,7 +4,7 @@ import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce.api.shared.core.Password
 import com.rj.ecommerce.api.shared.core.ZipCode
-import com.rj.ecommerce.api.shared.dto.user.AccountStatusRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
 import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequest
 import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequest
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
@@ -158,7 +158,7 @@ class AdminServiceImpl(
 
     override fun updateAccountStatus(
         userId: Long,
-        request: AccountStatusRequestDTO
+        request: ChangeAccountStatusDTO
     ): UserInfoDTO {
         logger.info { "Admin attempts to update account status for user ID: $userId to active=${request.isActive}" }
         securityContext.ensureAdmin()

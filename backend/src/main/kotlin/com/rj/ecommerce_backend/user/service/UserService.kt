@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.user.service
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.user.AccountStatusRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequest
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequest
@@ -21,7 +21,7 @@ interface UserService {
 
 
     fun changePassword(userId: Long, request: ChangePasswordRequestDTO)
-    fun updateAccountStatus(userId: Long, request: AccountStatusRequestDTO): UserInfoDTO
+    fun updateAccountStatus(userId: Long, request: ChangeAccountStatusDTO): UserInfoDTO
     fun requestPasswordReset(email: String)
     fun resetPassword(token: String, newPassword: String)
 

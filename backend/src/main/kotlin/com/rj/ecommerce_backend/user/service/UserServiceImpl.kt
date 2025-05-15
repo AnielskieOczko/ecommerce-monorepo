@@ -3,7 +3,7 @@ package com.rj.ecommerce_backend.user.service
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce.api.shared.core.Password
 import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.user.AccountStatusRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequest
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequest
@@ -139,7 +139,7 @@ class UserServiceImpl(
     @Transactional
     override fun updateAccountStatus(
         userId: Long,
-        request: AccountStatusRequestDTO
+        request: ChangeAccountStatusDTO
     ): UserInfoDTO {
         securityContext.ensureAccess(userId)
 

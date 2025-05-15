@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.user.controller
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.user.AccountStatusRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequest
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ResetPasswordRequestDTO
