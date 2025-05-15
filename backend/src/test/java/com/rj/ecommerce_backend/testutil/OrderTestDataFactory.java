@@ -9,8 +9,8 @@ import com.rj.ecommerce_backend.order.dtos.OrderDTO;
 import com.rj.ecommerce_backend.order.dtos.OrderItemDTO;
 import com.rj.ecommerce_backend.order.dtos.ShippingAddressDTO;
 import com.rj.ecommerce_backend.order.enums.Currency;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.enums.PaymentStatus;
 import com.rj.ecommerce_backend.order.enums.ShippingMethod;
 import com.rj.ecommerce_backend.product.domain.Product;
@@ -111,8 +111,8 @@ public class OrderTestDataFactory {
     public static OrderItem createOrderItem(Order order, Long productId, String productName, int quantity, BigDecimal price) {
         Product product = new Product();
         product.setId(productId);
-        product.setProductName(new ProductName(productName));
-        product.setStockQuantity(new StockQuantity(100));
+        product.setName(new ProductName(productName));
+        product.setQuantityInStock(new StockQuantity(100));
 
         return OrderItem.builder()
                 .order(order)

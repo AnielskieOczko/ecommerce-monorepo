@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.cart.service;
 
 import com.rj.ecommerce_backend.cart.domain.Cart;
-import com.rj.ecommerce_backend.cart.dtos.CartDTO;
+import com.rj.ecommerce.api.shared.dto.cart.CartDTO;
 import com.rj.ecommerce_backend.user.domain.User;
 
 public interface CartService {

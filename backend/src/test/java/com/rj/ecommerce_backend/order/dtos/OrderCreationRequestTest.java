@@ -2,7 +2,7 @@ package com.rj.ecommerce_backend.order.dtos;
 
 import com.rj.ecommerce_backend.cart.dtos.CartDTO;
 import com.rj.ecommerce_backend.cart.dtos.CartItemDTO;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.enums.ShippingMethod;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

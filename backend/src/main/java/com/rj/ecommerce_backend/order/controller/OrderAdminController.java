@@ -1,11 +1,12 @@
 package com.rj.ecommerce_backend.order.controller;
 
+import com.rj.ecommerce.api.shared.dto.order.OrderDTO;
+import com.rj.ecommerce.api.shared.dto.order.OrderStatusUpdateRequestDTO;
+import com.rj.ecommerce_backend.order.domain.Order;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
-import com.rj.ecommerce_backend.order.dtos.OrderDTO;
-import com.rj.ecommerce_backend.order.dtos.StatusUpdateRequest;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.service.OrderService;
 import com.rj.ecommerce_backend.sorting.OrderSortFilter;
 import com.rj.ecommerce_backend.sorting.SortValidator;
@@ -81,20 +82,21 @@ public class OrderAdminController {
     ) {
         log.info("Retrieving order {}", orderId);
 
-        return orderService.getOrderByIdAdmin(orderId)
-                .map(order -> ResponseEntity.ok(orderMapper.toDto(order)))
-                .orElse(ResponseEntity.notFound().build());
+        Order order = orderService.getOrderByIdAdmin(orderId);
+        OrderDTO orderDTO = orderMapper.toDto(order);
+
+        return ResponseEntity.ok(orderDTO);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{orderId}/status")
     public ResponseEntity<OrderDTO> updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestBody StatusUpdateRequest statusUpdate
+            @RequestBody OrderStatusUpdateRequestDTO statusUpdate
     ) {
         log.info("Updating status for order {}", orderId);
 
-        OrderDTO updatedOrder = orderService.updateOrderStatus(orderId, statusUpdate.newStatus());
+        OrderDTO updatedOrder = orderService.updateOrderStatus(orderId, statusUpdate.getNewStatus());
 
         return ResponseEntity.ok(updatedOrder);
     }

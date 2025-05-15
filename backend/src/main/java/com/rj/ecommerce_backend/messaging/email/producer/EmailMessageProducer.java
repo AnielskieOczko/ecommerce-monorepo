@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.messaging.email.producer;
 
+import com.rj.ecommerce.api.shared.messaging.email.EcommerceEmailRequest;
 import com.rj.ecommerce_backend.messaging.common.producer.AbstractMessageProducer;
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EcommerceEmailRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;

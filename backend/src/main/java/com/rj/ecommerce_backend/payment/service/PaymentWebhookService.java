@@ -1,6 +1,7 @@
 package com.rj.ecommerce_backend.payment.service;
 
 
+import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO;
 import com.rj.ecommerce_backend.messaging.payment.dto.CheckoutSessionResponseDTO;
 import com.rj.ecommerce_backend.order.service.OrderService;
 import jakarta.transaction.Transactional;
@@ -17,7 +18,7 @@ public class PaymentWebhookService {
     private final PaymentNotificationService paymentNotificationService;
 
     @Transactional
-    public void processCheckoutSessionResponse(CheckoutSessionResponseDTO response) {
+    public void processCheckoutSessionResponse(PaymentResponseDTO response) {
         try {
             // Update order status
             orderService.updateOrderWithCheckoutSession(response);
@@ -33,13 +34,13 @@ public class PaymentWebhookService {
     }
 
     @Transactional
-    private void handleProcessingError(CheckoutSessionResponseDTO response, Exception e) {
+    private void handleProcessingError(PaymentResponseDTO response, Exception e) {
         try {
             orderService.updateOrderWithCheckoutSession(response);
             paymentNotificationService.sendPaymentErrorNotification(response, e);
         } catch (Exception notificationError) {
             log.error("Failed to handle payment processing error for order {}",
-                    response.orderId(), notificationError);
+                    response.getOrderId(), notificationError);
         }
     }
 

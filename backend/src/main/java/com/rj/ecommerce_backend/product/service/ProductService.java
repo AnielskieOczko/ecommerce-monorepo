@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.product.service;
 
 import com.rj.ecommerce_backend.product.domain.Product;
-import com.rj.ecommerce_backend.product.dtos.ProductCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductSearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.ProductUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.search.ProductSearchCriteria;
+import com.rj.ecommerce_backend.product.filters.ProductUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;

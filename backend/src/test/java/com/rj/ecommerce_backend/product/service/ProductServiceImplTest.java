@@ -3,10 +3,10 @@ package com.rj.ecommerce_backend.product.service;
 import com.rj.ecommerce_backend.product.domain.Category;
 import com.rj.ecommerce_backend.product.domain.Image;
 import com.rj.ecommerce_backend.product.domain.Product;
-import com.rj.ecommerce_backend.product.dtos.ProductCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductSearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.ProductUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.search.ProductSearchCriteria;
+import com.rj.ecommerce_backend.product.filters.ProductUpdateDTO;
 import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException;
 import com.rj.ecommerce_backend.product.mapper.ProductMapper;
 import com.rj.ecommerce_backend.product.repository.CategoryRepository;
@@ -222,7 +222,7 @@ class ProductServiceImplTest {
         int quantityToReduce = 50;
         int currentStock = 100;
 
-        testProduct.setStockQuantity(new StockQuantity(currentStock));
+        testProduct.setQuantityInStock(new StockQuantity(currentStock));
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
 
         // When
@@ -231,7 +231,7 @@ class ProductServiceImplTest {
         // Then
         ArgumentCaptor<StockQuantity> stockQuantityCaptor = ArgumentCaptor.forClass(StockQuantity.class);
         verify(productRepository).updateProductQuantity(eq(productId), stockQuantityCaptor.capture());
-        assertEquals(currentStock - quantityToReduce, stockQuantityCaptor.getValue().value());
+        assertEquals(currentStock - quantityToReduce, stockQuantityCaptor.getValue().value);
     }
 
     @Test

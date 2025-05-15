@@ -1,5 +1,6 @@
 package com.rj.ecommerce_backend.messaging.email.contract.v1;
 
+import com.rj.ecommerce.api.shared.enums.EmailTemplate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -11,10 +12,10 @@ class EmailTemplateTest {
     @Test
     void shouldReturnCorrectTemplateId() {
         // Given & When & Then
-        assertEquals("customer-welcome", EmailTemplate.CUSTOMER_WELCOME.getTemplateId());
-        assertEquals("order-confirmation", EmailTemplate.ORDER_CONFIRMATION.getTemplateId());
-        assertEquals("payment-failed", EmailTemplate.PAYMENT_FAILED.getTemplateId());
-        assertEquals("test-message-template", EmailTemplate.TEST_MESSAGE.getTemplateId());
+        assertEquals("customer-welcome", com.rj.ecommerce.api.shared.enums.EmailTemplate.CUSTOMER_WELCOME.getTemplateId());
+        assertEquals("order-confirmation", com.rj.ecommerce.api.shared.enums.EmailTemplate.ORDER_CONFIRMATION.getTemplateId());
+        assertEquals("payment-failed", com.rj.ecommerce.api.shared.enums.EmailTemplate.PAYMENT_FAILED.getTemplateId());
+        assertEquals("test-message-template", com.rj.ecommerce.api.shared.enums.EmailTemplate.TEST_MESSAGE.getTemplateId());
     }
 
     @Test
@@ -23,17 +24,17 @@ class EmailTemplateTest {
         String templateId = "customer-welcome";
 
         // When
-        EmailTemplate template = EmailTemplate.fromTemplateId(templateId);
+        com.rj.ecommerce.api.shared.enums.EmailTemplate template = com.rj.ecommerce.api.shared.enums.EmailTemplate.fromTemplateId(templateId);
 
         // Then
-        assertEquals(EmailTemplate.CUSTOMER_WELCOME, template);
+        assertEquals(com.rj.ecommerce.api.shared.enums.EmailTemplate.CUSTOMER_WELCOME, template);
     }
 
     @Test
     void shouldFindAllTemplatesByTheirIds() {
         // Test all enum values can be found by their IDs
-        for (EmailTemplate template : EmailTemplate.values()) {
-            assertEquals(template, EmailTemplate.fromTemplateId(template.getTemplateId()));
+        for (com.rj.ecommerce.api.shared.enums.EmailTemplate template : com.rj.ecommerce.api.shared.enums.EmailTemplate.values()) {
+            assertEquals(template, com.rj.ecommerce.api.shared.enums.EmailTemplate.fromTemplateId(template.getTemplateId()));
         }
     }
 

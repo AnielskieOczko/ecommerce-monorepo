@@ -17,7 +17,7 @@ class ProductValueObjectsTest {
         ProductName productName = new ProductName("Test Product");
 
         // Then
-        assertEquals("Test Product", productName.value());
+        assertEquals("Test Product", productName.value);
     }
 
     @ParameterizedTest
@@ -29,7 +29,7 @@ class ProductValueObjectsTest {
         // Just create the object to ensure it doesn't throw
         ProductName name = new ProductName(invalidName);
         if (invalidName != null) {
-            assertEquals(invalidName, name.value());
+            assertEquals(invalidName, name.value);
         }
     }
 
@@ -39,7 +39,7 @@ class ProductValueObjectsTest {
         ProductDescription description = new ProductDescription("This is a valid product description");
 
         // Then
-        assertEquals("This is a valid product description", description.value());
+        assertEquals("This is a valid product description", description.value);
     }
 
     @ParameterizedTest
@@ -50,7 +50,7 @@ class ProductValueObjectsTest {
         // Just create the object to ensure it doesn't throw
         ProductDescription description = new ProductDescription(invalidDescription);
         if (invalidDescription != null) {
-            assertEquals(invalidDescription, description.value());
+            assertEquals(invalidDescription, description.value);
         }
     }
 
@@ -60,7 +60,7 @@ class ProductValueObjectsTest {
         Amount amount = new Amount(new BigDecimal("99.99"));
 
         // Then
-        assertEquals(new BigDecimal("99.99"), amount.value());
+        assertEquals(new BigDecimal("99.99"), amount.value);
     }
 
     @Test
@@ -72,7 +72,7 @@ class ProductValueObjectsTest {
         // Note: The current implementation doesn't throw exceptions for negative amounts
         // Just create the object to ensure it doesn't throw
         Amount amount = new Amount(negativeAmount);
-        assertEquals(negativeAmount, amount.value());
+        assertEquals(negativeAmount, amount.value);
     }
 
     @Test
@@ -87,7 +87,7 @@ class ProductValueObjectsTest {
         CurrencyCode currencyCode = new CurrencyCode("USD");
 
         // Then
-        assertEquals("USD", currencyCode.code());
+        assertEquals("USD", currencyCode.code);
     }
 
     @ParameterizedTest
@@ -110,8 +110,8 @@ class ProductValueObjectsTest {
         ProductPrice productPrice = new ProductPrice(amount, currencyCode);
 
         // Then
-        assertEquals(amount, productPrice.amount());
-        assertEquals(currencyCode, productPrice.currency());
+        assertEquals(amount, productPrice.amount);
+        assertEquals(currencyCode, productPrice.currency);
     }
 
     @Test
@@ -120,7 +120,7 @@ class ProductValueObjectsTest {
         StockQuantity stockQuantity = new StockQuantity(100);
 
         // Then
-        assertEquals(100, stockQuantity.value());
+        assertEquals(100, stockQuantity.value);
     }
 
     @ParameterizedTest
@@ -130,6 +130,6 @@ class ProductValueObjectsTest {
         // Note: The current implementation doesn't throw exceptions for negative quantities
         // Just create the object to ensure it doesn't throw
         StockQuantity quantity = new StockQuantity(invalidQuantity);
-        assertEquals(invalidQuantity, quantity.value());
+        assertEquals(invalidQuantity, quantity.value);
     }
 }

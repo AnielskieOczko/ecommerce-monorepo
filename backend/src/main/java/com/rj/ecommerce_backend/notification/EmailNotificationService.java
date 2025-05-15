@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.notification;
 
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailStatus;
+import com.rj.ecommerce.api.shared.enums.EmailStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

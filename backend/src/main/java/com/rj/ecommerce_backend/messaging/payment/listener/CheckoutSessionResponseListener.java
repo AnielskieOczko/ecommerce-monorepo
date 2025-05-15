@@ -1,5 +1,6 @@
 package com.rj.ecommerce_backend.messaging.payment.listener;
 
+import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO;
 import com.rj.ecommerce_backend.messaging.payment.dto.CheckoutSessionResponseDTO;
 import com.rj.ecommerce_backend.payment.service.PaymentWebhookService;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +18,16 @@ public class CheckoutSessionResponseListener {
     private final PaymentWebhookService paymentWebhookService;
 
     @RabbitListener(queues = CHECKOUT_SESSION_RESPONSE_QUEUE)
-    public void handleCheckoutSessionResponse(CheckoutSessionResponseDTO response) {
+    public void handleCheckoutSessionResponse(PaymentResponseDTO response) {
         log.info("Received checkout session response for order: {}, session status: {}, payment status: {}",
-                response.orderId(), response.sessionStatus(), response.paymentStatus());
+                response.getOrderId(), response.getSessionStatus(), response.getPaymentStatus());
 
         try {
             // Process the checkout session response directly
             paymentWebhookService.processCheckoutSessionResponse(response);
         } catch (Exception e) {
             log.error("Error processing checkout session response for order {}: {}",
-                    response.orderId(), e.getMessage(), e);
+                    response.getOrderId(), e.getMessage(), e);
             // Consider adding a dead letter queue handling here
         }
     }

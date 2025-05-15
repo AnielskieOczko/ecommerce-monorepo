@@ -3,10 +3,10 @@ package com.rj.ecommerce_backend.product.service;
 import com.rj.ecommerce_backend.product.domain.Category;
 import com.rj.ecommerce_backend.product.domain.Image;
 import com.rj.ecommerce_backend.product.domain.Product;
-import com.rj.ecommerce_backend.product.dtos.ProductCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductSearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.ProductUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.search.ProductSearchCriteria;
+import com.rj.ecommerce_backend.product.filters.ProductUpdateDTO;
 import com.rj.ecommerce_backend.product.exceptions.FileStorageException;
 import com.rj.ecommerce_backend.product.exceptions.ImageNotFoundException;
 import com.rj.ecommerce_backend.product.exceptions.InsufficientStockException;
@@ -15,9 +15,6 @@ import com.rj.ecommerce_backend.product.mapper.ProductMapper;
 import com.rj.ecommerce_backend.product.repository.CategoryRepository;
 import com.rj.ecommerce_backend.product.repository.ImageRepository;
 import com.rj.ecommerce_backend.product.repository.ProductRepository;
-import com.rj.ecommerce_backend.product.valueobject.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -41,8 +39,6 @@ public class ProductServiceImpl implements ProductService {
     private final ImageRepository imageRepository;
     private final FileStorageService fileStorageService;
     private final ProductMapper productMapper;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Override
     public ProductResponseDTO createProduct(ProductCreateDTO productDTO, List<MultipartFile> images) {
@@ -54,7 +50,12 @@ public class ProductServiceImpl implements ProductService {
             List<Image> savedImages = images.stream()
                     .map(file -> fileStorageService.storeFile(file, "Product Image", savedProduct))
                     .toList();
-            product.setImageList(savedImages);
+
+            savedImages.forEach(image -> {
+                image.setProduct(savedProduct);
+                imageRepository.save(image);
+            });
+
         }
 
         return productMapper.mapToDTO(savedProduct);
@@ -91,15 +92,19 @@ public class ProductServiceImpl implements ProductService {
                 new CurrencyCode(productDTO.currencyCode())
         );
 
-        product.setProductName(new ProductName(productDTO.name()));
-        product.setProductDescription(new ProductDescription(productDTO.description()));
-        product.setProductPrice(updatedProductPrice);
-        product.setStockQuantity(new StockQuantity(productDTO.quantity()));
+        product.setName(new ProductName(productDTO.name()));
+        product.setDescription(new ProductDescription(productDTO.description()));
+        product.setUnitPrice(updatedProductPrice);
+        product.setQuantityInStock(new StockQuantity(productDTO.quantity()));
 
         // Handle Categories
         if (productDTO.categoryIds() != null && !productDTO.categoryIds().isEmpty()) {
             List<Category> categories = categoryRepository.findAllById(productDTO.categoryIds());
-            product.setCategories(categories);
+            categories.forEach(category -> {
+                if (!product.getCategories().contains(category)) {
+                    product.addCategory(category);
+                }
+            });
         }
 
         // Handle new images
@@ -109,7 +114,9 @@ public class ProductServiceImpl implements ProductService {
                     Image savedImage = fileStorageService.storeFile(file, "Product Image", product);
                     if (savedImage != null) {
                         savedImage.setProduct(product);
-                        product.getImageList().add(savedImage);
+
+                        product.addImage(savedImage);
+
                         imageRepository.save(savedImage);
                     }
                 } catch (FileStorageException e) {
@@ -128,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = getProductEntityForValidation(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
-        int currentStock = product.getStockQuantity().value();
+        int currentStock = Objects.requireNonNull(product.getQuantityInStock()).getValue();
         if (currentStock < quantityToReduce) {
             throw new InsufficientStockException("Cannot reduce stock below zero");
         }
@@ -162,13 +169,13 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
-        Image imageToDelete = product.getImageList().stream()
+        Image imageToDelete = product.getImages().stream()
                 .filter(image -> image.getId().equals(imageId))
                 .findFirst()
                 .orElseThrow(() -> new ImageNotFoundException(imageId));
 
         // Remove image from product's list
-        product.getImageList().remove(imageToDelete);
+        product.getImages().remove(imageToDelete);
 
         // Delete image file and entity
         fileStorageService.deleteImage(imageToDelete);

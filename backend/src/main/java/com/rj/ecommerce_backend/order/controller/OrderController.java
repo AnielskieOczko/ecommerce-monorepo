@@ -1,11 +1,11 @@
 package com.rj.ecommerce_backend.order.controller;
 
+import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO;
+import com.rj.ecommerce.api.shared.dto.order.OrderDTO;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
-import com.rj.ecommerce_backend.order.dtos.OrderCreationRequest;
-import com.rj.ecommerce_backend.order.dtos.OrderDTO;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.service.OrderService;
 import com.rj.ecommerce_backend.sorting.OrderSortFilter;
 import com.rj.ecommerce_backend.sorting.SortValidator;
@@ -84,16 +84,15 @@ public class OrderController {
     ) {
         log.info("Retrieving order with id {} for user: {}", orderId, userId);
 
-        return orderService.getOrderById(userId, orderId)
-                .map(order -> ResponseEntity.ok(orderMapper.toDto(order)))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(orderMapper.toDto(orderService.getOrderByIdAdmin(orderId)));
+
     }
 
 
     @PostMapping("/users/{userId}/orders")
     public ResponseEntity<OrderDTO> createOrder(
             @PathVariable Long userId,
-            @Valid @RequestBody OrderCreationRequest orderCreationRequest) {
+            @Valid @RequestBody OrderCreateRequestDTO orderCreationRequest) {
 
         log.info("Creating new order for userId: {}", userId);
 

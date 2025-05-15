@@ -1,15 +1,17 @@
 package com.rj.ecommerce_backend;
 
+import com.rj.ecommerce.api.shared.core.ErrorDTO;
 import com.rj.ecommerce_backend.order.exceptions.AccessDeniedException;
 import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException;
 import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException;
 import com.rj.ecommerce_backend.order.exceptions.OrderServiceException;
-import com.rj.ecommerce_backend.product.dtos.ErrorDTO;
 import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
 import com.rj.ecommerce_backend.product.exceptions.InsufficientStockException;
 import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException;
+import com.rj.ecommerce_backend.user.exceptions.EmailAlreadyExistsException;
 import com.rj.ecommerce_backend.user.exceptions.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -25,6 +27,18 @@ import java.util.Map;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorDTO> handleEmailAlreadyExistsException(Exception ex, WebRequest webRequest) {
+        log.error("Attempt to use an existing email: {}", ex.getMessage(), ex);
+         ErrorDTO errorDTO = new ErrorDTO(
+                 HttpStatus.CONFLICT.value(),
+                 ex.getMessage(),
+                 LocalDateTime.now()
+         );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDTO);
+    }
 
     @ExceptionHandler(Exception.class) // Handles all exceptions (be more specific if needed)
     public ResponseEntity<ErrorDTO> handleGlobalException(Exception ex, WebRequest request) {

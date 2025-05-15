@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.controller;
 
-import com.rj.ecommerce_backend.product.dtos.ErrorDTO;
+import com.rj.ecommerce_backend.product.filters.ErrorDTO;
 import com.rj.ecommerce_backend.product.exceptions.CategoryAlreadyExistsException;
 import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
 import com.rj.ecommerce_backend.product.exceptions.InvalidCategoryDataException;

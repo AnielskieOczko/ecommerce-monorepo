@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.testutil;
 
-import com.rj.ecommerce_backend.messaging.email.contract.v1.customer.WelcomeEmailRequestDTO;
+import com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

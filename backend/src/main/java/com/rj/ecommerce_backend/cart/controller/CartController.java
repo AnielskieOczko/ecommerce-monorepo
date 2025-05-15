@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.cart.controller;
 
 import com.rj.ecommerce_backend.cart.service.CartService;
-import com.rj.ecommerce_backend.cart.dtos.CartDTO;
-import com.rj.ecommerce_backend.cart.dtos.CartItemRequest;
+import com.rj.ecommerce.api.shared.dto.cart.CartDTO;
+import com.rj.ecommerce.api.shared.dto.cart.CartItemAddRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +22,11 @@ public class CartController {
     @PostMapping("/items")
     public ResponseEntity<CartDTO> addItemToCart(
             @PathVariable Long userId,
-            @RequestBody CartItemRequest cartItemRequest,
+            @RequestBody CartItemAddRequestDTO cartItemRequest,
             @RequestParam(defaultValue = "1") int quantity
     ) {
         return ResponseEntity
-                .ok(cartService.addItemToCart(userId, cartItemRequest.productId(), cartItemRequest.quantity()));
+                .ok(cartService.addItemToCart(userId, cartItemRequest.getProductId(), cartItemRequest.getQuantity()));
     }
 
     @PutMapping("/items/{cartItemId}")

@@ -1,7 +1,6 @@
-package com.rj.ecommerce_backend.user.services;
+package com.rj.ecommerce_backend.securityconfig.services;
 
 import com.rj.ecommerce.api.shared.core.Email;
-import com.rj.ecommerce_backend.user.UserDetailsImpl;
 import com.rj.ecommerce_backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,10 +1,12 @@
 package com.rj.ecommerce_backend.cart.mapper;
 
+import com.rj.ecommerce.api.shared.core.Money;
 import com.rj.ecommerce_backend.cart.domain.Cart;
 import com.rj.ecommerce_backend.cart.domain.CartItem;
-import com.rj.ecommerce_backend.cart.dtos.CartDTO;
-import com.rj.ecommerce_backend.cart.dtos.CartItemDTO;
 import com.rj.ecommerce_backend.product.domain.Product;
+import com.rj.ecommerce.api.shared.dto.cart.CartDTO;
+import com.rj.ecommerce.api.shared.dto.cart.CartItemDTO;
+import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,12 +21,17 @@ public class CartMapper {
             return null;
         }
 
-        List<CartItemDTO> cartItemDTOs = cart.getCartItems().stream()
+        List<CartItemDTO> cartItems = cart.getCartItems().stream()
                 .map(CartMapper::toDto)
                 .toList();
 
-        return new CartDTO(cart.getId(), cart.getUser().getId(), cartItemDTOs,
-                cart.getCreatedAt(), cart.getUpdatedAt());
+        return new CartDTO(
+                cart.getId(),
+                cart.getUser().getId(),
+                cartItems,
+                cart.getCreatedAt(),
+                cart.getUpdatedAt()
+        );
     }
 
     public static CartItemDTO toDto(CartItem cartItem) {
@@ -33,47 +40,51 @@ public class CartMapper {
         }
 
         Product product = cartItem.getProduct();
-        String productName = (product != null && product.getProductName() != null) ?
-                product.getProductName().value() : null;  // Accessing nested record value
-        BigDecimal price = (product != null && product.getProductPrice() != null) ?
-                product.getProductPrice().amount().value() : null;  // Accessing nested record value
+        String productName = (product != null && product.getName() != null) ?
+                product.getName().value : null;
+        BigDecimal price = (product != null && product.getUnitPrice() != null) ?
+                product.getUnitPrice().amount.value : null;
 
+        // Create a ProductSummary for the shared CartItem
+        assert productName != null;
+        assert price != null;
+        ProductSummaryDTO productSummary = new ProductSummaryDTO(
+                product.getId(),
+                null,
+                productName,
+                new Money(price, "PLN")
+        );
 
-        return new CartItemDTO(cartItem.getId(), cartItem.getCart().getId(),
-                (product != null) ? product.getId() : null, productName, cartItem.getQuantity(), price);
+        return new CartItemDTO(
+                cartItem.getId(),
+                productSummary,
+                cartItem.getQuantity()
+        );
     }
 
-    public static Cart toEntity(CartDTO cartDTO) {
-        if (cartDTO == null) {
+    public static Cart toEntity(CartDTO cartDto) {
+        if (cartDto == null) {
             return null;
         }
 
-        // .user(userService.findById(cartDTO.userId())) // Fetch user from database in your service
-
-        // Don't set cartItems here directly. Handle them in the service layer to manage
-        // the bidirectional relationship properly
-
-
         return Cart.builder()
-                .id(cartDTO.id())
-                // .user(userService.findById(cartDTO.userId())) // Fetch user from database in your service
-                .createdAt(cartDTO.createdAt())
-                .updatedAt(cartDTO.updatedAt())
+                .id(cartDto.getId())
+                // .user(userService.findById(cartDto.getUserId())) // Fetch user from database in your service
+                .createdAt(cartDto.getCreatedAt())
+                .updatedAt(cartDto.getUpdatedAt())
                 .build();
     }
 
-    public static CartItem toEntity(CartItemDTO cartItemDTO) {
-        if (cartItemDTO == null) {
+    public static CartItem toEntity(CartItemDTO cartItemDto) {
+        if (cartItemDto == null) {
             return null;
         }
 
-        // .cart(cartRepository.findById(cartItemDTO.cartId())) // Fetch cart from the database in your service
-        // .product(productRepository.findById(cartItemDTO.productId())) // Fetch product from the database
         return CartItem.builder()
-                .id(cartItemDTO.id())
-                // .cart(cartRepository.findById(cartItemDTO.cartId())) // Fetch cart from the database in your service
-                // .product(productRepository.findById(cartItemDTO.productId())) // Fetch product from the database
-                .quantity(cartItemDTO.quantity())
+                .id(cartItemDto.getId())
+                // .cart(cartRepository.findById(cartItemDto.getCartId())) // Fetch cart from the database in your service
+                // .product(productRepository.findById(cartItemDto.getProductId())) // Fetch product from the database
+                .quantity(cartItemDto.getQuantity())
                 .build();
     }
 }

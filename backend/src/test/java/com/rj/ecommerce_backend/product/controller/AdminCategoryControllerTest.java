@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.product.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rj.ecommerce_backend.product.dtos.CategoryCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.CategoryResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.CategorySearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.CategoryUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryCreateDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryResponseDTO;
+import com.rj.ecommerce_backend.product.search.CategorySearchCriteria;
+import com.rj.ecommerce_backend.product.filters.CategoryUpdateDTO;
 import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
 import com.rj.ecommerce_backend.product.service.CategoryService;
 import com.rj.ecommerce_backend.sorting.CategorySortField;

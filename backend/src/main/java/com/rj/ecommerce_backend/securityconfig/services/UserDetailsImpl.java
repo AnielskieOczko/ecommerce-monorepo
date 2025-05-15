@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.user;
+package com.rj.ecommerce_backend.securityconfig.services;
 
 import com.rj.ecommerce_backend.user.domain.User;
 import lombok.Getter;

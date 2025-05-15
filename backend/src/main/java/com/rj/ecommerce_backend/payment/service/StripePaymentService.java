@@ -123,7 +123,7 @@ public class StripePaymentService {
         // Get order items and convert to line items
         List<CheckoutSessionRequestDTO.CheckoutLineItemDTO> lineItems = order.getOrderItems().stream()
                 .map(item -> CheckoutSessionRequestDTO.CheckoutLineItemDTO.builder()
-                        .name(item.getProduct().getProductName().value())
+                        .name(item.getProduct().getName().value)
                         .description("Product ID: " + item.getProduct().getId())
                         .unitAmount(item.getPrice().longValue())
                         .quantity(item.getQuantity())

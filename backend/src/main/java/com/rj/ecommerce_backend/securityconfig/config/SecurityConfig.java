@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.securityconfig.config;
 
-import com.rj.ecommerce_backend.user.services.UserDetailsServiceImpl;
+import com.rj.ecommerce_backend.securityconfig.services.UserDetailsServiceImpl;
 import com.rj.ecommerce_backend.securityconfig.services.LogoutService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.order.search;
 
 import com.rj.ecommerce_backend.order.domain.Order;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.user.domain.User;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.criteria.Join;

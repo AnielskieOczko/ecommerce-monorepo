@@ -6,8 +6,8 @@ import com.rj.ecommerce_backend.order.dtos.OrderDTO;
 import com.rj.ecommerce_backend.order.dtos.OrderItemDTO;
 import com.rj.ecommerce_backend.order.dtos.ShippingAddressDTO;
 import com.rj.ecommerce_backend.order.enums.Currency;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.enums.PaymentStatus;
 import com.rj.ecommerce_backend.order.enums.ShippingMethod;
 import com.rj.ecommerce_backend.product.domain.Product;
@@ -15,7 +15,6 @@ import com.rj.ecommerce_backend.product.valueobject.ProductName;
 import com.rj.ecommerce_backend.testutil.OrderTestDataFactory;
 import com.rj.ecommerce_backend.user.domain.User;
 import com.rj.ecommerce_backend.user.valueobject.Address;
-import com.rj.ecommerce_backend.user.valueobject.Email;
 import com.rj.ecommerce_backend.user.valueobject.ZipCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ class OrderMapperTest {
         assertEquals(order.getId(), orderDTO.id());
         assertEquals(order.getUser().getId(), orderDTO.userId());
         assertEquals(order.getUser().getEmail().value(), orderDTO.email());
-        assertEquals(order.getTotalPrice(), orderDTO.totalPrice());
+        assertEquals(order.getTotalAmount(), orderDTO.totalPrice());
         assertEquals(order.getCurrency().name(), orderDTO.currency());
         assertEquals(order.getShippingMethod(), orderDTO.shippingMethod());
         assertEquals(order.getPaymentMethod(), orderDTO.paymentMethod());
@@ -76,7 +75,7 @@ class OrderMapperTest {
         assertEquals(orderItem.getId(), itemDTO.id());
         assertEquals(orderItem.getOrder().getId(), itemDTO.orderId());
         assertEquals(orderItem.getProduct().getId(), itemDTO.productId());
-        assertEquals(orderItem.getProduct().getProductName().value(), itemDTO.productName());
+        assertEquals(orderItem.getProduct().getName().value, itemDTO.productName());
         assertEquals(orderItem.getQuantity(), itemDTO.quantity());
         assertEquals(orderItem.getPrice(), itemDTO.price());
     }
@@ -107,7 +106,7 @@ class OrderMapperTest {
         assertEquals(orderItem.getId(), orderItemDTO.id());
         assertEquals(orderItem.getOrder().getId(), orderItemDTO.orderId());
         assertEquals(orderItem.getProduct().getId(), orderItemDTO.productId());
-        assertEquals(orderItem.getProduct().getProductName().value(), orderItemDTO.productName());
+        assertEquals(orderItem.getProduct().getName().value, orderItemDTO.productName());
         assertEquals(orderItem.getQuantity(), orderItemDTO.quantity());
         assertEquals(orderItem.getPrice(), orderItemDTO.price());
     }
@@ -146,7 +145,7 @@ class OrderMapperTest {
         Order order = createTestOrder();
         OrderItem orderItem = order.getOrderItems().get(0);
         Product product = orderItem.getProduct();
-        product.setProductName(null);
+        product.setName(null);
 
         // When
         OrderItemDTO orderItemDTO = orderMapper.toDto(orderItem);
@@ -160,7 +159,7 @@ class OrderMapperTest {
         Order order = new Order();
         order.setId(1L);
         order.setUser(testUser);
-        order.setTotalPrice(new BigDecimal("199.99"));
+        order.setTotalAmount(new BigDecimal("199.99"));
         order.setCurrency(Currency.PLN);
 
         Address address = new Address(
@@ -186,7 +185,7 @@ class OrderMapperTest {
 
         Product product = new Product();
         product.setId(1L);
-        product.setProductName(new ProductName("Test Product"));
+        product.setName(new ProductName("Test Product"));
         orderItem.setProduct(product);
 
         orderItem.setQuantity(2);

@@ -3,7 +3,7 @@ package com.rj.ecommerce_backend.cart.service;
 import com.rj.ecommerce_backend.cart.mapper.CartMapper;
 import com.rj.ecommerce_backend.cart.domain.Cart;
 import com.rj.ecommerce_backend.cart.domain.CartItem;
-import com.rj.ecommerce_backend.cart.dtos.CartDTO;
+import com.rj.ecommerce.api.shared.dto.cart.CartDTO;
 import com.rj.ecommerce_backend.cart.exceptions.ResourceNotFoundException;
 import com.rj.ecommerce_backend.cart.repository.CartRepository;
 import com.rj.ecommerce_backend.product.domain.Product;

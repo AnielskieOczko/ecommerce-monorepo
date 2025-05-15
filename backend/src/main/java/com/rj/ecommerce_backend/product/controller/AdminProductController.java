@@ -2,9 +2,9 @@ package com.rj.ecommerce_backend.product.controller;
 
 import com.rj.ecommerce_backend.product.service.FileStorageService;
 import com.rj.ecommerce_backend.product.service.ProductService;
-import com.rj.ecommerce_backend.product.dtos.ProductCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.filters.ProductUpdateDTO;
 import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException;
 import com.rj.ecommerce_backend.sorting.SortValidator;
 import io.swagger.v3.oas.annotations.Operation;

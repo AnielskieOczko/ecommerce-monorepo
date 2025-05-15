@@ -1,10 +1,9 @@
 package com.rj.ecommerce_backend.payment.service;
 
 import com.rj.ecommerce_backend.messaging.email.EmailServiceClient;
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailTemplate;
+import com.rj.ecommerce.api.shared.enums.EmailTemplate;
 import com.rj.ecommerce_backend.messaging.email.contract.v1.common.MoneyDTO;
-import com.rj.ecommerce_backend.messaging.email.contract.v1.payment.PaymentEmailRequestDTO;
-import com.rj.ecommerce_backend.messaging.email.producer.EmailMessageProducer;
+import com.rj.ecommerce.api.shared.messaging.email.PaymentEmailRequestDTO;
 import com.rj.ecommerce_backend.messaging.payment.dto.CheckoutSessionResponseDTO;
 import com.rj.ecommerce_backend.order.enums.PaymentStatus;
 import lombok.RequiredArgsConstructor;
