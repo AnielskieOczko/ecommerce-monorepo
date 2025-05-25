@@ -16,9 +16,9 @@ import java.time.LocalDateTime
  * - createdAt and updatedAt are typically auto-generated
  */
 data class CartDTO(
-    val id: Long,
-    val userId: Long,
+    val id: Long?,
+    val userId: Long?,
     val items: List<CartItemDTO>,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: LocalDateTime?,
+    val updatedAt: LocalDateTime?
 )

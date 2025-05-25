@@ -1,5 +1,7 @@
 package com.rj.ecommerce.api.shared.dto.cart
 
+import jakarta.validation.constraints.Min
+
 /**
  * Request to add an item to a cart.
  *
@@ -10,9 +12,10 @@ package com.rj.ecommerce.api.shared.dto.cart
  * - productId and quantity are required
  * - quantity must be at least 1
  */
-data class CartItemAddRequestDTO(
+data class AddItemToCartRequestDTO(
     val productId: Long,
-    val quantity: Int
+    @field:Min(1, message = "Quantity must be at least 1.")
+    val quantity: Int = 1
 ) {
     init {
         require(quantity >= 1) { "Quantity must be at least 1" }

@@ -1,5 +1,7 @@
 package com.rj.ecommerce.api.shared.core
 
+import jakarta.validation.constraints.NotBlank
+
 /**
  * Represents metadata for an image.
  *
@@ -14,7 +16,10 @@ package com.rj.ecommerce.api.shared.core
  */
 data class ImageInfo(
     val id: Long? = null,
+    @field:NotBlank
     val path: String,
+    @field:NotBlank
     val altText: String,
+    @field:NotBlank
     val mimeType: String
 )

@@ -6,7 +6,6 @@ import com.rj.ecommerce.api.shared.core.Money
  * Core identifying information for a product. Used for composition, not directly generated unless needed.
  *
  * @property id Product ID (Using String for cross-service consistency).
- * @property sku Stock Keeping Unit, if applicable.
  * @property name Product name.
  * @property unitPrice Price per unit of the product.
  *
@@ -15,8 +14,7 @@ import com.rj.ecommerce.api.shared.core.Money
  * - sku is optional
  */
 data class ProductSummaryDTO(
-    val id: Long? = null,
-    val sku: String? = null,
+    val id: Long,
     val name: String? = null,
     val unitPrice: Money? = null
 )

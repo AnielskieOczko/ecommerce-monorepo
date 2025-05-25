@@ -14,7 +14,7 @@ import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO
  * - quantity must be at least 1
  */
 data class CartItemDTO(
-    val id: Long,
+    val id: Long?,
     val product: ProductSummaryDTO,
     val quantity: Int
 ) {

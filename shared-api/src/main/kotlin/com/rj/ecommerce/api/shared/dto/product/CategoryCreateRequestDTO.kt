@@ -2,7 +2,7 @@ package com.rj.ecommerce.api.shared.dto.product
 
 import jakarta.validation.constraints.NotBlank
 
-data class CategoryUpdateDTO(
+
+data class CategoryCreateRequestDTO(
     @field:NotBlank
-    val name: String
-)
+    val name: String)

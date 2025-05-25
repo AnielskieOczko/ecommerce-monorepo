@@ -21,6 +21,5 @@ data class ProductUpdateRequestDTO(
     val description: String? = null,
     val unitPrice: Money? = null,
     val quantityInStock: Int? = null,
-    val categoryIds: List<Long>? = null,
-    val images: List<ImageInfo>? = null
+    val categoryIds: List<Long>? = null
 )
