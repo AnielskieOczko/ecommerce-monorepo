@@ -18,7 +18,7 @@ data class Category(
     var id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    var name: String? = null,
+    var name: String,
 
     // For ManyToMany with Product
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)

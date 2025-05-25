@@ -23,23 +23,26 @@ data class Product(
 
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "name", nullable = false))
+    @field:Valid // Cascade validation to ProductName VO
     var name: ProductName? = null,
 
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "description"))
+    @field:Valid
     var description: ProductDescription? = null,
 
     @Embedded
     @AttributeOverrides(
-        AttributeOverride(name = "amount", column = Column(name = "price_amount", precision = 19, scale = 2)),
-        AttributeOverride(name = "currencyCode.name", column = Column(name = "price_currency", length = 3))
+        AttributeOverride(name = "amount", column = Column(name = "price_amount", precision = 19, scale = 2, nullable = false)),
+        AttributeOverride(name = "currencyCode", column = Column(name = "price_currency", length = 3, nullable = false))
     )
-    @field:Valid
+    @field:Valid // Cascade validation to Money VO
     var unitPrice: Money,
 
     @Embedded
-    @AttributeOverride(name = "value", column = Column(name = "quantity", nullable = false))
-    var quantityInStock: QuantityInStock? = null,
+    @AttributeOverride(name = "value", column = Column(name = "quantity_in_stock", nullable = false))
+    @field:Valid
+    var quantityInStock: QuantityInStock,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

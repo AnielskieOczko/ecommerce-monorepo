@@ -1,10 +1,6 @@
 package com.rj.ecommerce_backend.product.domain
 
 import jakarta.persistence.*
-import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Data
-import lombok.NoArgsConstructor
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
@@ -13,21 +9,24 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "images")
+@Table(
+    name = "images",
+    indexes = [Index(name = "idx_image_path", columnList = "path")]
+)
 @EntityListeners(AuditingEntityListener::class)
 data class Image(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @Column(nullable = false)
-    var path: String? = null,
+    @Column(nullable = false, unique = true)
+    var path: String,
 
-    var altText: String? = null, // Optional
-    var mimeType: String? = null, // Optional, but good to have
+    var altText: String? = null,
+    var mimeType: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false) // An image must belong to a product
+    @JoinColumn(name = "product_id", nullable = false)
     var product: Product? = null,
 ) {
     @CreationTimestamp
