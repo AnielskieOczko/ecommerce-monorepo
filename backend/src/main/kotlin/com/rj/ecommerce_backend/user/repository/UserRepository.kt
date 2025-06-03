@@ -10,16 +10,15 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
-import java.util.Optional
 
 @Repository
 interface UserRepository : JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     @Transactional(readOnly = true)
-    fun findUserByEmail(email: Email): Optional<User>
+    fun findUserByEmail(email: Email): User?
 
     @Transactional(readOnly = true)
-    fun findUserByFirstName(firstName: String): Optional<User> // Standard Spring Data query method
+    fun findUserByFirstName(firstName: String): User?// Standard Spring Data query method
 
     @Transactional(readOnly = true)
     @Query("SELECT u FROM User u JOIN u.authorities a WHERE a.name = :roleName ORDER BY u.email ASC")

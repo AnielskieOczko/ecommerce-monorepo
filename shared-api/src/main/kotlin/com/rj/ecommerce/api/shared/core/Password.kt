@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty
 
 @Embeddable
 @JvmRecord
-data class Password(val value: @NotEmpty String?) {
+data class Password(val value: @NotEmpty String) {
     companion object {
         fun of(password: String): Password {
             validatePassword(password)
