@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.securityconfig.service // Or your chosen package
 
 import com.rj.ecommerce.api.shared.core.Email
-import com.rj.ecommerce_backend.securityconfig.services.UserDetailsImpl
 import com.rj.ecommerce_backend.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.core.userdetails.UserDetails

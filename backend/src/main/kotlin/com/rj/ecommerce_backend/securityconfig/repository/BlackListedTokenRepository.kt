@@ -1,4 +1,22 @@
 package com.rj.ecommerce_backend.securityconfig.repository
 
-interface BlackListedTokenRepository {
+import com.rj.ecommerce_backend.securityconfig.domain.BlacklistedToken
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
+
+@Repository
+interface BlackListedTokenRepository : JpaRepository<BlacklistedToken, Long> {
+
+    @Query("SELECT b FROM BlacklistedToken b WHERE b.expiresAt <= :expiryDate")
+    fun findExpiredTokens(@Param("expiryDate") expiryDate: LocalDateTime): List<BlacklistedToken>
+    // Or: fun findByExpiresAtLessThanEqual(expiryDate: LocalDateTime): List<BlacklistedToken> // Derived query
+
+    @Modifying
+    @Query("DELETE FROM BlacklistedToken b WHERE b.expiresAt <= :expiryDate")
+    fun deleteExpiredTokens(@Param("expiryDate") expiryDate: LocalDateTime): Int
+
 }
