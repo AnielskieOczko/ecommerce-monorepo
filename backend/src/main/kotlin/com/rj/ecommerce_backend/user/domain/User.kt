@@ -7,6 +7,7 @@ import com.rj.ecommerce.api.shared.core.PhoneNumber
 import com.rj.ecommerce_backend.cart.domain.Cart
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.LastModifiedBy
@@ -52,12 +53,13 @@ class User(
     // --- Collections ---
     // Initialize collections. 'val' as the reference to the set itself won't change.
     // The set should contain non-nullable Authority entities.
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "users_authorities",
         joinColumns = [JoinColumn(name = "user_id", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "authority_id", referencedColumnName = "id")]
     )
+    @BatchSize(size = 20)
     val authorities: MutableSet<Authority> = mutableSetOf()
 
 ) {
