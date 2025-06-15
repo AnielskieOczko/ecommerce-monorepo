@@ -5,7 +5,7 @@ import com.rj.ecommerce.api.shared.core.PhoneNumber
 import jakarta.validation.constraints.Email
 import java.time.LocalDate
 
-data class AdminUpdateUserRequest(
+data class AdminUpdateUserRequestDTO(
     val firstName: String?,
     val lastName: String?,
     @field:Email

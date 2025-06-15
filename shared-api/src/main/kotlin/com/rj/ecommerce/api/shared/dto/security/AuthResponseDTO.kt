@@ -1,7 +1,7 @@
 package com.rj.ecommerce.api.shared.dto.security
 
-data class AuthResponse(
+data class AuthResponseDTO(
     val success: Boolean,
     val message: String?,
-    val data: JwtResponse? = null
+    val data: JwtResponseDTO? = null
 )

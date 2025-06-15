@@ -4,7 +4,7 @@ import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.PhoneNumber
 import java.time.LocalDate
 
-data class UpdateBasicDetailsRequest(
+data class UpdateBasicDetailsRequestDTO(
     val firstName: String? = null,
     val lastName: String? = null,
     val address: Address? = null,

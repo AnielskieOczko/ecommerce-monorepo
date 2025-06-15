@@ -3,7 +3,7 @@ package com.rj.ecommerce.api.shared.messaging.email
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
 
-data class NotificationCreationRequest(
+data class NotificationCreationRequestDTO(
     val messageId: String,
     val recipient: String,
     val subject: String,
