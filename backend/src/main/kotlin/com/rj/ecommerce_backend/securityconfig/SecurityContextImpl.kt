@@ -33,11 +33,13 @@ class SecurityContextImpl(private val userRepository: UserRepository) : Security
         }
         val username = authentication.name
 
-        return userRepository.findUserByEmail(Email(username))
-            .orElseThrow {
-                logger.warn { "User not found in repository for authenticated username: $username" }
-                UsernameNotFoundException("User details not found for authenticated user: $username")
-            }
+        return userRepository.findUserByEmail(Email(username)) ?:
+        run()
+        {
+            logger.warn { "User not found in repository for authenticated username: $username" }
+            throw UsernameNotFoundException("User details not found for authenticated user: $username")
+        }
+
     }
 
     override fun isAdmin(): Boolean {
