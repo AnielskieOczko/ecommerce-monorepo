@@ -66,7 +66,7 @@ data class Order(
     var receiptUrl: String? = null,
 
     @Enumerated(EnumType.STRING)
-    var paymentStatus: PaymentStatus? = null,
+    var paymentStatus: PaymentStatus,
 
     @Enumerated(EnumType.STRING)
     var orderStatus: OrderStatus? = null,

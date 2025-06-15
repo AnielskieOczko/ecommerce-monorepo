@@ -8,5 +8,5 @@ import jakarta.validation.constraints.Size
 data class ProductDescription(
     @field:NotBlank
     @field:Size(min = 3, max = 255)
-    val value: String?
+    val value: String
 )

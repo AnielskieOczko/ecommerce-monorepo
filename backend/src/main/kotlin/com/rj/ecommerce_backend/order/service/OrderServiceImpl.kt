@@ -8,13 +8,13 @@ import com.rj.ecommerce.api.shared.dto.cart.CartItemDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce_backend.messaging.common.excepion.MessagePublishException
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailRequestFactory
+import com.rj.ecommerce_backend.messaging.email.factory.EmailRequestFactory
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce.api.shared.enums.*
 import com.rj.ecommerce.api.shared.messaging.email.EcommerceEmailRequest
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailServiceClient
+import com.rj.ecommerce_backend.messaging.email.client.EmailServiceClient
 import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException
 import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException
 import com.rj.ecommerce_backend.order.exceptions.OrderServiceException
