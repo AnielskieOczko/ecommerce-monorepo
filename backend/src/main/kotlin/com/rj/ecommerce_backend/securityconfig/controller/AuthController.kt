@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.securityconfig.controller
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.security.LoginRequest
 import com.rj.ecommerce.api.shared.dto.security.TokenInfo
-import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequest
+import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
+import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.securityconfig.service.AuthenticationService
@@ -57,7 +57,7 @@ class AuthController(
 
     @PostMapping("/login")
     fun authenticateUser(
-        @Valid @RequestBody loginRequest: LoginRequest
+        @Valid @RequestBody loginRequest: LoginRequestDTO
     ): ResponseEntity<AuthResponse> {
         logger.info { "Received login request for user: ${loginRequest.email}" }
         // The AuthenticationService.authenticateUser method already handles exceptions and returns an AuthResponse.
@@ -135,7 +135,7 @@ class AuthController(
     }
 
     @PostMapping("/refresh-token")
-    fun refreshToken(@Valid @RequestBody request: TokenRefreshRequest): ResponseEntity<AuthResponse> {
+    fun refreshToken(@Valid @RequestBody request: TokenRefreshRequestDTO): ResponseEntity<AuthResponse> {
         // Avoid logging the full refresh token for security reasons. Log its presence or a part of it if necessary.
         logger.info { "Received request to refresh token." } // Potentially add request.userIdentifier if available and safe
         // Similar to /login, AuthenticationService.refreshToken should handle its errors and return an AuthResponse.

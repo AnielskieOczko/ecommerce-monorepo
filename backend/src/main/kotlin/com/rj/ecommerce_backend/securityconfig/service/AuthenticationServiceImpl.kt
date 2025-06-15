@@ -2,8 +2,8 @@ package com.rj.ecommerce_backend.securityconfig.service
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponse
 import com.rj.ecommerce.api.shared.dto.security.JwtResponse
-import com.rj.ecommerce.api.shared.dto.security.LoginRequest
-import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequest
+import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
+import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
 import com.rj.ecommerce_backend.securityconfig.domain.RefreshToken
 import com.rj.ecommerce_backend.securityconfig.exceptions.TokenRefreshException
 import com.rj.ecommerce_backend.securityconfig.exceptions.UserAuthenticationException
@@ -36,7 +36,7 @@ class AuthenticationServiceImpl(
         private const val TOKEN_PREFIX = "Bearer "
     }
 
-    override fun authenticateUser(loginRequest: LoginRequest): AuthResponse {
+    override fun authenticateUser(loginRequest: LoginRequestDTO): AuthResponse {
         logger.info { "Attempting to authenticate user: ${loginRequest.email}" }
         return try {
             val authentication: Authentication = performAuthentication(loginRequest)
@@ -64,7 +64,7 @@ class AuthenticationServiceImpl(
         }
     }
 
-    override fun refreshToken(tokenRefreshRequest: TokenRefreshRequest): AuthResponse {
+    override fun refreshToken(tokenRefreshRequest: TokenRefreshRequestDTO): AuthResponse {
         logger.info { "Attempting to refresh token." }
         return try {
             val refreshToken: RefreshToken = refreshTokenService
@@ -167,7 +167,7 @@ class AuthenticationServiceImpl(
     }
 
 
-    private fun performAuthentication(loginRequest: LoginRequest): Authentication {
+    private fun performAuthentication(loginRequest: LoginRequestDTO): Authentication {
         logger.debug { "Performing authentication for: ${loginRequest.email}" }
         try {
             val authentication: Authentication = authenticationManager.authenticate(
