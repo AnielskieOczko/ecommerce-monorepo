@@ -1,8 +1,9 @@
-package com.rj.ecommerce_backend.notification
+package com.rj.ecommerce_backend.notification.service
 
 import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
 import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequest
+import com.rj.ecommerce_backend.notification.EmailNotification
 
 interface EmailNotificationService {
     /**
@@ -15,7 +16,7 @@ interface EmailNotificationService {
     /**
      * Marks a notification as successfully SENT.
      * @param messageId The unique ID of the message to update.
-     * @throws NotificationNotFoundException if no notification with the given ID exists.
+     * @throws com.rj.ecommerce_backend.notification.exception.NotificationNotFoundException if no notification with the given ID exists.
      */
     fun markAsSent(messageId: String)
 
@@ -23,7 +24,7 @@ interface EmailNotificationService {
      * Marks a notification as FAILED and records the reason.
      * @param messageId The unique ID of the message to update.
      * @param reason A descriptive error message explaining the failure.
-     * @throws NotificationNotFoundException if no notification with the given ID exists.
+     * @throws com.rj.ecommerce_backend.notification.exception.NotificationNotFoundException if no notification with the given ID exists.
      */
     fun markAsFailed(messageId: String, reason: String)
 

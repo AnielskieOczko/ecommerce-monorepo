@@ -1,8 +1,11 @@
-package com.rj.ecommerce_backend.notification
+package com.rj.ecommerce_backend.notification.service
 
 import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
 import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequest
+import com.rj.ecommerce_backend.notification.EmailNotification
+import com.rj.ecommerce_backend.notification.repository.EmailNotificationRepository
+import com.rj.ecommerce_backend.notification.exception.NotificationNotFoundException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +22,7 @@ class EmailNotificationServiceImpl(
 
     override fun createNotification(request: NotificationCreationRequest): EmailNotification {
         log.info { "Creating notification record for messageId: ${request.messageId}" }
-        val newNotification = EmailNotification.create(
+        val newNotification = EmailNotification.Companion.create(
             messageId = request.messageId,
             recipient = request.recipient,
             subject = request.subject,

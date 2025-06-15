@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.notification
 
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
+import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
-import com.rj.ecommerce.api.shared.enums.NotificationStatus
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -41,15 +41,12 @@ class EmailNotification(
     val entityId: String,
 
     // --- State properties ---
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    var status: NotificationStatus = NotificationStatus.PENDING, // Default to PENDING
+    var status: NotificationDispatchStatus = NotificationDispatchStatus.PENDING,
 
     @Column(name = "error_message", length = 1000)
     var errorMessage: String? = null,
-
-    // --- Audit properties (now part of the primary constructor) ---
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -93,5 +90,3 @@ class EmailNotification(
         }
     }
 }
-
-class NotificationNotFoundException(message: String) : RuntimeException(message)
