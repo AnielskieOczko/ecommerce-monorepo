@@ -2,7 +2,7 @@ package com.rj.ecommerce_backend.order.service;
 
 import com.rj.ecommerce_backend.cart.dtos.CartDTO;
 import com.rj.ecommerce_backend.cart.dtos.CartItemDTO;
-import com.rj.ecommerce_backend.messaging.email.contract.v1.EmailRequestFactory;
+import com.rj.ecommerce_backend.messaging.email.factory.EmailRequestFactory;
 import com.rj.ecommerce_backend.messaging.email.EmailServiceClient;
 import com.rj.ecommerce_backend.messaging.payment.dto.CheckoutSessionResponseDTO;
 import com.rj.ecommerce_backend.order.domain.Order;
