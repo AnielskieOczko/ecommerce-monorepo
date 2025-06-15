@@ -8,6 +8,9 @@ import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
 import com.rj.ecommerce_backend.order.service.OrderService
 import com.rj.ecommerce_backend.sorting.OrderSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@Tag(name = "Order", description = "APIs for customer order management")
 @RequestMapping("/api/v1")
 class OrderController(
     private val orderService: OrderService,
@@ -38,6 +42,10 @@ class OrderController(
     }
 
     @GetMapping("/users/{userId}/orders")
+    @Operation(summary = "Get all orders for a user", description = "Retrieves a paginated and filtered list of orders for a specific user.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved orders")
+    @ApiResponse(responseCode = "400", description = "Invalid sorting or filtering parameters")
+    @ApiResponse(responseCode = "403", description = "Forbidden access")
     @PreAuthorize("#pathUserId == authentication.principal.id or hasRole('ADMIN')")
     fun getAllOrdersForUser(
         @PathVariable pathUserId: Long,
@@ -78,6 +86,10 @@ class OrderController(
     }
 
     @GetMapping("/users/{userId}/orders/{orderId}")
+    @Operation(summary = "Get a specific order", description = "Retrieves a single order by its ID for a specific user.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved the order")
+    @ApiResponse(responseCode = "404", description = "Order not found")
+    @ApiResponse(responseCode = "403", description = "Forbidden access")
     fun getOrder(
         @PathVariable userId: Long,
         @PathVariable orderId: Long
@@ -94,6 +106,10 @@ class OrderController(
     }
 
     @PostMapping("/users/{userId}/orders")
+    @Operation(summary = "Create a new order", description = "Creates a new order from the user's cart and shipping details.")
+    @ApiResponse(responseCode = "201", description = "Order created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid order data, e.g., insufficient stock")
+    @ApiResponse(responseCode = "403", description = "Forbidden access")
     @PreAuthorize("#userId == authentication.principal.id")
     fun createOrder(
         @PathVariable userId: Long,
@@ -106,6 +122,9 @@ class OrderController(
     }
 
     @DeleteMapping("/users/{userId}/orders/{orderId}")
+    @Operation(summary = "Cancel an order", description = "Allows a user or an admin to cancel an order.")
+    @ApiResponse(responseCode = "204", description = "Order cancelled successfully")
+    @ApiResponse(responseCode = "400", description = "Order cannot be cancelled in its current state")
     @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun cancelOrder(
