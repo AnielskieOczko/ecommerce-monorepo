@@ -9,6 +9,7 @@ import com.rj.ecommerce.api.shared.enums.ShippingMethod
 import com.rj.ecommerce_backend.user.domain.User
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.LastModifiedBy
@@ -29,6 +30,7 @@ data class Order(
     var user: User? = null,
 
     @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     val orderItems: MutableList<OrderItem> = mutableListOf(),
 
     @Column(precision = 19, scale = 2)

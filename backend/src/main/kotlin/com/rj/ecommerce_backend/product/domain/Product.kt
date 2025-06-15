@@ -6,6 +6,7 @@ import com.rj.ecommerce.api.shared.core.ProductName
 import com.rj.ecommerce.api.shared.core.QuantityInStock
 import jakarta.persistence.*
 import jakarta.validation.Valid
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
@@ -50,6 +51,7 @@ data class Product(
         joinColumns = [JoinColumn(name = "product_id")],
         inverseJoinColumns = [JoinColumn(name = "category_id")]
     )
+    @BatchSize(size = 20)
     val categories: MutableSet<Category> = mutableSetOf(),
 
     @OneToMany(
@@ -58,6 +60,7 @@ data class Product(
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
+    @BatchSize(size = 20)
     val images: MutableList<Image> = mutableListOf(),
 ) {
     @CreationTimestamp

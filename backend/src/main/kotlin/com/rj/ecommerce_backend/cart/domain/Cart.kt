@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.LastModifiedBy
@@ -41,6 +42,7 @@ class Cart(
     @OneToMany(
         mappedBy = "cart", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY
     )
+    @BatchSize(size = 20)
     val cartItems: MutableList<CartItem> = mutableListOf()
 
     @CreationTimestamp
