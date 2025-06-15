@@ -2,9 +2,12 @@ package com.rj.ecommerce_backend.cart.controller
 
 import com.rj.ecommerce.api.shared.dto.cart.AddItemToCartRequestDTO
 import com.rj.ecommerce.api.shared.dto.cart.CartDTO
-import com.rj.ecommerce.api.shared.dto.cart.UpdateCartItemQuantityRequest
+import com.rj.ecommerce.api.shared.dto.cart.UpdateCartItemQuantityRequestDTO
 import com.rj.ecommerce_backend.cart.service.CartService
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/users/{userId}/cart")
+@Tag(name = "Cart", description = "APIs for managing user shopping carts")
 @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
 class CartController(
     private val cartService: CartService
@@ -31,6 +35,10 @@ class CartController(
 
 
     @GetMapping
+    @Operation(summary = "Get user's cart", description = "Retrieves the full shopping cart for a given user.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved cart")
+    @ApiResponse(responseCode = "404", description = "User or cart not found")
+    @ApiResponse(responseCode = "403", description = "Forbidden access")
     fun getUserCart(@PathVariable userId: Long): ResponseEntity<CartDTO> {
         logger.info { "Request to get cart for user ID: $userId" }
         val cartDto = cartService.getCartForUser(userId)
@@ -40,6 +48,10 @@ class CartController(
 
     @PostMapping("/items")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Add item to cart", description = "Adds a product with a specified quantity to the user's cart.")
+    @ApiResponse(responseCode = "201", description = "Item successfully added and cart returned")
+    @ApiResponse(responseCode = "400", description = "Invalid request data, e.g., negative quantity")
+    @ApiResponse(responseCode = "404", description = "Product not found")
     @PreAuthorize("#userId == authentication.principal.id")
     fun addItemToCart(
         @PathVariable userId: Long,
@@ -51,17 +63,19 @@ class CartController(
             addItemRequest.productId,
             addItemRequest.quantity
         )
-        // Consider returning 201 Created if a new cart item resource was conceptually created,
-        // or 200 OK if it's just updating the cart state. 200 OK is common.
-        return ResponseEntity.ok(updatedCartDto)
+        return ResponseEntity.status(HttpStatus.CREATED).body(updatedCartDto)
     }
 
     @PutMapping("/items/{cartItemId}")
+    @Operation(summary = "Update cart item quantity", description = "Changes the quantity of a specific item in the cart.")
+    @ApiResponse(responseCode = "200", description = "Quantity updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid request data, e.g., negative quantity")
+    @ApiResponse(responseCode = "404", description = "Cart item not found")
     @PreAuthorize("#userId == authentication.principal.id")
     fun updateCartItemQuantity(
         @PathVariable userId: Long,
         @PathVariable cartItemId: Long,
-        @Valid @RequestBody updateRequest: UpdateCartItemQuantityRequest
+        @Valid @RequestBody updateRequest: UpdateCartItemQuantityRequestDTO
     ): ResponseEntity<CartDTO> {
         logger.info { "Request to update quantity for cart item ID: $cartItemId to ${updateRequest.newQuantity} for user ID: $userId" }
         val updatedCartDto = cartService.updateCartItemQuantity(
@@ -73,6 +87,9 @@ class CartController(
     }
 
     @DeleteMapping("/items/{cartItemId}")
+    @Operation(summary = "Remove item from cart", description = "Removes a specific item from the cart.")
+    @ApiResponse(responseCode = "200", description = "Item removed successfully")
+    @ApiResponse(responseCode = "404", description = "Cart item not found")
     @PreAuthorize("#userId == authentication.principal.id")
     fun removeItemFromCart(
         @PathVariable userId: Long,
@@ -85,6 +102,8 @@ class CartController(
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Clear cart", description = "Removes all items from the user's cart.")
+    @ApiResponse(responseCode = "204", description = "Cart cleared successfully")
     @PreAuthorize("#userId == authentication.principal.id")
     fun clearUserCart(@PathVariable userId: Long) {
         logger.info { "Request to clear cart for user ID: $userId" }
