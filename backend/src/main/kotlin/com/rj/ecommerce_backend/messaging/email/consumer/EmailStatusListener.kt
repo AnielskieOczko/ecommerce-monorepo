@@ -2,7 +2,7 @@ package com.rj.ecommerce_backend.messaging.email.consumer
 
 import com.rj.ecommerce.api.shared.enums.EmailDeliveryReceiptStatus
 import com.rj.ecommerce.api.shared.messaging.email.EmailDeliveryReceiptDTO
-import com.rj.ecommerce_backend.notification.EmailNotificationService
+import com.rj.ecommerce_backend.notification.service.EmailNotificationService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component

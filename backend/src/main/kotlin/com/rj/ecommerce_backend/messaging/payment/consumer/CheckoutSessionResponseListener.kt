@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.messaging.payment.listener
+package com.rj.ecommerce_backend.messaging.payment.consumer
 
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
 import com.rj.ecommerce_backend.payment.PaymentWebhookService
