@@ -1,8 +1,10 @@
 package com.rj.ecommerce.api.shared.enums
 
-enum class NotifiableEntityType {
+enum class NotificationEntityType {
     ORDER,
     CUSTOMER,
     PAYMENT,
-    SHIPMENT
+    SHIPMENT,
+    WELCOME_EMAIL,
+    UNKNOWN
 }

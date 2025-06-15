@@ -26,8 +26,10 @@ data class PaymentLineItemDTO(
     init {
         require(unitAmountCents > 0) { "Unit amount must be positive" }
         require(quantity >= 1) { "Quantity must be at least 1" }
-        require(currencyCode.matches(Regex("^[A-Z]{3}$"))) {
-            "Currency code must be a 3-letter ISO 4217 code"
+        // Consider using a pre-compiled Regex for slight performance improvement if used very frequently
+        // private val CURRENCY_CODE_REGEX = Regex("^[A-Z]{3}$")
+        require(currencyCode.matches(Regex("^[A-Z]{3}$"))) { // For ISO 4217, usually uppercase
+            "Currency code must be a 3-letter ISO 4217 code (e.g., USD, EUR)"
         }
     }
 }

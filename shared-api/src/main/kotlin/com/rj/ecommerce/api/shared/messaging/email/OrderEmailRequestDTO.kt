@@ -1,10 +1,9 @@
 package com.rj.ecommerce.api.shared.messaging.email
 
+import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.core.ShippingAddressDTO
 import com.rj.ecommerce.api.shared.dto.customer.CustomerInfoDTO
 import com.rj.ecommerce.api.shared.dto.order.MessagingOrderItemDTO
-import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
@@ -22,10 +21,10 @@ data class OrderEmailRequestDTO(
     val orderId: String,
     val orderNumber: String? = null,
     val customer: CustomerInfoDTO? = null, // Make nullable if optional for some templates
-    @field:NotEmpty // Ensure list is not empty
+    @field:NotEmpty
     val items: List<MessagingOrderItemDTO>, // Use the messaging-specific OrderItemDTO
     val totalAmount: Money,
-    val shippingAddress: ShippingAddressDTO? = null,
+    val shippingAddress: Address? = null,
     val shippingMethod: ShippingMethod? = null, // Corrected import
     val paymentMethod: PaymentMethod? = null,
     val paymentTransactionId: String? = null,
@@ -88,7 +87,7 @@ data class OrderEmailRequestDTO(
             version: String = "1.0",
             orderNumber: String? = null,
             customer: CustomerInfoDTO? = null,
-            shippingAddress: ShippingAddressDTO? = null,
+            shippingAddress: Address? = null,
             shippingMethod: ShippingMethod? = null,
             paymentMethod: PaymentMethod? = null,
             paymentTransactionId: String? = null,

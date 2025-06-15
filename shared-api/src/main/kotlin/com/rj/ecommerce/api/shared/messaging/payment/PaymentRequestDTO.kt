@@ -16,7 +16,7 @@ package com.rj.ecommerce.api.shared.messaging.payment
  * - successUrl and cancelUrl must be valid URLs
  */
 data class PaymentRequestDTO(
-    val orderId: String,
+    val orderId: Long,
     val customerEmail: String,
     val successUrl: String,
     val cancelUrl: String,

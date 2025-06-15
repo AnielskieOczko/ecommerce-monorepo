@@ -19,11 +19,17 @@ import java.time.LocalDateTime
  * - expiresAt and metadata are optional
  */
 data class PaymentResponseDTO(
+    // Original fields
     val sessionId: String,
-    val orderId: String,
+    val orderId: Long,
     val sessionStatus: PaymentStatus,
     val paymentStatus: PaymentStatus,
     val checkoutUrl: String,
     val expiresAt: LocalDateTime? = null,
-    val metadata: Map<String, String>? = null
+    val metadata: Map<String, String>? = null, // This will replace 'additionalDetails'
+
+    // --- Extended fields required by the notification service ---
+    val customerEmail: String,
+    val amountTotal: Long?, // Total amount in the smallest currency unit (e.g., cents), nullable for safety
+    val currency: String?   // 3-letter ISO currency code, nullable for safety
 )

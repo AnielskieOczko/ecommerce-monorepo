@@ -21,12 +21,12 @@ import java.time.LocalDateTime
  * - amount, paidAt, and rawProviderPayload are optional
  */
 data class PaymentNotificationDTO(
-    val eventId: String,
-    val eventType: String,
-    val orderId: String,
-    val paymentId: String,
-    val status: PaymentStatus,
-    val amount: Money? = null,
-    val paidAt: LocalDateTime? = null,
-    val rawProviderPayload: Map<String, Any>? = null
+    val eventId: String, // Unique ID for the event from the payment provider
+    val eventType: String, // e.g., "payment.succeeded", "charge.failed"
+    val orderId: Long, // Your system's order ID
+    val paymentId: String, // Payment provider's ID for the payment transaction
+    val status: PaymentStatus, // Your system's standardized status
+    val amount: Money? = null, // Amount associated with this specific event (e.g., capture amount, refund amount)
+    val paidAt: LocalDateTime? = null, // Timestamp when the payment was successfully processed or specific event occurred
+    val rawProviderPayload: Map<String, Any>? = null // Raw data from the payment provider (webhook payload)
 )
