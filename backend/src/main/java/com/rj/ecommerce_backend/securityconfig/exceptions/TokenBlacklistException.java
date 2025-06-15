@@ -5,7 +5,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class TokenBlacklistException extends RuntimeException {
-  public TokenBlacklistException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public TokenBlacklistException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public TokenBlacklistException(String message) {
+        super(message);
+    }
+
+
 }
+
+
