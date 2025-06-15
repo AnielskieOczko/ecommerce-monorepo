@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.securityconfig.controller
 
-import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.security.TokenInfo
+import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
+import com.rj.ecommerce.api.shared.dto.security.TokenInfoDTO
 import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
 import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
@@ -58,14 +58,14 @@ class AuthController(
     @PostMapping("/login")
     fun authenticateUser(
         @Valid @RequestBody loginRequest: LoginRequestDTO
-    ): ResponseEntity<AuthResponse> {
+    ): ResponseEntity<AuthResponseDTO> {
         logger.info { "Received login request for user: ${loginRequest.email}" }
         // The AuthenticationService.authenticateUser method already handles exceptions and returns an AuthResponse.
         // So, the try-catch here might be redundant or could be simplified.
         // Let's assume authenticationService.authenticateUser can throw exceptions that are NOT UserAuthenticationException
         // (though it's designed to wrap them) or that you want to handle AuthResponse success=false specifically.
 
-        val authResponse: AuthResponse = authenticationService.authenticateUser(loginRequest)
+        val authResponse: AuthResponseDTO = authenticationService.authenticateUser(loginRequest)
 
         return if (authResponse.success) {
             logger.info { "User login successful for: ${loginRequest.email}" }
@@ -119,7 +119,7 @@ class AuthController(
     }
 
     @GetMapping("/user/{userId}/tokens")
-    fun getUserTokens(@PathVariable userId: Long): ResponseEntity<List<TokenInfo>> {
+    fun getUserTokens(@PathVariable userId: Long): ResponseEntity<List<TokenInfoDTO>> {
         logger.info { "Received request to get tokens for user ID: $userId" }
         return try {
             val tokens = jwtBlackListService.getUserTokens(userId)
@@ -135,7 +135,7 @@ class AuthController(
     }
 
     @PostMapping("/refresh-token")
-    fun refreshToken(@Valid @RequestBody request: TokenRefreshRequestDTO): ResponseEntity<AuthResponse> {
+    fun refreshToken(@Valid @RequestBody request: TokenRefreshRequestDTO): ResponseEntity<AuthResponseDTO> {
         // Avoid logging the full refresh token for security reasons. Log its presence or a part of it if necessary.
         logger.info { "Received request to refresh token." } // Potentially add request.userIdentifier if available and safe
         // Similar to /login, AuthenticationService.refreshToken should handle its errors and return an AuthResponse.

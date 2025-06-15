@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.securityconfig.service
 
-import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.security.JwtResponse
+import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
+import com.rj.ecommerce.api.shared.dto.security.JwtResponseDTO
 import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
 import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
 import com.rj.ecommerce_backend.securityconfig.domain.RefreshToken
@@ -36,27 +36,27 @@ class AuthenticationServiceImpl(
         private const val TOKEN_PREFIX = "Bearer "
     }
 
-    override fun authenticateUser(loginRequest: LoginRequestDTO): AuthResponse {
+    override fun authenticateUser(loginRequest: LoginRequestDTO): AuthResponseDTO {
         logger.info { "Attempting to authenticate user: ${loginRequest.email}" }
         return try {
             val authentication: Authentication = performAuthentication(loginRequest)
-            val jwtResponse: JwtResponse = generateAuthResponse(authentication)
+            val jwtResponse: JwtResponseDTO = generateAuthResponse(authentication)
             logger.info { "User authenticated successfully: ${loginRequest.email}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = true,
                 message = "Authentication successful",
                 data = jwtResponse
             )
         } catch (e: UserAuthenticationException) {
             logger.warn(e) { "Authentication failed for user ${loginRequest.email}: ${e.message}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = e.localizedMessage ?: "Authentication failed.", // Use exception's message
                 data = null
             )
         } catch (e: Exception) {
             logger.error(e) { "Unexpected error during authentication for user ${loginRequest.email}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = "An unexpected error occurred during authentication.",
                 data = null
@@ -64,28 +64,28 @@ class AuthenticationServiceImpl(
         }
     }
 
-    override fun refreshToken(tokenRefreshRequest: TokenRefreshRequestDTO): AuthResponse {
+    override fun refreshToken(tokenRefreshRequest: TokenRefreshRequestDTO): AuthResponseDTO {
         logger.info { "Attempting to refresh token." }
         return try {
             val refreshToken: RefreshToken = refreshTokenService
                 .verifyRefreshToken(tokenRefreshRequest.refreshToken)
-            val jwtResponse: JwtResponse = generateNewTokens(user = refreshToken.user)
+            val jwtResponse: JwtResponseDTO = generateNewTokens(user = refreshToken.user)
             logger.info { "Token refreshed successfully for user ID: ${refreshToken.user.id}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = true,
                 message = "Token refresh successful",
                 data = jwtResponse
             )
         } catch (e: TokenRefreshException) {
             logger.warn(e) { "Token refresh failed: ${e.message}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = e.localizedMessage ?: "Token refresh failed.",
                 data = null
             )
         } catch (e: Exception) {
             logger.error(e) { "Unexpected error during token refresh." }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = "An unexpected error occurred during token refresh.",
                 data = null
@@ -98,7 +98,7 @@ class AuthenticationServiceImpl(
         currentPassword: String,
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): AuthResponse {
+    ): AuthResponseDTO {
         val userEmail = user.email.value // Cache for logging
         logger.info { "Attempting to handle email update for user: $userEmail" }
         return try {
@@ -125,7 +125,7 @@ class AuthenticationServiceImpl(
             // in an API context, but if this is a requirement, it's fine.
             // response.setHeader(AUTH_HEADER, TOKEN_PREFIX + newAccessToken) // Consider if this is truly needed or if JwtResponse is sufficient
 
-            val jwtResponse = JwtResponse(
+            val jwtResponse = JwtResponseDTO(
                 token = newAccessToken,
                 refreshToken = newRefreshToken.token,
                 id = userId,
@@ -135,7 +135,7 @@ class AuthenticationServiceImpl(
             )
 
             logger.info { "Email update and re-authentication successful for user ID: $userId" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = true,
                 message = "Authentication updated successfully after email change.",
                 data = jwtResponse
@@ -143,14 +143,14 @@ class AuthenticationServiceImpl(
 
         } catch (e: IllegalStateException) {
             logger.error(e) { "Error during email update for $userEmail: ${e.message}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = e.localizedMessage ?: "Failed to update authentication due to invalid user state.",
                 data = null
             )
         } catch (e: UserAuthenticationException) {
             logger.warn(e) { "Re-authentication failed during email update for $userEmail: ${e.message}" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = e.localizedMessage ?: "Failed to update authentication due to re-authentication failure.",
                 data = null
@@ -158,7 +158,7 @@ class AuthenticationServiceImpl(
         }
         catch (e: Exception) {
             logger.error(e) { "Unexpected error during email update for $userEmail" }
-            AuthResponse(
+            AuthResponseDTO(
                 success = false,
                 message = "Failed to update authentication due to an unexpected error.",
                 data = null
@@ -188,7 +188,7 @@ class AuthenticationServiceImpl(
         }
     }
 
-    private fun generateAuthResponse(authentication: Authentication): JwtResponse {
+    private fun generateAuthResponse(authentication: Authentication): JwtResponseDTO {
         val userDetails: UserDetailsImpl = authentication.principal as UserDetailsImpl
         logger.debug { "Generating auth response for user: ${userDetails.username}" }
         val accessToken: String = jwtUtils.generateJwtToken(authentication)
@@ -198,7 +198,7 @@ class AuthenticationServiceImpl(
             grantedAuthority.authority
         }
 
-        return JwtResponse(
+        return JwtResponseDTO(
             token = accessToken,
             refreshToken = refreshToken.token,
             id = userDetails.id,
@@ -208,7 +208,7 @@ class AuthenticationServiceImpl(
         )
     }
 
-    private fun generateNewTokens(user: User): JwtResponse {
+    private fun generateNewTokens(user: User): JwtResponseDTO {
         val userEmailForLog = user.email.value
         logger.debug { "Generating new tokens for user: $userEmailForLog" }
         try {
@@ -232,7 +232,7 @@ class AuthenticationServiceImpl(
                 grantedAuthority.authority
             }
             logger.debug { "Successfully generated new tokens for user ID: $userId" }
-            return JwtResponse(
+            return JwtResponseDTO(
                 token = accessToken,
                 refreshToken = newRefreshToken.token,
                 id = userId,

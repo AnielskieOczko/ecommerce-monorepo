@@ -2,7 +2,7 @@ package com.rj.ecommerce_backend.messaging.email.client
 
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
 import com.rj.ecommerce.api.shared.messaging.email.EcommerceEmailRequest
-import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequest
+import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequestDTO
 import com.rj.ecommerce.api.shared.messaging.email.OrderEmailRequestDTO
 import com.rj.ecommerce.api.shared.messaging.email.PaymentEmailRequestDTO
 import com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO
@@ -26,7 +26,7 @@ class EmailServiceClient(
 
         val (entityType, entityId) = extractNotificationMetadata(request)
 
-        val creationRequest = NotificationCreationRequest(
+        val creationRequest = NotificationCreationRequestDTO(
             messageId = request.messageId,
             recipient = request.to,
             subject = request.subject,

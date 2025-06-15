@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.dto.security.AuthResponse
+import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequest
+import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -12,12 +12,12 @@ import jakarta.servlet.http.HttpServletResponse
 interface UserService {
 
     fun getProfile(userId: Long): UserInfoDTO
-    fun updateBasicDetails(userId: Long, request: UpdateBasicDetailsRequest): UserInfoDTO
+    fun updateBasicDetails(userId: Long, request: UpdateBasicDetailsRequestDTO): UserInfoDTO
     fun changeEmail(
         userId: Long,
-        changeEmailRequest: ChangeEmailRequest,
+        changeEmailRequest: ChangeEmailRequestDTO,
         request: HttpServletRequest,
-        response: HttpServletResponse): AuthResponse
+        response: HttpServletResponse): AuthResponseDTO
 
 
     fun changePassword(userId: Long, request: ChangePasswordRequestDTO)

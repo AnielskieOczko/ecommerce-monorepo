@@ -1,8 +1,6 @@
 package com.rj.ecommerce_backend.securityconfig.repository
 
-import com.rj.ecommerce.api.shared.dto.security.TokenInfo
 import com.rj.ecommerce_backend.securityconfig.domain.BlacklistedToken
-import org.antlr.v4.runtime.Token
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

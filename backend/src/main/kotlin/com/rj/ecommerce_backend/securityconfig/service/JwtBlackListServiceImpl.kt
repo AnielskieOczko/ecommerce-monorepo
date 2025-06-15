@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.securityconfig.service
 
-import com.rj.ecommerce.api.shared.dto.security.TokenInfo
+import com.rj.ecommerce.api.shared.dto.security.TokenInfoDTO
 import com.rj.ecommerce_backend.securityconfig.domain.BlacklistedToken
 import com.rj.ecommerce_backend.securityconfig.exceptions.TokenBlacklistException
 import com.rj.ecommerce_backend.securityconfig.repository.BlackListedTokenRepository
@@ -66,10 +66,10 @@ class JwtBlackListServiceImpl(
         }
     }
 
-    override fun getUserTokens(userId: Long): List<TokenInfo> {
+    override fun getUserTokens(userId: Long): List<TokenInfoDTO> {
         return blackListedTokenRepository.findByUserId(userId)
             .map { domainToken ->
-                TokenInfo(
+                TokenInfoDTO(
                     token = domainToken.tokenString,
                     blacklistedAt = domainToken.recordCreatedAt,
                     expiresAt = domainToken.tokenExpiresAt,

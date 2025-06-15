@@ -2,8 +2,8 @@ package com.rj.ecommerce_backend.user.mapper
 
 import com.rj.ecommerce.api.shared.core.Email
 
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequest
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.user.domain.User
 import com.rj.ecommerce_backend.user.repositories.UserRepository
@@ -14,7 +14,7 @@ class UserMapper(
     private val userRepository: UserRepository
 ) {
 
-    fun updateUserFromBasicDetails(user: User, request: UpdateBasicDetailsRequest) {
+    fun updateUserFromBasicDetails(user: User, request: UpdateBasicDetailsRequestDTO) {
         user.firstName = request.firstName
         user.lastName = request.lastName
         user.address = request.address
@@ -22,7 +22,7 @@ class UserMapper(
         user.dateOfBirth = request.dateOfBirth
     }
 
-    fun updateUserFromAdminRequest(user: User, request: AdminUpdateUserRequest) {
+    fun updateUserFromAdminRequest(user: User, request: AdminUpdateUserRequestDTO) {
 
         user.firstName = request.firstName
 

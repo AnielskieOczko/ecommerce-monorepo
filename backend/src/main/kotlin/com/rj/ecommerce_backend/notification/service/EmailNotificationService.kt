@@ -2,7 +2,7 @@ package com.rj.ecommerce_backend.notification.service
 
 import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
-import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequest
+import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequestDTO
 import com.rj.ecommerce_backend.notification.EmailNotification
 
 interface EmailNotificationService {
@@ -11,7 +11,7 @@ interface EmailNotificationService {
      * @param request A DTO containing all necessary data to create the notification record.
      * @return The newly created and persisted EmailNotification entity.
      */
-    fun createNotification(request: NotificationCreationRequest): EmailNotification
+    fun createNotification(request: NotificationCreationRequestDTO): EmailNotification
 
     /**
      * Marks a notification as successfully SENT.

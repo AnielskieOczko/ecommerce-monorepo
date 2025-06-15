@@ -2,11 +2,11 @@ package com.rj.ecommerce_backend.user.service
 
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce.api.shared.core.Password
-import com.rj.ecommerce.api.shared.dto.security.AuthResponse
+import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequest
+import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.securityconfig.SecurityContext
 import com.rj.ecommerce_backend.securityconfig.repositories.RefreshTokenRepository
@@ -57,7 +57,7 @@ class UserServiceImpl(
     @Transactional(readOnly = true)
     override fun updateBasicDetails(
         userId: Long,
-        request: UpdateBasicDetailsRequest
+        request: UpdateBasicDetailsRequestDTO
     ): UserInfoDTO {
         securityContext.ensureAccess(userId)
 
@@ -72,10 +72,10 @@ class UserServiceImpl(
     @Transactional // Ensure this method is transactional for data changes
     override fun changeEmail(
         userId: Long,
-        changeEmailRequest: ChangeEmailRequest,
+        changeEmailRequest: ChangeEmailRequestDTO,
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): AuthResponse {
+    ): AuthResponseDTO {
         logger.debug { "Processing email change request for user: $userId to new email: ${changeEmailRequest.newEmail}" }
 
         // 1. Authorization

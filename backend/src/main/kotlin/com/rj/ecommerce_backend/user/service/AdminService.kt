@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.user.service
 
 import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequest
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequest
+import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.user.domain.User
@@ -14,7 +14,7 @@ interface AdminService {
     fun getAllUsers(pageable: Pageable, criteria: UserSearchCriteria): Page<UserInfoDTO>
     fun getUserById(userId: Long): UserInfoDTO
     fun createUser(request: UserCreateRequestDTO): UserInfoDTO
-    fun updateUser(userId: Long, request: AdminUpdateUserRequest): UserInfoDTO
+    fun updateUser(userId: Long, request: AdminUpdateUserRequestDTO): UserInfoDTO
     fun deleteUser(userId: Long)
 
 
@@ -27,7 +27,7 @@ interface AdminService {
     fun getUserEntityForValidation(userId: Long): User?
 
     fun updateAccountStatus(userId: Long, request: ChangeAccountStatusDTO): UserInfoDTO
-    fun updateUserAuthorities(userId: Long, request: AdminChangeUserAuthorityRequest): UserInfoDTO
+    fun updateUserAuthorities(userId: Long, request: AdminChangeUserAuthorityRequestDTO): UserInfoDTO
 
     // bulk operations
     fun enableUsers(userIds: List<Long>): Int // Consider returning number of users affected or List<UserInfoDTO>

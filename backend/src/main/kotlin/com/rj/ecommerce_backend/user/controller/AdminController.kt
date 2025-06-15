@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequest
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequest
+import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
@@ -86,7 +86,7 @@ class AdminController(
     @PreAuthorize("hasRole('ADMIN')")
     fun updateUserData(
         @PathVariable userId: Long,
-        @Valid @RequestBody adminUserUpdateDTO: AdminUpdateUserRequest
+        @Valid @RequestBody adminUserUpdateDTO: AdminUpdateUserRequestDTO
     ): ResponseEntity<UserInfoDTO> {
         logger.info { "Admin request to update user data for ID: $userId" }
         val updatedUser: UserInfoDTO = adminService.updateUser(userId, adminUserUpdateDTO)
@@ -116,7 +116,7 @@ class AdminController(
     @PreAuthorize("hasRole('ADMIN')")
     fun updateUserAuthorities(
         @PathVariable userId: Long,
-        @Valid @RequestBody adminChangeUserAuthorityRequest: AdminChangeUserAuthorityRequest
+        @Valid @RequestBody adminChangeUserAuthorityRequest: AdminChangeUserAuthorityRequestDTO
     ): ResponseEntity<UserInfoDTO> {
         logger.info { "Admin request to update authorities for user ID: $userId" }
         val updatedUser = adminService.updateUserAuthorities(userId, adminChangeUserAuthorityRequest)

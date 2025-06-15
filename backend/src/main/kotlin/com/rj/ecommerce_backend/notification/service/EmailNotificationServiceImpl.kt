@@ -2,7 +2,7 @@ package com.rj.ecommerce_backend.notification.service
 
 import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
-import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequest
+import com.rj.ecommerce.api.shared.messaging.email.NotificationCreationRequestDTO
 import com.rj.ecommerce_backend.notification.EmailNotification
 import com.rj.ecommerce_backend.notification.repository.EmailNotificationRepository
 import com.rj.ecommerce_backend.notification.exception.NotificationNotFoundException
@@ -20,7 +20,7 @@ class EmailNotificationServiceImpl(
         private val log = KotlinLogging.logger {}
     }
 
-    override fun createNotification(request: NotificationCreationRequest): EmailNotification {
+    override fun createNotification(request: NotificationCreationRequestDTO): EmailNotification {
         log.info { "Creating notification record for messageId: ${request.messageId}" }
         val newNotification = EmailNotification.Companion.create(
             messageId = request.messageId,

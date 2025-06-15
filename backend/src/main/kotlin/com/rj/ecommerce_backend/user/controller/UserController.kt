@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.security.AuthResponse
-import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequest
+import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
+import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ResetPasswordRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.user.service.UserService
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -46,12 +46,12 @@ class UserController(
     @PreAuthorize("#userId == authentication.principal.id")
     fun updateUserEmail(
         @PathVariable userId: Long,
-        @Valid @RequestBody changeEmailRequest: ChangeEmailRequest,
+        @Valid @RequestBody changeEmailRequest: ChangeEmailRequestDTO,
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): ResponseEntity<AuthResponse> {
+    ): ResponseEntity<AuthResponseDTO> {
         logger.info { "Request to update email for user ID: $userId" }
-        val authResponse: AuthResponse = userService.changeEmail(
+        val authResponse: AuthResponseDTO = userService.changeEmail(
             userId, changeEmailRequest, request, response
         )
 
@@ -73,7 +73,7 @@ class UserController(
     @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
     fun updateUserBasicDetails(
         @PathVariable userId: Long,
-        @Valid @RequestBody updateBasicDetailsRequest: UpdateBasicDetailsRequest
+        @Valid @RequestBody updateBasicDetailsRequest: UpdateBasicDetailsRequestDTO
     ): UserInfoDTO {
         logger.info { "Request to update basic details for user ID: $userId" }
         return userService.updateBasicDetails(userId, updateBasicDetailsRequest)

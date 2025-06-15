@@ -5,8 +5,8 @@ import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce.api.shared.core.Password
 import com.rj.ecommerce.api.shared.core.ZipCode
 import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequest
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequest
+import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.securityconfig.SecurityContext
@@ -107,7 +107,7 @@ class AdminServiceImpl(
 
     override fun updateUser(
         userId: Long,
-        request: AdminUpdateUserRequest
+        request: AdminUpdateUserRequestDTO
     ): UserInfoDTO {
         logger.info { "Admin updating user with ID: $userId" }
         securityContext.ensureAdmin()
@@ -178,7 +178,7 @@ class AdminServiceImpl(
 
     override fun updateUserAuthorities(
         userId: Long,
-        request: AdminChangeUserAuthorityRequest
+        request: AdminChangeUserAuthorityRequestDTO
     ): UserInfoDTO {
         logger.info { "Admin explicitly updating authorities for user ID: $userId" }
         securityContext.ensureAdmin()
