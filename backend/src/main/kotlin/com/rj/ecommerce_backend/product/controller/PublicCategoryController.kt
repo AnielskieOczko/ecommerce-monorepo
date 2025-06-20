@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.dto.product.CategoryDTO
+import com.rj.ecommerce.api.shared.dto.product.category.CategoryDTO
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria
 import com.rj.ecommerce_backend.product.service.CategoryService
 import com.rj.ecommerce_backend.sorting.CategorySortField

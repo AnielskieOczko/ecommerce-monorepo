@@ -4,9 +4,10 @@ import com.rj.ecommerce.api.shared.core.Email
 
 import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.UserBaseDetails
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
 import com.rj.ecommerce_backend.user.domain.User
-import com.rj.ecommerce_backend.user.repositories.UserRepository
+import com.rj.ecommerce_backend.user.repository.UserRepository
 import org.springframework.stereotype.Component
 
 @Component
@@ -51,19 +52,37 @@ class UserMapper(
 
     }
 
+    /**
+     * Converts a User domain object into a UserInfoDTO.
+     * This is the standard, safe way to create a DTO for API responses.
+     *
+     * @param user The User domain object to convert.
+     * @return A fully populated UserInfoDTO.
+     * @throws IllegalArgumentException if the User object is missing required fields (id, firstName, lastName)
+     *                                  that are non-nullable in the DTO.
+     */
     fun toUserInfoDTO(user: User): UserInfoDTO {
-        val userEmailValue = user.email.value
+        // Use `requireNotNull` for clear, concise, and immediate validation.
+        val userId = requireNotNull(user.id) { "User ID cannot be null for UserInfoDTO" }
+        val userFirstName = requireNotNull(user.firstName) { "User firstName cannot be null for UserInfoDTO" }
+        val userLastName = requireNotNull(user.lastName) { "User lastName cannot be null for UserInfoDTO" }
 
-        return UserInfoDTO(
-            id = user.id ?: throw IllegalStateException("User ID cannot be null for UserInfoDTO"),
-            firstName = user.firstName ?: "",
-            lastName = user.lastName ?: "",
-            email = userEmailValue,
+        // First, create the nested UserBaseDetails object.
+        val userDetails = UserBaseDetails(
+            firstName = userFirstName,
+            lastName = userLastName,
             address = user.address,
             phoneNumber = user.phoneNumber,
-            dateOfBirth = user.dateOfBirth,
-            authorities = user.authorities.map { authority -> authority.name }.toList(),
-            isActive = user.isActive // User.isActive is Boolean (non-nullable)
+            dateOfBirth = user.dateOfBirth
+        )
+
+        // Then, construct the final DTO using the nested object.
+        return UserInfoDTO(
+            id = userId,
+            userDetails = userDetails,
+            email = user.email.value,
+            authorities = user.authorities.map { it.name },
+            isActive = user.isActive
         )
     }
 

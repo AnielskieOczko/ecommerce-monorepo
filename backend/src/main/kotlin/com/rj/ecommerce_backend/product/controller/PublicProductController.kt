@@ -6,7 +6,7 @@ import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
 // Backend components
 import com.rj.ecommerce_backend.product.service.FileStorageService
 import com.rj.ecommerce_backend.product.service.ProductService
-import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException // For getPublicProductById
+import com.rj.ecommerce_backend.product.exception.ProductNotFoundException // For getPublicProductById
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria // For getAllProducts if used
 import com.rj.ecommerce_backend.sorting.ProductSortField
 import com.rj.ecommerce_backend.sorting.SortValidator

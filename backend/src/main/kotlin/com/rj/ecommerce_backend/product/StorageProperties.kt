@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product
 
-import com.rj.ecommerce_backend.product.exceptions.FileStorageException
+import com.rj.ecommerce_backend.product.exception.FileStorageException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
 import jakarta.validation.constraints.Min

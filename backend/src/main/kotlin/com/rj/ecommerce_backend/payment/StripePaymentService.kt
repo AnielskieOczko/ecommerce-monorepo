@@ -11,7 +11,7 @@ import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException
 import com.rj.ecommerce_backend.order.service.OrderService
 import com.rj.ecommerce_backend.product.domain.Product
-import com.rj.ecommerce_backend.securityconfig.SecurityContext
+import com.rj.ecommerce_backend.security.SecurityContext
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

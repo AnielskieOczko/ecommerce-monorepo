@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig.config
+package com.rj.ecommerce_backend.security.config
 
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min

@@ -25,7 +25,7 @@ data class Product(
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "name", nullable = false))
     @field:Valid // Cascade validation to ProductName VO
-    var name: ProductName? = null,
+    var name: ProductName,
 
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "description"))
@@ -111,6 +111,6 @@ data class Product(
     override fun hashCode(): Int = id?.hashCode() ?: javaClass.hashCode()
 
     override fun toString(): String {
-        return "Product(id=$id, productName=${name?.value}, stockQuantity=${quantityInStock?.value})"
+        return "Product(id=$id, productName=${name.value}, stockQuantity=${quantityInStock.value})"
     }
 }

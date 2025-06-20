@@ -1,13 +1,13 @@
-package com.rj.ecommerce_backend.securityconfig.service
+package com.rj.ecommerce_backend.security.service
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
 import com.rj.ecommerce.api.shared.dto.security.JwtResponseDTO
 import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
 import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
-import com.rj.ecommerce_backend.securityconfig.domain.RefreshToken
-import com.rj.ecommerce_backend.securityconfig.exceptions.TokenRefreshException
-import com.rj.ecommerce_backend.securityconfig.exceptions.UserAuthenticationException
-import com.rj.ecommerce_backend.securityconfig.utils.JwtUtils
+import com.rj.ecommerce_backend.security.domain.RefreshToken
+import com.rj.ecommerce_backend.security.exception.TokenRefreshException
+import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
+import com.rj.ecommerce_backend.security.util.JwtUtils
 import com.rj.ecommerce_backend.user.domain.User
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest

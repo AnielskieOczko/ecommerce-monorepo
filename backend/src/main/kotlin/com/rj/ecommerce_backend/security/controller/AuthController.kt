@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig.controller
+package com.rj.ecommerce_backend.security.controller
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
 import com.rj.ecommerce.api.shared.dto.security.TokenInfoDTO
@@ -6,8 +6,8 @@ import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
 import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
-import com.rj.ecommerce_backend.securityconfig.service.AuthenticationService
-import com.rj.ecommerce_backend.securityconfig.service.JwtBlackListService
+import com.rj.ecommerce_backend.security.service.AuthenticationService
+import com.rj.ecommerce_backend.security.service.JwtBlackListService
 import com.rj.ecommerce_backend.user.service.AdminService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.Valid

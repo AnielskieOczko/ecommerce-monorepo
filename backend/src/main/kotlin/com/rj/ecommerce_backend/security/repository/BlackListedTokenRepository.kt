@@ -1,6 +1,6 @@
-package com.rj.ecommerce_backend.securityconfig.repository
+package com.rj.ecommerce_backend.security.repository
 
-import com.rj.ecommerce_backend.securityconfig.domain.BlacklistedToken
+import com.rj.ecommerce_backend.security.domain.BlacklistedToken
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

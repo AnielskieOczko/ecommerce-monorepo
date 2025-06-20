@@ -10,7 +10,9 @@ import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.product.domain.Product // Assuming Product has productName property
 import com.rj.ecommerce.api.shared.enums.Currency // Use this one
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
+import java.lang.IllegalStateException
 import java.math.BigDecimal
 
 @Component
@@ -55,14 +57,18 @@ class OrderMapper {
 
             val productNameValue: String? = productEntity?.name?.value
             if (productNameValue == null && productEntity != null) {
-                // Log warning or decide on a default if critical
-                // For now, let it be null if product/name is null
+                logger.error { "Product should name id." }
+                throw IllegalStateException("Product should have name.")
+            }
+
+            val productId: Long = productEntity?.id ?: run {
+                logger.error { "Product should have id." }
+                throw IllegalStateException("Product should have id.")
             }
 
 
             val productSummary = ProductSummaryDTO(
-                id = productEntity?.id,
-                sku = null,
+                id = productId,
                 name = productNameValue,
                 unitPrice = oi.price?.let { price ->
                     Money(
@@ -132,6 +138,8 @@ class OrderMapper {
     }
 
     companion object {
+        private val logger = KotlinLogging.logger {  }
+
         private fun getLineTotal(orderItem: OrderItem): Money {
             val itemPrice = orderItem.price ?: BigDecimal.ZERO
             val quantity = BigDecimal.valueOf(orderItem.quantity.toLong())

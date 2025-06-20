@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig.service
+package com.rj.ecommerce_backend.security.service
 
 import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
 import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO

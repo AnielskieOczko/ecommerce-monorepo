@@ -1,10 +1,10 @@
-package com.rj.ecommerce_backend.securityconfig.service
+package com.rj.ecommerce_backend.security.service
 
 import com.rj.ecommerce.api.shared.dto.security.TokenInfoDTO
-import com.rj.ecommerce_backend.securityconfig.domain.BlacklistedToken
-import com.rj.ecommerce_backend.securityconfig.exceptions.TokenBlacklistException
-import com.rj.ecommerce_backend.securityconfig.repository.BlackListedTokenRepository
-import com.rj.ecommerce_backend.securityconfig.utils.JwtUtils
+import com.rj.ecommerce_backend.security.domain.BlacklistedToken
+import com.rj.ecommerce_backend.security.exception.TokenBlacklistException
+import com.rj.ecommerce_backend.security.repository.BlackListedTokenRepository
+import com.rj.ecommerce_backend.security.util.JwtUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
 import jakarta.transaction.Transactional

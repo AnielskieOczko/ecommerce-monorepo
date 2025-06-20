@@ -3,7 +3,8 @@ package com.rj.ecommerce_backend.product.service
 import com.rj.ecommerce_backend.product.StorageProperties
 import com.rj.ecommerce_backend.product.domain.Image
 import com.rj.ecommerce_backend.product.domain.Product
-import com.rj.ecommerce_backend.product.exceptions.FileStorageException
+import com.rj.ecommerce_backend.product.exception.FileNotFoundInStorageException
+import com.rj.ecommerce_backend.product.exception.FileStorageException
 import com.rj.ecommerce_backend.product.repository.ImageRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.io.Resource
@@ -147,25 +148,23 @@ class FileStorageService( // Constructor injection
                 return resource
             } else {
                 logger.warn { "File not found or not readable: '$fileName' at path '$filePath'" }
-                throw FileStorageException("File not found or not readable: $fileName")
+                // FIXED: Throw the new, more specific exception for a 404 response.
+                throw FileNotFoundInStorageException("File not found or not readable: $fileName")
             }
         } catch (ex: MalformedURLException) {
             logger.error(ex) { "Malformed URL for file: '$fileName'" }
+            // This is a server configuration issue, so the base 500 exception is still appropriate.
             throw FileStorageException("File path is invalid (malformed URL): $fileName", ex)
         } catch (fnf: FileNotFoundException){
             logger.warn(fnf) { "File not found during resource creation: '$fileName'" }
-            throw FileStorageException("File not found: $fileName", fnf)
+            // FIXED: Throw the new, more specific exception for a 404 response.
+            throw FileNotFoundInStorageException("File not found: $fileName", fnf)
         }
     }
 
     @Transactional
     fun deleteImage(image: Image) {
-        val fileName = image.path ?: run {
-            logger.warn { "Attempting to delete image entity ID ${image.id} with a null path. Skipping file deletion." }
-            imageRepository.delete(image)
-            logger.info { "Deleted image entity ID: ${image.id} (path was null)." }
-            return
-        }
+        val fileName = image.path
 
         logger.debug { "Attempting to delete image entity ID: ${image.id} and physical file: '$fileName'" }
 

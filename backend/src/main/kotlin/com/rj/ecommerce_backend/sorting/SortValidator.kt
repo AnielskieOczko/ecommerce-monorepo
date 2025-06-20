@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.sorting
 
-import com.rj.ecommerce_backend.user.exceptions.InvalidSortParameterException
+import com.rj.ecommerce_backend.user.exception.InvalidSortParameterException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.domain.Sort
 

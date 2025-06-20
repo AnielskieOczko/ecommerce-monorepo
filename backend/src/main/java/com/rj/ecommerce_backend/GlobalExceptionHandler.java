@@ -1,15 +1,15 @@
 package com.rj.ecommerce_backend;
 
 import com.rj.ecommerce.api.shared.core.ErrorDTO;
-import com.rj.ecommerce_backend.order.exceptions.AccessDeniedException;
-import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException;
-import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException;
-import com.rj.ecommerce_backend.order.exceptions.OrderServiceException;
-import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
-import com.rj.ecommerce_backend.product.exceptions.InsufficientStockException;
-import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException;
-import com.rj.ecommerce_backend.user.exceptions.EmailAlreadyExistsException;
-import com.rj.ecommerce_backend.user.exceptions.UserNotFoundException;
+import com.rj.ecommerce_backend.order.exception.AccessDeniedException;
+import com.rj.ecommerce_backend.order.exception.OrderCancellationException;
+import com.rj.ecommerce_backend.order.exception.OrderNotFoundException;
+import com.rj.ecommerce_backend.order.exception.OrderServiceException;
+import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException;
+import com.rj.ecommerce_backend.product.exception.InsufficientStockException;
+import com.rj.ecommerce_backend.product.exception.ProductNotFoundException;
+import com.rj.ecommerce_backend.user.exception.EmailAlreadyExistsException;
+import com.rj.ecommerce_backend.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;

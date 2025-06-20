@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.user.domain // Assuming this is the target package for domain entities
+package com.rj.ecommerce_backend.user.domain
 
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp

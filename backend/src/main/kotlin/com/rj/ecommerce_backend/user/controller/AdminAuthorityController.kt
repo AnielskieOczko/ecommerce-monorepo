@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.user.AuthorityCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.AuthorityDTO
+import com.rj.ecommerce.api.shared.dto.user.AuthorityRequestDTO
 import com.rj.ecommerce_backend.user.service.AuthorityService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
@@ -44,7 +44,7 @@ class AdminAuthorityController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createAuthority(@RequestBody authorityCreateRequest: AuthorityCreateRequestDTO): AuthorityDTO {
+    fun createAuthority(@RequestBody authorityCreateRequest: AuthorityRequestDTO): AuthorityDTO {
         logger.info { "Admin request to create new authority with name: ${authorityCreateRequest.name}" }
 
         val createdAuthority = authorityService.createAuthority(authorityCreateRequest)

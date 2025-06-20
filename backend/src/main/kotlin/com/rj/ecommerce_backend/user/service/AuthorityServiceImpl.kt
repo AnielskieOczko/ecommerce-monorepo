@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.dto.user.AuthorityCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.AuthorityDTO
+import com.rj.ecommerce.api.shared.dto.user.AuthorityRequestDTO
 import com.rj.ecommerce_backend.user.domain.Authority
-import com.rj.ecommerce_backend.user.exceptions.AuthorityAlreadyExistsException
-import com.rj.ecommerce_backend.user.exceptions.AuthorityNotFoundException
+import com.rj.ecommerce_backend.user.exception.AuthorityAlreadyExistsException
+import com.rj.ecommerce_backend.user.exception.AuthorityNotFoundException
 import com.rj.ecommerce_backend.user.repository.AuthorityRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ class AuthorityServiceImpl(
     }
 
     @Transactional
-    override fun createAuthority(authorityCreateRequestDTO: AuthorityCreateRequestDTO): AuthorityDTO {
+    override fun createAuthority(authorityCreateRequestDTO: AuthorityRequestDTO): AuthorityDTO {
 
         if (authorityRepository.findByName(authorityCreateRequestDTO.name) != null) {
             logger.warn { "Attempt to add duplicate authority name: ${authorityCreateRequestDTO.name}" }

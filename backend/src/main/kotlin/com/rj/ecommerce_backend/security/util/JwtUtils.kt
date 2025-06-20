@@ -1,7 +1,7 @@
-package com.rj.ecommerce_backend.securityconfig.utils
+package com.rj.ecommerce_backend.security.util
 
-import com.rj.ecommerce_backend.securityconfig.config.JwtConfig
-import com.rj.ecommerce_backend.securityconfig.service.UserDetailsImpl
+import com.rj.ecommerce_backend.security.config.JwtConfig
+import com.rj.ecommerce_backend.security.service.UserDetailsImpl
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts

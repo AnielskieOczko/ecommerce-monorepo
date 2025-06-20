@@ -1,7 +1,6 @@
-package com.rj.ecommerce_backend.securityconfig.service // Or your chosen Kotlin package
+package com.rj.ecommerce_backend.security.service
 
-import com.rj.ecommerce_backend.securityconfig.services.JwtBlacklistService
-import com.rj.ecommerce_backend.securityconfig.utils.JwtUtils
+import com.rj.ecommerce_backend.security.util.JwtUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -15,7 +14,7 @@ private val logger = KotlinLogging.logger {}
 @Service
 class LogoutService(
     private val jwtUtils: JwtUtils,
-    private val jwtBlacklistService: JwtBlacklistService
+    private val jwtBlacklistService: JwtBlackListService
 ) : LogoutHandler {
 
     override fun logout(
@@ -39,7 +38,7 @@ class LogoutService(
             ?: "unknown_or_expired_token_user"
 
         try {
-            jwtBlacklistService.blacklistToken(token, usernameFromToken)
+            jwtBlacklistService.blackListToken(token, usernameFromToken)
             logger.info {
                 "Token successfully blacklisted for user: '$usernameFromToken' (Token starting with: ${
                     token.take(

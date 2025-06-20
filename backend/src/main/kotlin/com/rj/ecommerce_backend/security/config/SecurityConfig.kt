@@ -1,8 +1,8 @@
-package com.rj.ecommerce_backend.securityconfig.config
+package com.rj.ecommerce_backend.security.config
 
-import com.rj.ecommerce_backend.securityconfig.filter.AuthTokenFilter
-import com.rj.ecommerce_backend.securityconfig.service.LogoutService
-import com.rj.ecommerce_backend.securityconfig.service.UserDetailsServiceImpl
+import com.rj.ecommerce_backend.security.filter.AuthTokenFilter
+import com.rj.ecommerce_backend.security.service.LogoutService
+import com.rj.ecommerce_backend.security.service.UserDetailsServiceImpl
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig
+package com.rj.ecommerce_backend.security
 
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce_backend.user.domain.User

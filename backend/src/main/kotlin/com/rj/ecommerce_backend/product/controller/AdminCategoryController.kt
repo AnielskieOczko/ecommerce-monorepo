@@ -1,8 +1,7 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.dto.product.CategoryCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.product.CategoryDTO
-import com.rj.ecommerce.api.shared.dto.product.CategoryUpdateDTO
+import com.rj.ecommerce.api.shared.dto.product.category.CategoryDTO
+import com.rj.ecommerce.api.shared.dto.product.category.CategoryRequestDTO
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria
 import com.rj.ecommerce_backend.product.service.CategoryService
 import com.rj.ecommerce_backend.sorting.CategorySortField
@@ -31,7 +30,7 @@ class AdminCategoryController(
     }
 
     @PostMapping
-    fun createCategory(@RequestBody @Valid requestDTO: CategoryCreateRequestDTO): ResponseEntity<CategoryDTO> {
+    fun createCategory(@RequestBody @Valid requestDTO: CategoryRequestDTO): ResponseEntity<CategoryDTO> {
         logger.info { "Admin request to create category with name: '${requestDTO.name}'" }
         val createdCategory = categoryService.createCategory(requestDTO)
 
@@ -78,7 +77,7 @@ class AdminCategoryController(
     @PutMapping("/{categoryId}")
     fun updateCategory(
         @PathVariable categoryId: Long,
-        @RequestBody @Valid requestDTO: CategoryUpdateDTO
+        @RequestBody @Valid requestDTO: CategoryRequestDTO
     ): ResponseEntity<CategoryDTO> {
         logger.info { "Admin request to update category ID: $categoryId with new name: '${requestDTO.name}'" }
         val updatedCategory = categoryService.updateCategory(categoryId, requestDTO)

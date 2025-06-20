@@ -7,7 +7,7 @@ import com.rj.ecommerce.api.shared.dto.product.ProductUpdateRequestDTO
 // Backend components
 import com.rj.ecommerce_backend.product.service.FileStorageService
 import com.rj.ecommerce_backend.product.service.ProductService
-import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException
+import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.sorting.ProductSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
 
@@ -128,7 +128,7 @@ class AdminProductController(
         @Parameter(description = "Product images (optional file parts)")
         @RequestPart(value = "imageFiles", required = false) imageFiles: List<MultipartFile>?
     ): ResponseEntity<ProductResponseDTO> {
-        logger.info { "Admin request to create product: ${productCreateDTO.name} with ${imageFiles?.size ?: 0} images." }
+        logger.info { "Admin request to create product: ${productCreateDTO.productData.name} with ${imageFiles?.size ?: 0} images." }
         val createdProduct = productService.createProduct(productCreateDTO, imageFiles ?: emptyList())
 
         val location: URI = ServletUriComponentsBuilder.fromCurrentRequest()

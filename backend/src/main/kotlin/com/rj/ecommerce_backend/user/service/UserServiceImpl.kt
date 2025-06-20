@@ -8,13 +8,13 @@ import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
-import com.rj.ecommerce_backend.securityconfig.SecurityContext
-import com.rj.ecommerce_backend.securityconfig.repositories.RefreshTokenRepository
-import com.rj.ecommerce_backend.securityconfig.services.AuthService
+import com.rj.ecommerce_backend.security.SecurityContext
+import com.rj.ecommerce_backend.security.repository.RefreshTokenRepository
+import com.rj.ecommerce_backend.security.service.AuthenticationService
 import com.rj.ecommerce_backend.user.domain.User
-import com.rj.ecommerce_backend.user.exceptions.EmailAlreadyExistsException
-import com.rj.ecommerce_backend.user.exceptions.InvalidCredentialsException
-import com.rj.ecommerce_backend.user.exceptions.UserNotFoundException
+import com.rj.ecommerce_backend.user.exception.EmailAlreadyExistsException
+import com.rj.ecommerce_backend.user.exception.InvalidCredentialsException
+import com.rj.ecommerce_backend.user.exception.UserNotFoundException
 import com.rj.ecommerce_backend.user.mapper.UserMapper
 import com.rj.ecommerce_backend.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -32,7 +32,7 @@ class UserServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val userMapper: UserMapper,
     private val securityContext: SecurityContext,
-    private val authService: AuthService,
+    private val authService: AuthenticationService,
     private val refreshTokenRepository: RefreshTokenRepository
 ) : UserService {
 

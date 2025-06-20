@@ -51,7 +51,10 @@ class EmailRequestFactory {
             paymentMethod = order.paymentMethod,
             orderDate = order.orderDate ?: order.createdAt ?: missing("orderDate or createdAt"),
             orderStatus = order.orderStatus ?: missing("orderStatus"),
-            additionalData = additionalData
+            additionalData = additionalData,
+            correlationId = TODO(),
+            paymentTransactionId = TODO(),
+            subjectOverride = TODO()
         )
     }
 

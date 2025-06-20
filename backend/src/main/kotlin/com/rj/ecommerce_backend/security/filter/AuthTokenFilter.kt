@@ -1,20 +1,19 @@
-package com.rj.ecommerce_backend.securityconfig.filter // Common to put filters in a 'filter' subpackage
+package com.rj.ecommerce_backend.security.filter
 
-import com.rj.ecommerce_backend.securityconfig.services.JwtBlacklistService
-import com.rj.ecommerce_backend.securityconfig.utils.JwtUtils // Your Kotlin utils
-import io.github.oshai.kotlinlogging.KotlinLogging // KotlinLogging
+import com.rj.ecommerce_backend.security.service.JwtBlackListService
+import com.rj.ecommerce_backend.security.util.JwtUtils
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-// No need for org.springframework.lang.NonNull in Kotlin if parameters are non-nullable types
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService // Spring Security interface
-import org.springframework.security.core.userdetails.UsernameNotFoundException // For handling loadUserByUsername failure
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
-import org.springframework.web.filter.OncePerRequestFilter // Spring base class for filters
+import org.springframework.web.filter.OncePerRequestFilter
 
 // Logger at the file level or in a companion object
 private val logger = KotlinLogging.logger {}
@@ -23,7 +22,7 @@ private val logger = KotlinLogging.logger {}
 class AuthTokenFilter( // Dependencies injected via primary constructor
     private val jwtUtils: JwtUtils,
     private val userDetailsService: UserDetailsService, // Spring's UserDetailsService interface
-    private val jwtBlacklistService: JwtBlacklistService
+    private val jwtBlacklistService: JwtBlackListService
 ) : OncePerRequestFilter() { // Extends Spring's OncePerRequestFilter
 
     override fun doFilterInternal(
@@ -42,7 +41,7 @@ class AuthTokenFilter( // Dependencies injected via primary constructor
 
             // Check if token is blacklisted BEFORE validating its signature/expiry
             // This is more efficient if a token is known to be invalid.
-            if (jwtBlacklistService.isTokenBlacklisted(jwt)) {
+            if (jwtBlacklistService.isTokenBlackListed(jwt)) {
                 logger.warn { "JWT token is blacklisted: ${jwt.take(15)}..." }
                 // SC_UNAUTHORIZED (401) is appropriate. Spring Security's exception handling
                 // further down the chain (if no auth is set) will also result in 401 if needed.

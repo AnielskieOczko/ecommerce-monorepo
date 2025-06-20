@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig.service // Or your chosen package
+package com.rj.ecommerce_backend.security.service // Or your chosen package
 
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce_backend.user.repository.UserRepository

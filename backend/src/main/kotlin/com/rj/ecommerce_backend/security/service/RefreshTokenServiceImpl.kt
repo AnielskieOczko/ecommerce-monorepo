@@ -1,8 +1,8 @@
-package com.rj.ecommerce_backend.securityconfig.service
+package com.rj.ecommerce_backend.security.service
 
-import com.rj.ecommerce_backend.securityconfig.domain.RefreshToken
-import com.rj.ecommerce_backend.securityconfig.exceptions.TokenRefreshException
-import com.rj.ecommerce_backend.securityconfig.repository.RefreshTokenRepository
+import com.rj.ecommerce_backend.security.domain.RefreshToken
+import com.rj.ecommerce_backend.security.exception.TokenRefreshException
+import com.rj.ecommerce_backend.security.repository.RefreshTokenRepository
 import com.rj.ecommerce_backend.user.domain.User
 import com.rj.ecommerce_backend.user.exception.UserNotFoundException
 import com.rj.ecommerce_backend.user.repository.UserRepository

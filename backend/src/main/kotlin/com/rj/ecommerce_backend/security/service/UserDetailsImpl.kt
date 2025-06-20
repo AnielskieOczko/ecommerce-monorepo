@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig.service
+package com.rj.ecommerce_backend.security.service
 
 import com.rj.ecommerce_backend.user.domain.User
 import org.springframework.security.core.GrantedAuthority

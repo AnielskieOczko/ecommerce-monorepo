@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.securityconfig.domain
+package com.rj.ecommerce_backend.security.domain
 
 import com.rj.ecommerce_backend.user.domain.User
 import jakarta.persistence.*

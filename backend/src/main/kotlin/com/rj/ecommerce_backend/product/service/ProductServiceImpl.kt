@@ -10,11 +10,11 @@ import com.rj.ecommerce.api.shared.dto.product.ProductUpdateRequestDTO
 import com.rj.ecommerce_backend.product.domain.Category
 import com.rj.ecommerce_backend.product.domain.Image
 import com.rj.ecommerce_backend.product.domain.Product
-import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException
-import com.rj.ecommerce_backend.product.exceptions.FileStorageException
-import com.rj.ecommerce_backend.product.exceptions.ImageNotFoundException
-import com.rj.ecommerce_backend.product.exceptions.InsufficientStockException
-import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException
+import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException
+import com.rj.ecommerce_backend.product.exception.FileStorageException
+import com.rj.ecommerce_backend.product.exception.ImageNotFoundException
+import com.rj.ecommerce_backend.product.exception.InsufficientStockException
+import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.product.mapper.ProductMapper
 import com.rj.ecommerce_backend.product.repository.CategoryRepository
 import com.rj.ecommerce_backend.product.repository.ImageRepository
@@ -47,21 +47,21 @@ class ProductServiceImpl(
         productCreateRequestDTO: ProductCreateRequestDTO,
         images: List<MultipartFile>
     ): ProductResponseDTO {
-        logger.info { "Creating new product: ${productCreateRequestDTO.name}" }
+        logger.info { "Creating new product: ${productCreateRequestDTO.productData.name}" }
         val product: Product = productMapper.toEntity(productCreateRequestDTO)
 
         // Handle images
         images.forEach { multipartFile ->
             try {
-                // storeFile should ideally not require a pre-saved product if it can create Image without product_id initially,
+                // storeFile should ideally not require a pre-saved product if it can create an Image without product_id initially,
                 // or if Product.addImage sets the link before cascade save.
-                // For simplicity, let's assume Product.addImage adds to list and JPA handles cascade.
+                // For simplicity, let's assume Product.addImage adds to list, and JPA handles cascade.
                 val imageName = multipartFile.originalFilename ?: "product_image_${System.currentTimeMillis()}"
                 val imageEntity =
                     fileStorageService.storeFile(multipartFile, imageName, product) // Pass product to link
                 product.addImage(imageEntity) // This should set image.product = product
             } catch (e: FileStorageException) {
-                logger.error(e) { "Failed to store image ${multipartFile.originalFilename} for new product ${product.name?.value}" }
+                logger.error(e) { "Failed to store image ${multipartFile.originalFilename} for new product ${product.name.value}" }
                 // Decide: continue without this image or fail the whole product creation?
                 // For now, logging and continuing.
             }
@@ -111,8 +111,12 @@ class ProductServiceImpl(
             throw ProductNotFoundException(productId)
         }
 
-        request.name.let { if (!it.isNullOrBlank()) product.name = ProductName(request.name) }
-        request.description.let { if (it != null) product.description = ProductDescription(request.description) }
+
+        // product name can't be either blank or null
+        request.name?.takeIf { it.isNotBlank() }?.let { validName -> ProductName(validName) }
+
+        // product description can be blank but not null
+        request.description?.let { newDescription -> ProductDescription(newDescription) }
 
         request.unitPrice.let { if (it != null) product.unitPrice = it }
         request.quantityInStock.let {
@@ -171,9 +175,9 @@ class ProductServiceImpl(
 
     override fun reduceProductQuantity(productId: Long, quantityInStockToReduce: Int) {
         logger.debug { "Reducing stock for product ID: $productId by $quantityInStockToReduce" }
-        if (quantityInStockToReduce <= 0) {
-            throw IllegalArgumentException("Quantity to reduce must be positive.")
-        }
+
+        require(quantityInStockToReduce > 0) { "Quantity to reduce must be positive." }
+
 
         val product = productRepository.findById(productId)
             .orElseThrow { ProductNotFoundException(productId) }
@@ -248,7 +252,7 @@ class ProductServiceImpl(
                 product.addImage(image)
             } catch (e: FileStorageException) {
                 logger.error(e) { "Failed to store image ${img.originalFilename} for product ID $productId" }
-                // log error and continue with next image
+                // log error and continue with the next image
             } catch (e: Exception) {
                 logger.error(e) { "Unexpected error processing file ${img.originalFilename} for product ID $productId" }
             }
@@ -287,11 +291,10 @@ class ProductServiceImpl(
         if (metadataChanged) {
             val savedImage = imageRepository.save(image)
             logger.info { "Successfully updated metadata for image ID: ${savedImage.id} on product ID: $productId" }
-            return mapImageEntityToInfoDTO(savedImage)
         } else {
             logger.info { "No metadata changes for image ID: $imageId on product ID: $productId. Returning current state." }
-            return mapImageEntityToInfoDTO(image)
         }
+        return mapImageEntityToInfoDTO(image)
     }
 
     private fun mapImageEntityToInfoDTO(image: Image): ImageInfo {

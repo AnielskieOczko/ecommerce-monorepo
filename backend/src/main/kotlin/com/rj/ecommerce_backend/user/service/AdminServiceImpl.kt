@@ -9,12 +9,12 @@ import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
-import com.rj.ecommerce_backend.securityconfig.SecurityContext
+import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.user.domain.Authority
 import com.rj.ecommerce_backend.user.domain.User
-import com.rj.ecommerce_backend.user.exceptions.AuthorityNotFoundException
-import com.rj.ecommerce_backend.user.exceptions.EmailAlreadyExistsException
-import com.rj.ecommerce_backend.user.exceptions.UserNotFoundException
+import com.rj.ecommerce_backend.user.exception.AuthorityNotFoundException
+import com.rj.ecommerce_backend.user.exception.EmailAlreadyExistsException
+import com.rj.ecommerce_backend.user.exception.UserNotFoundException
 import com.rj.ecommerce_backend.user.mapper.UserMapper
 import com.rj.ecommerce_backend.user.repository.AuthorityRepository
 import com.rj.ecommerce_backend.user.repository.UserRepository
@@ -64,6 +64,7 @@ class AdminServiceImpl(
     override fun getUserById(userId: Long): UserInfoDTO {
         logger.info { "Admin retrieving user with ID: $userId" }
         securityContext.ensureAdmin()
+        val user = findUserByIdOrThrow(userId)
 
         return userMapper.toUserInfoDTO(findUserByIdOrThrow(userId))
 
@@ -79,19 +80,19 @@ class AdminServiceImpl(
         }
 
         val user = User(
-            firstName = request.firstName,
-            lastName = request.lastName,
+            firstName = request.userDetails.firstName,
+            lastName = request.userDetails.lastName,
             email = newEmailVO,
             password = Password(
                 passwordEncoder.encode(request.password)
             ),
             address = Address(
-                street = request.address?.street,
-                city = request.address?.city,
-                zipCode = ZipCode(request.address?.zipCode?.value)
+                street = request.userDetails.address?.street,
+                city = request.userDetails.address?.city,
+                zipCode = ZipCode(request.userDetails.address?.zipCode?.value)
             ),
-            phoneNumber = request.phoneNumber,
-            dateOfBirth = request.dateOfBirth,
+            phoneNumber = request.userDetails.phoneNumber,
+            dateOfBirth = request.userDetails.dateOfBirth,
             isActive = true, //by default new user is active
             authorities = mutableSetOf()
         )
@@ -298,15 +299,23 @@ class AdminServiceImpl(
         if (currentUserAuthorityNames == newAuthorityNames) {
             val oldAuthoritiesDisplay = user.authorities.map { it.name }.toSet() // For logging
 
-            val authoritiesToRemove =  user.authorities.filterNot { newAuthorities.contains(it) }.toSet()
+            val authoritiesToRemove = user.authorities.filterNot { newAuthorities.contains(it) }.toSet()
             val authoritiesToAdd = newAuthorities.filterNot { user.authorities.contains(it) }.toSet()
 
             authoritiesToRemove.forEach { authority -> user.removeAuthority(authority) }
             authoritiesToAdd.forEach { authority -> user.addAuthority(authority) }
 
-            logger.info { "Authorities updated for user ID: ${user.id}. Old: $oldAuthoritiesDisplay, New: ${newAuthorities.map { it.name }.toSet()}" }
+            logger.info {
+                "Authorities updated for user ID: ${user.id}. Old: $oldAuthoritiesDisplay, New: ${
+                    newAuthorities.map { it.name }.toSet()
+                }"
+            }
         } else {
-            logger.debug { "No effective change in authorities for user ID: ${user.id}. Authorities remain: ${user.authorities.map { it.name }.toSet()}" }
+            logger.debug {
+                "No effective change in authorities for user ID: ${user.id}. Authorities remain: ${
+                    user.authorities.map { it.name }.toSet()
+                }"
+            }
         }
 
 

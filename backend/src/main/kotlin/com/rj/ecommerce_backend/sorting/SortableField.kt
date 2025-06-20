@@ -1,6 +1,7 @@
 package com.rj.ecommerce_backend.sorting
 
-import com.rj.ecommerce_backend.user.exceptions.InvalidSortParameterException
+import com.rj.ecommerce_backend.user.exception.InvalidSortParameterException
+
 
 interface SortableField {
 

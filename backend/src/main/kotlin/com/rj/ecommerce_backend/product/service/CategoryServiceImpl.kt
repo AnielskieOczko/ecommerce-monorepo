@@ -1,12 +1,11 @@
 package com.rj.ecommerce_backend.product.service
 
-import com.rj.ecommerce.api.shared.dto.product.CategoryCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.product.CategoryDTO
-import com.rj.ecommerce.api.shared.dto.product.CategoryUpdateDTO
+import com.rj.ecommerce.api.shared.dto.product.category.CategoryDTO
+import com.rj.ecommerce.api.shared.dto.product.category.CategoryRequestDTO
 import com.rj.ecommerce_backend.product.domain.Category
-import com.rj.ecommerce_backend.product.exceptions.CategoryAlreadyExistsException
-import com.rj.ecommerce_backend.product.exceptions.CategoryInUseException
-import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException
+import com.rj.ecommerce_backend.product.exception.CategoryAlreadyExistsException
+import com.rj.ecommerce_backend.product.exception.CategoryInUseException
+import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException
 import com.rj.ecommerce_backend.product.repository.CategoryRepository
 import com.rj.ecommerce_backend.product.repository.ProductRepository
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria
@@ -31,7 +30,7 @@ class CategoryServiceImpl(
         private const val CATEGORY_NOT_FOUND_MSG_PREFIX = "Category not found with ID: "
     }
 
-    override fun createCategory(requestDTO: CategoryCreateRequestDTO): CategoryDTO {
+    override fun createCategory(requestDTO: CategoryRequestDTO): CategoryDTO {
         logger.info { "Attempting to create category with name: '${requestDTO.name}'" }
 
         if (requestDTO.name.isBlank()) {
@@ -83,7 +82,7 @@ class CategoryServiceImpl(
 
     override fun updateCategory(
         categoryId: Long,
-        request: CategoryUpdateDTO
+        request: CategoryRequestDTO
     ): CategoryDTO {
         logger.info { "Attempting to update category ID: $categoryId with new name: '${request.name}'" }
         if (request.name.isBlank()) {

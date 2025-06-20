@@ -3,8 +3,8 @@ package com.rj.ecommerce_backend.payment
 import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionDTO
 import com.rj.ecommerce.api.shared.messaging.payment.CheckoutUrlsRequestDTO
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentStatusDTO
-import com.rj.ecommerce_backend.securityconfig.SecurityContext
-import com.rj.ecommerce_backend.securityconfig.exceptions.UserAuthenticationException
+import com.rj.ecommerce_backend.security.SecurityContext
+import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
