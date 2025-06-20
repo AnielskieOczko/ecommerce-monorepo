@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 interface EcommerceEmailRequest {
     val messageId: String
+    val correlationId: String
     val version: String
     val to: String
     val subject: String

@@ -1,59 +1,59 @@
+// AFTER
 package com.rj.ecommerce.api.shared.messaging.email
 
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
+import com.rj.ecommerce.api.shared.messaging.contract.MessageVersioning
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class WelcomeEmailRequestDTO(
-    // @field:NotBlank // If using Bean Validation
-    override val messageId: String, // Non-nullable by type
-    override val version: String,   // Non-nullable by type
-    override val to: String,        // Non-nullable by type
-    override val subject: String = "Welcome to Our Store!", // Default value in constructor
-    val customerName: String, // Non-nullable by type
-    val couponCode: String? = null, // Nullable with default
-    val additionalData: Map<String, Any> = emptyMap(), // Use Any for Object, default to emptyMap
-    override val timestamp: LocalDateTime = LocalDateTime.now(), // Default value
-    override val template: EmailTemplate
+    override val messageId: String,
+    override val correlationId: String,
+    override val version: String,
+    override val to: String,
+    override val subject: String,
+    override val template: EmailTemplate,
+    override val timestamp: LocalDateTime,
+    val customerName: String,
+    val couponCode: String? = null,
+    val additionalData: Map<String, Any> = emptyMap()
 ) : EcommerceEmailRequest {
 
     init {
-        // require is Kotlin's way to throw IllegalArgumentException
         require(messageId.isNotBlank()) { "Message ID cannot be blank" }
-        require(version.isNotBlank()) { "Version cannot be blank" }
+        require(correlationId.isNotBlank()) { "Correlation ID cannot be blank" }
         require(to.isNotBlank()) { "Recipient email cannot be blank" }
         require(customerName.isNotBlank()) { "Customer name cannot be blank" }
-        // subject, timestamp, additionalData have defaults or are handled by constructor.
     }
 
-    override fun getTemplateData(): Map<String, Any> { // Use Any for Object
-        return buildMap { // Kotlin's scope function for building maps
+    override fun getTemplateData(): Map<String, Any> {
+        return buildMap {
             put("customerName", customerName)
-            couponCode?.let { put("couponCode", it) } // Add only if not null
-            putAll(additionalData) // additionalData is already defaulted to emptyMap if null
+            couponCode?.let { put("couponCode", it) }
+            putAll(additionalData)
         }
     }
 
     companion object {
-        @JvmStatic // For Java interop if needed
-        fun defaultBuilder(
-            to: String, // Mandatory fields for a minimal valid object
+        @JvmStatic
+        fun create(
+            to: String,
             customerName: String,
-            // Other optional fields with defaults or null
-            subject: String = "Welcome to Our Store!",
+            correlationId: String,
             couponCode: String? = null,
             additionalData: Map<String, Any> = emptyMap()
         ): WelcomeEmailRequestDTO {
             return WelcomeEmailRequestDTO(
                 messageId = UUID.randomUUID().toString(),
-                version = "1.0",
+                correlationId = correlationId,
+                version = MessageVersioning.CURRENT_VERSION,
                 to = to,
-                subject = subject,
+                subject = "Welcome to Our Store!",
+                template = EmailTemplate.CUSTOMER_WELCOME,
+                timestamp = LocalDateTime.now(),
                 customerName = customerName,
                 couponCode = couponCode,
-                additionalData = additionalData,
-                timestamp = LocalDateTime.now(),
-                template = EmailTemplate.CUSTOMER_WELCOME
+                additionalData = additionalData
             )
         }
     }

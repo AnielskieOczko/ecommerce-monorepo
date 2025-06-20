@@ -8,41 +8,45 @@ import com.rj.ecommerce.api.shared.enums.EmailTemplate
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
 import com.rj.ecommerce.api.shared.enums.ShippingMethod
+import com.rj.ecommerce.api.shared.messaging.contract.MessageVersioning
 import jakarta.validation.constraints.NotEmpty
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class OrderEmailRequestDTO(
+    // --- Interface Properties ---
     override val messageId: String,
+    override val correlationId: String,
     override val version: String,
     override val to: String,
-    override val subject: String, // Will be set by companion object or init
+    override val subject: String,
     override val template: EmailTemplate,
+    override val timestamp: LocalDateTime,
+
+    // --- DTO-Specific Properties ---
     val orderId: String,
     val orderNumber: String? = null,
-    val customer: CustomerInfoDTO? = null, // Make nullable if optional for some templates
+    val customer: CustomerInfoDTO? = null,
     @field:NotEmpty
-    val items: List<MessagingOrderItemDTO>, // Use the messaging-specific OrderItemDTO
+    val items: List<MessagingOrderItemDTO>,
     val totalAmount: Money,
     val shippingAddress: Address? = null,
-    val shippingMethod: ShippingMethod? = null, // Corrected import
+    val shippingMethod: ShippingMethod? = null,
     val paymentMethod: PaymentMethod? = null,
     val paymentTransactionId: String? = null,
     val orderDate: LocalDateTime,
     val orderStatus: OrderStatus,
-    val additionalData: Map<String, Any> = emptyMap(),
-    override val timestamp: LocalDateTime = LocalDateTime.now()
+    val additionalData: Map<String, Any> = emptyMap()
 ) : EcommerceEmailRequest {
 
     init {
         require(messageId.isNotBlank()) { "Message ID cannot be blank" }
+        require(correlationId.isNotBlank()) { "Correlation ID cannot be blank" } // 2. ADDED: Validation for correlationId
         require(version.isNotBlank()) { "Version cannot be blank" }
         require(to.isNotBlank()) { "Recipient email cannot be blank" }
         require(orderId.isNotBlank()) { "Order ID cannot be blank" }
         require(items.isNotEmpty()) { "Order must have at least one item" }
-        // Subject is handled by factory method or constructor logic
     }
-
 
     override fun getTemplateData(): Map<String, Any> {
         return buildMap {
@@ -52,11 +56,11 @@ data class OrderEmailRequestDTO(
             put("items", items)
             put("totalAmount", totalAmount)
             shippingAddress?.let { put("shippingAddress", it) }
-            shippingMethod?.let { put("shippingMethod", it.name) } // Send enum name
-            paymentMethod?.let { put("paymentMethod", it.name) }   // Send enum name
+            shippingMethod?.let { put("shippingMethod", it.name) }
+            paymentMethod?.let { put("paymentMethod", it.name) }
             paymentTransactionId?.let { put("paymentTransactionId", it) }
             put("orderDate", orderDate)
-            put("orderStatus", orderStatus.name) // Send enum name
+            put("orderStatus", orderStatus.name)
             putAll(additionalData)
         }
     }
@@ -69,22 +73,22 @@ data class OrderEmailRequestDTO(
                 EmailTemplate.ORDER_SHIPMENT -> "Your Order$orderRef Has Been Shipped"
                 EmailTemplate.ORDER_CANCELLED -> "Your Order$orderRef Has Been Cancelled"
                 EmailTemplate.ORDER_REFUNDED -> "Your Order$orderRef Has Been Refunded"
-                else -> "Information About Your Order$orderRef" // Handles CUSTOMER_WELCOME etc. if template is passed
+                else -> "Information About Your Order$orderRef"
             }
         }
 
-        // Factory function to ensure subject is generated
         @JvmStatic
         fun create(
+            // --- Required Parameters ---
             to: String,
+            correlationId: String, // 3. ADDED: correlationId is a required parameter for the factory
             template: EmailTemplate,
             orderId: String,
             items: List<MessagingOrderItemDTO>,
             totalAmount: Money,
             orderDate: LocalDateTime,
             orderStatus: OrderStatus,
-            messageId: String = UUID.randomUUID().toString(),
-            version: String = "1.0",
+            // --- Optional Parameters ---
             orderNumber: String? = null,
             customer: CustomerInfoDTO? = null,
             shippingAddress: Address? = null,
@@ -92,14 +96,30 @@ data class OrderEmailRequestDTO(
             paymentMethod: PaymentMethod? = null,
             paymentTransactionId: String? = null,
             additionalData: Map<String, Any> = emptyMap(),
-            timestamp: LocalDateTime = LocalDateTime.now(),
-            subjectOverride: String? = null // Allow overriding the generated subject
+            subjectOverride: String? = null
         ): OrderEmailRequestDTO {
             val finalSubject = subjectOverride ?: generateSubject(template, orderNumber)
+
             return OrderEmailRequestDTO(
-                messageId, version, to, finalSubject, template, orderId, orderNumber,
-                customer, items, totalAmount, shippingAddress, shippingMethod, paymentMethod,
-                paymentTransactionId, orderDate, orderStatus, additionalData, timestamp
+                messageId = UUID.randomUUID().toString(),
+                correlationId = correlationId,
+                version = MessageVersioning.CURRENT_VERSION,
+                to = to,
+                subject = finalSubject,
+                template = template,
+                timestamp = LocalDateTime.now(),
+                orderId = orderId,
+                orderNumber = orderNumber,
+                customer = customer,
+                items = items,
+                totalAmount = totalAmount,
+                shippingAddress = shippingAddress,
+                shippingMethod = shippingMethod,
+                paymentMethod = paymentMethod,
+                paymentTransactionId = paymentTransactionId,
+                orderDate = orderDate,
+                orderStatus = orderStatus,
+                additionalData = additionalData
             )
         }
     }

@@ -8,6 +8,7 @@ import java.util.UUID
 data class PaymentEmailRequestDTO(
     // Properties from the EcommerceEmailRequest interface
     override val messageId: String = UUID.randomUUID().toString(),
+    override val correlationId: String,
     override val version: String,
     override val to: String,
     override val template: EmailTemplate,
@@ -18,9 +19,10 @@ data class PaymentEmailRequestDTO(
     val paymentId: String? = null,
     val paymentStatus: String,
     val paymentAmount: Money? = null,
-    val additionalData: Map<String, Any> = emptyMap()
+    val additionalData: Map<String, Any> = emptyMap(),
 
-) : EcommerceEmailRequest {
+
+    ) : EcommerceEmailRequest {
 
     // 1. The 'subject' is now a computed property that implements the interface requirement.
     // It's calculated automatically based on the template and orderId.

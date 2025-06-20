@@ -1,4 +1,4 @@
-package com.rj.ecommerce.api.shared.dto.product
+package com.rj.ecommerce.api.shared.dto.product.category
 
 /**
  * Represents a product category.
