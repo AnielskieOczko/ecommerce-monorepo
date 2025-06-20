@@ -7,7 +7,7 @@ import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
 import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria;
 import com.rj.ecommerce_backend.product.filters.ProductUpdateDTO;
-import com.rj.ecommerce_backend.product.exceptions.ProductNotFoundException;
+import com.rj.ecommerce_backend.product.exception.ProductNotFoundException;
 import com.rj.ecommerce_backend.product.mapper.ProductMapper;
 import com.rj.ecommerce_backend.product.repository.CategoryRepository;
 import com.rj.ecommerce_backend.product.repository.ImageRepository;

@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.product.controller;
 
 import com.rj.ecommerce_backend.product.filters.ErrorDTO;
-import com.rj.ecommerce_backend.product.exceptions.CategoryAlreadyExistsException;
-import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
-import com.rj.ecommerce_backend.product.exceptions.InvalidCategoryDataException;
+import com.rj.ecommerce_backend.product.exception.CategoryAlreadyExistsException;
+import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException;
+import com.rj.ecommerce_backend.product.exception.InvalidCategoryDataException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

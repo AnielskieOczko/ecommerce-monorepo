@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.order.controller;
 
-import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException;
-import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException;
+import com.rj.ecommerce_backend.order.exception.OrderCancellationException;
+import com.rj.ecommerce_backend.order.exception.OrderNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

@@ -5,7 +5,7 @@ import com.rj.ecommerce_backend.product.filters.CategoryCreateDTO;
 import com.rj.ecommerce_backend.product.filters.CategoryResponseDTO;
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria;
 import com.rj.ecommerce_backend.product.filters.CategoryUpdateDTO;
-import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
+import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException;
 import com.rj.ecommerce_backend.product.service.CategoryService;
 import com.rj.ecommerce_backend.sorting.CategorySortField;
 import com.rj.ecommerce_backend.sorting.SortValidator;
