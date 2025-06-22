@@ -4,14 +4,15 @@ import com.rj.ecommerce.api.shared.core.Money
 import com.rj.ecommerce.api.shared.enums.Currency
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
 import com.rj.ecommerce.api.shared.enums.PaymentStatus
+import com.rj.ecommerce.api.shared.messaging.contract.MessageVersioning.CURRENT_VERSION
 import com.rj.ecommerce.api.shared.messaging.email.PaymentEmailRequestDTO
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO // Using the extended DTO now
-import com.rj.ecommerce_backend.messaging.email.contract.MessageVersioning.CURRENT_VERSION
+import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
 import com.rj.ecommerce_backend.messaging.email.client.EmailServiceClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.util.UUID
 
 /**
  * Service responsible for sending payment-related notifications via email.
@@ -56,7 +57,10 @@ class PaymentNotificationService(
             paymentId = response.sessionId,
             paymentStatus = "SUCCEEDED",
             paymentAmount = createMoney(response),
-            additionalData = createAdditionalData(response)
+            additionalData = createAdditionalData(response),
+            messageId = UUID.randomUUID().toString(),
+            correlationId = response.correlationId,
+            timestamp = LocalDateTime.now()
         )
 
         emailServiceClient.sendEmailRequest(emailRequest)
@@ -79,7 +83,10 @@ class PaymentNotificationService(
             paymentId = response.sessionId,
             paymentStatus = "FAILED",
             paymentAmount = createMoney(response),
-            additionalData = createAdditionalData(response, extraData)
+            additionalData = createAdditionalData(response, extraData),
+            messageId = UUID.randomUUID().toString(),
+            correlationId = response.correlationId,
+            timestamp = LocalDateTime.now()
         )
 
         emailServiceClient.sendEmailRequest(emailRequest)
@@ -103,10 +110,15 @@ class PaymentNotificationService(
             paymentId = response.sessionId,
             paymentStatus = "ERROR",
             paymentAmount = createMoney(response),
-            additionalData = createAdditionalData(response, mapOf(
-                "errorMessage" to (e.message ?: "Unknown error"),
-                "timestamp" to LocalDateTime.now().toString()
-            ))
+            additionalData = createAdditionalData(
+                response, mapOf(
+                    "errorMessage" to (e.message ?: "Unknown error"),
+                    "timestamp" to LocalDateTime.now().toString()
+                )
+            ),
+            messageId = UUID.randomUUID().toString(),
+            correlationId = response.correlationId,
+            timestamp = LocalDateTime.now()
         )
 
         // Customer notification
@@ -118,10 +130,15 @@ class PaymentNotificationService(
             paymentId = response.sessionId,
             paymentStatus = "ERROR",
             paymentAmount = createMoney(response),
-            additionalData = createAdditionalData(response, mapOf(
-                "supportEmail" to SUPPORT_EMAIL,
-                "helpUrl" to PAYMENT_HELP_URL
-            ))
+            additionalData = createAdditionalData(
+                response, mapOf(
+                    "supportEmail" to SUPPORT_EMAIL,
+                    "helpUrl" to PAYMENT_HELP_URL
+                )
+            ),
+            messageId = UUID.randomUUID().toString(),
+            correlationId = response.correlationId,
+            timestamp = LocalDateTime.now()
         )
 
         emailServiceClient.sendEmailRequest(adminNotification)

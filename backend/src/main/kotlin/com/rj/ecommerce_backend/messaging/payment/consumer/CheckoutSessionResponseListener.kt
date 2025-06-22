@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.messaging.payment.consumer
 
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
-import com.rj.ecommerce_backend.payment.PaymentWebhookService
+import com.rj.ecommerce_backend.payment.PaymentResponseProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class CheckoutSessionResponseListener(
-    private val paymentWebhookService: PaymentWebhookService
+    private val paymentWebhookService: PaymentResponseProcessor
 ) {
 
     companion object {
