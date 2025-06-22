@@ -79,6 +79,13 @@ app:
       exchange: checkout.session.response.exchange
       queue: checkout.session.response.queue
       routing-key: checkout.session.response.routing-key
+    payment-options-request:
+      exchange: payment.events
+      routing-key: payment.options.request
+    payment-options-reply:
+      queue: payment.options.reply.q
+      exchange: payment.events
+      routing-key: payment.options.reply
 
   # --- MOVED: Storage configuration ---
   storage:
@@ -99,6 +106,14 @@ app:
   cleanup:
     cron: "0 0 * * * *"  # Default: every hour
     batch-size: 1000
+  payment:
+    # This map links a user-chosen PaymentMethod to a specific Gateway implementation key.
+    method-to-gateway-mapping:
+      CREDIT_CARD: STRIPE_GATEWAY
+      BANK_TRANSFER: STRIPE_GATEWAY
+      BLIK: STRIPE_GATEWAY
+      # When you add PayPal, you'll add:
+      # PAYPAL: PAYPAL_GATEWAY
 
 ---
 # ===================================================================
