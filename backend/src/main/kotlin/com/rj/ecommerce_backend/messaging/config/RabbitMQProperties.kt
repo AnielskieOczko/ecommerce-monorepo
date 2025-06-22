@@ -8,7 +8,9 @@ data class RabbitMQProperties(
     val email: TopicConfig,
     val emailNotification: TopicConfig,
     val checkoutSession: TopicConfig,
-    val checkoutSessionResponse: TopicConfig
+    val checkoutSessionResponse: TopicConfig,
+    val paymentOptionsRequest: TopicConfig,
+    val paymentOptionsReply: TopicConfig
 ) {
     // A nested data class for the repeated exchange/queue/routing-key structure
     data class TopicConfig(
