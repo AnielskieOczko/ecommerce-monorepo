@@ -16,20 +16,21 @@ import java.time.LocalDateTime
  *
  * Requirements:
  * - sessionId, orderId, sessionStatus, paymentStatus, and checkoutUrl are required
- * - expiresAt and metadata are optional
+ * - expiresAt, and metadata is optional
  */
 data class PaymentResponseDTO(
-    // Original fields
     val sessionId: String,
     val orderId: Long,
     val sessionStatus: PaymentStatus,
     val paymentStatus: PaymentStatus,
     val checkoutUrl: String,
     val expiresAt: LocalDateTime? = null,
-    val metadata: Map<String, String>? = null, // This will replace 'additionalDetails'
 
-    // --- Extended fields required by the notification service ---
+    // This field is mandatory for tracing and reliability.
+    val correlationId: String,
+
+    val metadata: Map<String, String>? = null,
     val customerEmail: String,
-    val amountTotal: Long?, // Total amount in the smallest currency unit (e.g., cents), nullable for safety
-    val currency: String?   // 3-letter ISO currency code, nullable for safety
+    val amountTotal: Long?,
+    val currency: String?
 )
