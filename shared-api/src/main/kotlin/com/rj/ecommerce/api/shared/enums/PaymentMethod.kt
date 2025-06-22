@@ -2,7 +2,6 @@ package com.rj.ecommerce.api.shared.enums // Or your equivalent Kotlin package
 
 enum class PaymentMethod {
     CREDIT_CARD,
-    PAYPAL,
     BANK_TRANSFER,
     BLIK; // Semicolon is optional if companion object is the last member or if there are no other members
 
