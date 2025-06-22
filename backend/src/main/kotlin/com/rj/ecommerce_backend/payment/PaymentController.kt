@@ -1,5 +1,6 @@
 package com.rj.ecommerce_backend.payment
 
+import com.rj.ecommerce.api.shared.dto.payment.PaymentOptionDTO
 import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionDTO
 import com.rj.ecommerce.api.shared.messaging.payment.CheckoutUrlsRequestDTO
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentStatusDTO
@@ -10,20 +11,28 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/v1/stripe")
+@RequestMapping("/api/v1/payments")
 class StripePaymentController(
     private val securityContext: SecurityContext,
-    private val stripePaymentService: StripePaymentService
+    private val paymentFacade: PaymentFacade,
+    private val paymentOptionsService: PaymentOptionsService
 ) {
 
     companion object {
         private val log = KotlinLogging.logger {}
     }
 
+
+    @GetMapping("/options")
+    fun getPaymentOptions(): ResponseEntity<List<PaymentOptionDTO>> {
+        // This call now triggers the RabbitMQ request-reply flow.
+        return ResponseEntity.ok(paymentOptionsService.getAvailablePaymentOptions())
+    }
+
     @GetMapping("/checkout/session/{orderId}")
     fun getPaymentStatus(@PathVariable orderId: Long): ResponseEntity<PaymentStatusDTO> {
         log.info { "Fetching payment status for orderId: $orderId" }
-        val paymentStatus = stripePaymentService.getOrderPaymentStatus(orderId)
+        val paymentStatus = paymentFacade.getOrderPaymentStatus(orderId)
         return ResponseEntity.ok(paymentStatus)
     }
 
@@ -33,10 +42,7 @@ class StripePaymentController(
         @RequestBody request: CheckoutUrlsRequestDTO
     ): ResponseEntity<CheckoutSessionDTO> {
         log.info { "Request to create/get checkout session for orderId: $orderId" }
-        // 2. Logic is clean and focuses on the "happy path".
-        val userId = getCurrentUserId()
-        val sessionDto = stripePaymentService.createOrGetCheckoutSession(
-            userId,
+        val sessionDto = paymentFacade.createCheckoutSession(
             orderId,
             request.successUrl,
             request.cancelUrl

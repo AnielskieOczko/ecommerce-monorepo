@@ -21,7 +21,7 @@ class PaymentWebhookService(
     /**
      * Processes a checkout session response from a payment provider webhook.
      * 1. Updates the order status transactionally.
-     * 2. Sends a notification. A failure here does NOT roll back the order update.
+     * 2. Send a notification. A failure here does NOT roll back the order update.
      */
     fun processCheckoutSessionResponse(response: PaymentResponseDTO) {
         val orderId = response.orderId
