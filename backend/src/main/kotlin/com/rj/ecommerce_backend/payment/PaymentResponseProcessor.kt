@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional // Annotation applies to the public method
-class PaymentWebhookService(
+class PaymentResponseProcessor(
     private val orderService: OrderService,
     private val paymentNotificationService: PaymentNotificationService
 ) {

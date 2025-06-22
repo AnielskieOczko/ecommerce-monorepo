@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/payments")
-class StripePaymentController(
+class PaymentController(
     private val securityContext: SecurityContext,
     private val paymentFacade: PaymentFacade,
     private val paymentOptionsService: PaymentOptionsService
