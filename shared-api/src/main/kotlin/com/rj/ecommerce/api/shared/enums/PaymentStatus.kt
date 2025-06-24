@@ -7,6 +7,7 @@ package com.rj.ecommerce.api.shared.enums // Or your equivalent Kotlin package
  * @see <a href="https://stripe.com/docs/api/checkout/sessions/object#checkout_session_object-payment_status">Stripe Checkout Session Payment Status</a>
  * @see <a href="https://stripe.com/docs/api/checkout/sessions/object#checkout_session_object-status">Stripe Checkout Session Status</a>
  */
+@Deprecated("Use enum CanonicalPaymentStatus")
 enum class PaymentStatus(val stripeStatus: String) { // Primary constructor with 'val' property
     // Charge statuses
     SUCCEEDED("succeeded"),
