@@ -1,7 +1,7 @@
-package producer
+package com.rj.payment_service.producer
 
 import com.rj.payment_service.exception.MessagePublishException
-import config.RabbitMQProperties
+import com.rj.payment_service.config.RabbitMQProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Component
@@ -33,7 +33,7 @@ class MessageProducer(
         }
     }
 
-    fun <T : Any> sendCheckoutSessionResponse(response: T, correlationId: String) {
+    fun <T : Any> sendCheckoutSessionResponse(response: T, correlationId: String?) {
         sendMessage(
             exchange = rabbitMQProperties.checkoutSessionExchange,
             routingKey = rabbitMQProperties.checkoutSessionResponseRoutingKey,

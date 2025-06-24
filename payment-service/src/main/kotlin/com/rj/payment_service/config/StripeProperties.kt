@@ -1,4 +1,4 @@
-package config
+package com.rj.payment_service.config
 
 import jakarta.validation.constraints.NotBlank
 import org.springframework.boot.context.properties.ConfigurationProperties

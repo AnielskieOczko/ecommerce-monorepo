@@ -1,7 +1,5 @@
-package config
+package com.rj.payment_service.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.amqp.core.*
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
 import org.springframework.amqp.support.converter.MessageConverter
@@ -9,22 +7,41 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class RabbitMQConfig(private val props: RabbitMQProperties) { // Inject properties
+class RabbitMQConfig(private val props: RabbitMQProperties) {
 
     // --- Queues, Exchanges, Bindings using properties ---
-    @Bean fun checkoutSessionExchange(): TopicExchange = TopicExchange(props.checkoutSessionExchange)
-    @Bean fun checkoutSessionQueue(): Queue = Queue(props.checkoutSessionQueue)
-    @Bean fun checkoutSessionBinding(): Binding = BindingBuilder.bind(checkoutSessionQueue())
+    @Bean
+    fun checkoutSessionExchange(): TopicExchange = TopicExchange(props.checkoutSessionExchange)
+
+    @Bean
+    fun checkoutSessionQueue(): Queue = Queue(props.checkoutSessionResponseQueue)
+
+    @Bean
+    fun checkoutSessionBinding(): Binding = BindingBuilder.bind(checkoutSessionQueue())
         .to(checkoutSessionExchange()).with(props.checkoutSessionRoutingKey)
 
-    // ... other bindings for DLQ etc. ...
+    @Bean
+    fun checkoutSessionResponseExchange(): TopicExchange = TopicExchange(props.checkoutSessionResponseExchange)
 
-    // --- CRITICAL FIX: Decoupled Message Converter ---
+    @Bean
+    fun checkoutSessionResponseQueue(): Queue = Queue(props.checkoutSessionResponseQueue)
+
+    @Bean
+    fun checkoutSessionResponseBinding(): Binding = BindingBuilder.bind(checkoutSessionResponseQueue())
+        .to(checkoutSessionExchange()).with(props.checkoutSessionResponseRoutingKey)
+
+    @Bean
+    fun dlqExchange(): TopicExchange = TopicExchange(props.dlqExchange)
+
+    @Bean
+    fun dlqQueue(): Queue = Queue(props.dlqQueue)
+
+    @Bean
+    fun dlqBinding(): Binding = BindingBuilder.bind(dlqQueue())
+        .to(dlqExchange()).with(props.dlqRoutingKey)
+
     @Bean
     fun jsonMessageConverter(): MessageConverter {
-        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
-        // DO NOT configure default typing or class mappers.
-        // The contract is the JSON structure, not the Java class.
-        return Jackson2JsonMessageConverter(objectMapper)
+        return Jackson2JsonMessageConverter()
     }
 }
