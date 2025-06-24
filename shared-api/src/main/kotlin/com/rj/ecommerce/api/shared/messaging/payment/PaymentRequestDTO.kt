@@ -13,13 +13,14 @@ package com.rj.ecommerce.api.shared.messaging.payment
  * Requirements:
  * - orderId, customerEmail, successUrl, cancelUrl, and lineItems are required
  * - metadata is optional
- * - successUrl and cancelUrl must be valid URLs
+ * - successUrl, and cancelUrl must be valid URLs
  */
 data class PaymentRequestDTO(
     val orderId: Long,
     val customerEmail: String,
     val successUrl: String,
     val cancelUrl: String,
+    val providerIdentifier: String,
     val lineItems: List<PaymentLineItemDTO>,
     val metadata: Map<String, String>? = null
 )

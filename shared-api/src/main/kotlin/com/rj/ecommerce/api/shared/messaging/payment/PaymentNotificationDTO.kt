@@ -1,6 +1,7 @@
 package com.rj.ecommerce.api.shared.messaging.payment
 
 import com.rj.ecommerce.api.shared.core.Money
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.PaymentStatus
 import java.time.LocalDateTime
 
@@ -25,7 +26,7 @@ data class PaymentNotificationDTO(
     val eventType: String, // e.g., "payment.succeeded", "charge.failed"
     val orderId: Long, // Your system's order ID
     val paymentId: String, // Payment provider's ID for the payment transaction
-    val status: PaymentStatus, // Your system's standardized status
+    val status: CanonicalPaymentStatus, // Your system's standardized status
     val amount: Money? = null, // Amount associated with this specific event (e.g., capture amount, refund amount)
     val paidAt: LocalDateTime? = null, // Timestamp when the payment was successfully processed or specific event occurred
     val rawProviderPayload: Map<String, Any>? = null // Raw data from the payment provider (webhook payload)

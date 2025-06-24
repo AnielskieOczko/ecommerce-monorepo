@@ -1,5 +1,6 @@
 package com.rj.ecommerce.api.shared.messaging.payment
 
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.PaymentStatus
 import java.time.LocalDateTime
 
@@ -21,8 +22,8 @@ import java.time.LocalDateTime
 data class PaymentResponseDTO(
     val sessionId: String,
     val orderId: Long,
-    val sessionStatus: PaymentStatus,
-    val paymentStatus: PaymentStatus,
+    val sessionStatus: CanonicalPaymentStatus,
+    val paymentStatus: CanonicalPaymentStatus,
     val checkoutUrl: String,
     val expiresAt: LocalDateTime? = null,
 
