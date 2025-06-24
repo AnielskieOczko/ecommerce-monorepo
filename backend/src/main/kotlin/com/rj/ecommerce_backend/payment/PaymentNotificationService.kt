@@ -1,6 +1,7 @@
 package com.rj.ecommerce_backend.payment
 
 import com.rj.ecommerce.api.shared.core.Money
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.Currency
 import com.rj.ecommerce.api.shared.enums.EmailTemplate
 import com.rj.ecommerce.api.shared.enums.PaymentStatus
@@ -40,8 +41,8 @@ class PaymentNotificationService(
         log.info("Sending payment notification for order: ${response.orderId}")
 
         when (response.paymentStatus) {
-            PaymentStatus.PAID, PaymentStatus.SUCCEEDED -> sendPaymentSuccessNotification(response)
-            PaymentStatus.UNPAID, PaymentStatus.FAILED -> sendPaymentFailureNotification(response)
+            CanonicalPaymentStatus.SUCCEEDED -> sendPaymentSuccessNotification(response)
+            CanonicalPaymentStatus.FAILED -> sendPaymentFailureNotification(response)
             else -> log.warn("Unhandled payment status: ${response.paymentStatus} for order: ${response.orderId}")
         }
     }

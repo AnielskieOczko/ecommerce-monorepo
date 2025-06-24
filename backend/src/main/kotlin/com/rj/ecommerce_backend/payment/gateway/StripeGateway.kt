@@ -54,7 +54,7 @@ class StripeGateway : PaymentGateway {
             val product = requireNotNull(orderItem.product) {
                 "OrderItem ID ${orderItem.id} in Order ID $orderId has no associated product."
             }
-            val productName = requireNotNull(product.name?.value) {
+            val productName = requireNotNull(product.name.value) {
                 "Product ID ${product.id} has no name."
             }
             val itemPrice = requireNotNull(orderItem.price) {
@@ -89,7 +89,8 @@ class StripeGateway : PaymentGateway {
             successUrl = successUrl,
             cancelUrl = cancelUrl,
             lineItems = lineItems,
-            metadata = metadata
+            metadata = metadata,
+            providerIdentifier = "STRIPE"
         )
 
         logger.info { "Successfully built Stripe PaymentRequestDTO for Order ID: $orderId" }

@@ -1,19 +1,16 @@
 package com.rj.ecommerce_backend.order.service
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.core.ShippingAddressDTO
-import com.rj.ecommerce.api.shared.core.ZipCode
 import com.rj.ecommerce.api.shared.dto.cart.CartDTO
 import com.rj.ecommerce.api.shared.dto.cart.CartItemDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
-import com.rj.ecommerce_backend.messaging.common.excepion.MessagePublishException
 import com.rj.ecommerce_backend.messaging.email.factory.EmailRequestFactory
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce.api.shared.enums.*
 import com.rj.ecommerce.api.shared.messaging.email.EcommerceEmailRequest
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
+import com.rj.ecommerce_backend.messaging.common.exception.MessagePublishException
 import com.rj.ecommerce_backend.messaging.email.client.EmailServiceClient
 import com.rj.ecommerce_backend.order.exception.OrderCancellationException
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
@@ -247,15 +244,19 @@ class OrderServiceImpl( // Constructor Injection (replaces @RequiredArgsConstruc
         response.metadata?.get("receiptUrl")?.let { order.receiptUrl = it }
 
         when (paymentStatus) {
-            PaymentStatus.COMPLETE, PaymentStatus.PAID -> {
+            CanonicalPaymentStatus.SUCCEEDED -> {
                 order.orderStatus = OrderStatus.CONFIRMED
                 // TODO: Send payment success / order confirmation email if not already sent robustly
             }
-            PaymentStatus.FAILED -> {
+            CanonicalPaymentStatus.FAILED -> {
                 order.orderStatus = OrderStatus.FAILED
                 // TODO: Send payment failed email
             }
-            PaymentStatus.PENDING, PaymentStatus.EXPIRED, PaymentStatus.UNKNOWN -> {
+            CanonicalPaymentStatus.EXPIRED -> {
+                order.orderStatus = OrderStatus.FAILED
+                // TODO: Send payment failed email
+            }
+            CanonicalPaymentStatus.PENDING -> {
                 if (order.orderStatus == OrderStatus.PENDING) {
                     // Potentially no change or to a more specific pending state
                 }
@@ -284,12 +285,22 @@ class OrderServiceImpl( // Constructor Injection (replaces @RequiredArgsConstruc
 
         validateCartAvailability(request.cart)
 
-        val newOrder = Order( // Using data class constructor
+        val newOrder = Order(
+            // Using data class constructor
             user = user,
             shippingAddress = request.shippingAddress,
             shippingMethod = request.shippingMethod,
             paymentMethod = request.paymentMethod,
             currency = Currency.PLN,
+            id = TODO(),
+            orderItems = TODO(),
+            totalAmount = TODO(),
+            paymentTransactionId = TODO(),
+            checkoutSessionUrl = TODO(),
+            checkoutSessionExpiresAt = TODO(),
+            receiptUrl = TODO(),
+            paymentStatus = TODO(),
+            orderStatus = TODO(),
             // totalAmount will be calculated and set after items are processed or from cart
             // orderItems = mutableListOf() // Initialized by default in Order data class
             // Other fields will be set by auditing or explicitly below
@@ -313,15 +324,6 @@ class OrderServiceImpl( // Constructor Injection (replaces @RequiredArgsConstruc
         return orderRepository.save(newOrder)
     }
 
-    private fun mapShippingAddressDtoToEntity(shippingAddressDTO: ShippingAddressDTO): Address {
-        // Assuming com.rj.ecommerce_backend.user.valueobject.Address and ZipCode
-        return Address(
-            street = shippingAddressDTO.street, // Assuming DTO fields are non-nullable based on common patterns
-            city = shippingAddressDTO.city,
-            zipCode = ZipCode(shippingAddressDTO.zipCode), // Assuming ZipCode VO takes String
-            country = shippingAddressDTO.country
-        )
-    }
 
     private fun validateCartAvailability(cartDTO: CartDTO) {
         cartDTO.items.forEach { item ->

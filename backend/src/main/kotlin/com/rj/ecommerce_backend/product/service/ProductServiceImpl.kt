@@ -20,6 +20,7 @@ import com.rj.ecommerce_backend.product.repository.CategoryRepository
 import com.rj.ecommerce_backend.product.repository.ImageRepository
 import com.rj.ecommerce_backend.product.repository.ProductRepository
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria
+import com.rj.ecommerce_backend.storage.service.LocalStorageService
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 import org.springframework.data.domain.Page
@@ -35,7 +36,7 @@ class ProductServiceImpl(
     private val productRepository: ProductRepository,
     private val categoryRepository: CategoryRepository,
     private val imageRepository: ImageRepository,
-    private val fileStorageService: FileStorageService,
+    private val localStorageService: LocalStorageService,
     private val productMapper: ProductMapper
 ) : ProductService {
 

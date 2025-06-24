@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.messaging.common.producer
 
 import com.rj.ecommerce_backend.messaging.common.exception.MessagePublishException
-import com.rj.ecommerce_backend.messaging.config.RabbitMQProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 

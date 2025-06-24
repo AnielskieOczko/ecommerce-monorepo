@@ -39,9 +39,12 @@ class ProductMapper(
 
     fun toImageEntity(imageDTO: ImageInfo): Image {
         return Image(
-            path = imageDTO.path,
-            altText = imageDTO.altText,
-            mimeType = imageDTO.mimeType,
+            id = null,
+            fileIdentifier = TODO(),
+            webpFileIdentifier = TODO(),
+            altText = TODO(),
+            mimeType = TODO(),
+            product = TODO(),
         )
     }
 
@@ -53,7 +56,7 @@ class ProductMapper(
 
         // 1. ARCHITECTURAL FIX: Create the ProductBase object first.
         val productBase = ProductBase(
-            name = requireNotNull(product.name?.value) { "Product name cannot be null" },
+            name = requireNotNull(product.name.value) { "Product name cannot be null" },
             description = requireNotNull(product.description?.value) { "Product description cannot be null" },
             unitPrice = product.unitPrice, // Assuming unitPrice is non-nullable in the domain
             categoryIds = product.categories.map { requireNotNull(it.id) { "Category in product list has a null ID" } }
@@ -67,7 +70,7 @@ class ProductMapper(
         return ProductResponseDTO(
             id = productId,
             productData = productBase, // Use the composed base object
-            quantity = requireNotNull(product.quantityInStock?.value) { "Product quantity cannot be null" },
+            quantity = requireNotNull(product.quantityInStock.value) { "Product quantity cannot be null" },
             categories = categoriesDTO,
             images = imagesDTO
         )

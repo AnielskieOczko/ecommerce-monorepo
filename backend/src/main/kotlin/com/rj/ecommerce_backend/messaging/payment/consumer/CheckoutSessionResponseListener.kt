@@ -30,7 +30,7 @@ class CheckoutSessionResponseListener(
      *
      * @param response The DTO containing the result of the checkout session.
      */
-    @RabbitListener(queues = ["\${app.rabbitmq.checkout-session-response.queue}"]) // <-- CORRECTED QUEUE
+    @RabbitListener(queues = ["\${app.rabbitmq.checkout-session-response.queue}"])
     fun handleCheckoutSessionResponse(response: PaymentResponseDTO) {
         log.info { "Received checkout session response for orderId: ${response.orderId}, status: ${response.paymentStatus}" }
 
