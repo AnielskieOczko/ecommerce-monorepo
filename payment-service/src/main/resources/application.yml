@@ -1,23 +1,20 @@
+# ===================================================================
+# BASE (DEFAULT) PROFILE
+# Contains all common properties. Active when no other profile is set.
+# ===================================================================
+server:
+  port: 8010
+  error:
+    include-message: always
+    include-binding-errors: always
 
----
 spring:
   application:
     name: payment-service
-  config:
-    activate:
-      on-profile: ${SPRING_PROFILES_ACTIVE:local}
-  docker:
-    compose:
-      enabled: false
-  logging:
-    level:
-      .web: DEBUG
-      com.rj.payment_service: DEBUG
   jackson:
     default-property-inclusion: non_null
   rabbitmq:
-    #    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
-    host: ${SPRING_RABBITMQ_HOST:localhost}
+    host: localhost # Default for local
     username: ${SPRING_RABBITMQ_USERNAME:guest}
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
     port: 5672
@@ -31,64 +28,35 @@ spring:
           max-attempts: 3
           max-interval: 10000ms
           multiplier: 2.0
-    connection-timeout: 5000
-    publisher-confirm-type: correlated
-    publisher-returns: true
-server:
-  port: 8010
-  error:
-    include-message: always
-    include-binding-errors: always
 
-stripe:
-  secret:
-    key: ${STRIPE_SECRET_KEY}
-    publishable: ${STRIPE_PUBLISHABLE_KEY}
-  webhook:
-    secret: ${STRIPE_WEBHOOK_SECRET}
+# All custom application properties are grouped under 'app'
+app:
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY}
+    publishable-key: ${STRIPE_PUBLISHABLE_KEY}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+
+  rabbitmq:
+    checkout-session-queue: "checkout-session-request-queue"
+    checkout-session-exchange: "payment.events"
+    checkout-session-routing-key: "payment.initiate.request"
+
+    checkout-session-response-queue: "checkout.session.response.q"
+    checkout-session-response-exchange: "payment.events"
+    checkout-session-response-routing-key: "payment.initiate.reply"
+
+    dlq-queue: "payment.dlq.q"
+    dlq-exchange: "payment.dlq.exchange"
+    dlq-routing-key: "payment.dlq.key"
+
 ---
-# dev container profile
+# ===================================================================
+# DEVELOPMENT PROFILE (dev)
+# Only overrides what is different from the base profile.
+# ===================================================================
 spring:
-  application:
-    name: payment-service
   config:
     activate:
-      on-profile: ${SPRING_PROFILES_ACTIVE:dev}
-  docker:
-    compose:
-      enabled: false
-  logging:
-    level:
-      .web: DEBUG
-      com.rj.payment_service: DEBUG
-  jackson:
-    default-property-inclusion: non_null
+      on-profile: dev
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
-    username: ${SPRING_RABBITMQ_USERNAME:guest}
-    password: ${SPRING_RABBITMQ_PASSWORD:guest}
-    port: 5672
-    template:
-      replay-timeout: 5000
-    listener:
-      simple:
-        retry:
-          enabled: true
-          initial-interval: 1000ms
-          max-attempts: 3
-          max-interval: 10000ms
-          multiplier: 2.0
-    connection-timeout: 5000
-    publisher-confirm-type: co
-server:
-  port: 8010
-  error:
-    include-message: always
-    include-binding-errors: always
-
-stripe:
-  secret:
-    key: ${STRIPE_SECRET_KEY}
-    publishable: ${STRIPE_PUBLISHABLE_KEY}
-  webhook:
-    secret: ${STRIPE_WEBHOOK_SECRET}
+    host: rabbitmq # Override for Docker Compose environment
