@@ -2,7 +2,6 @@ package com.rj.ecommerce_backend.messaging.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-// The prefix "app.rabbitmq" matches the root key in application.yml
 @ConfigurationProperties(prefix = "app.rabbitmq")
 data class RabbitMQProperties(
     val email: TopicConfig,

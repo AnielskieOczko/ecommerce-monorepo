@@ -2,6 +2,7 @@ package com.rj.ecommerce_backend.storage.service
 
 import com.rj.ecommerce_backend.product.exception.FileNotFoundInStorageException
 import com.rj.ecommerce_backend.product.exception.FileStorageException
+import com.rj.ecommerce_backend.storage.StorageProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.Resource
