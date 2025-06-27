@@ -3,6 +3,7 @@ package com.rj.ecommerce.api.shared.dto.order
 import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
 import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
 import com.rj.ecommerce.api.shared.enums.PaymentStatus
@@ -43,7 +44,7 @@ data class OrderDTO(
     val shippingMethod: ShippingMethod? = null,
     val paymentMethod: PaymentMethod? = null,
     val orderStatus: OrderStatus? = null,
-    val paymentStatus: PaymentStatus? = null,
+    val paymentStatus: CanonicalPaymentStatus,
     val paymentTransactionId: String? = null,
     val checkoutSessionUrl: String? = null,
     val receiptUrl: String? = null,
