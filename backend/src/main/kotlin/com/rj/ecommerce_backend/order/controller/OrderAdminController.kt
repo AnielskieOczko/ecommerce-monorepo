@@ -2,10 +2,10 @@ package com.rj.ecommerce_backend.order.controller
 
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderStatusUpdateRequestDTO
-import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException
+import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.mapper.OrderMapper
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
-import com.rj.ecommerce_backend.order.service.OrderService
+import com.rj.ecommerce_backend.order.service.OrderCommandService
 import com.rj.ecommerce_backend.sorting.OrderSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/api/v1/admin/orders") // Base path for admin order operations
-@PreAuthorize("hasRole('ADMIN')") // Secure all endpoints in this controller by default
+@RequestMapping("/api/v1/admin/orders")
+@PreAuthorize("hasRole('ADMIN')")
 class OrderAdminController(
-    private val orderService: OrderService,
+    private val orderService: OrderCommandService,
     private val sortValidator: SortValidator,
     private val orderMapper: OrderMapper
 ) {

@@ -2,10 +2,10 @@ package com.rj.ecommerce_backend.order.controller
 
 import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
-import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException
+import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.mapper.OrderMapper
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
-import com.rj.ecommerce_backend.order.service.OrderService
+import com.rj.ecommerce_backend.order.service.OrderCommandService
 import com.rj.ecommerce_backend.sorting.OrderSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
 import io.swagger.v3.oas.annotations.Operation
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Order", description = "APIs for customer order management")
 @RequestMapping("/api/v1")
 class OrderController(
-    private val orderService: OrderService,
+    private val orderService: OrderCommandService,
     private val orderMapper: OrderMapper,
     private val sortValidator: SortValidator
 ) {

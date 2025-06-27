@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.order.domain
 
 import com.rj.ecommerce.api.shared.core.Address
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.Currency
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
-import com.rj.ecommerce.api.shared.enums.PaymentStatus
 import com.rj.ecommerce.api.shared.enums.ShippingMethod
 import com.rj.ecommerce_backend.user.domain.User
 import jakarta.persistence.*
@@ -68,10 +68,11 @@ data class Order(
     var receiptUrl: String? = null,
 
     @Enumerated(EnumType.STRING)
-    var paymentStatus: PaymentStatus,
+    @Column(nullable = false)
+    var paymentStatus: CanonicalPaymentStatus = CanonicalPaymentStatus.PENDING,
 
-    @Enumerated(EnumType.STRING)
-    var orderStatus: OrderStatus? = null,
+    @Enumerated(EnumType.STRING) @Column(nullable = false)
+    var orderStatus: OrderStatus = OrderStatus.PENDING,
 
     // Auditing fields are better placed in the body
     // if not strictly part of the primary data for object construction

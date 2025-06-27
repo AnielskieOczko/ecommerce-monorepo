@@ -10,6 +10,7 @@ import com.rj.ecommerce_backend.product.exception.ProductNotFoundException // Fo
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria // For getAllProducts if used
 import com.rj.ecommerce_backend.sorting.ProductSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
+import com.rj.ecommerce_backend.storage.service.LocalStorageService
 
 // Swagger/OpenAPI
 import io.swagger.v3.oas.annotations.Operation
@@ -34,9 +35,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/public/products")
 class PublicProductController(
     productService: ProductService,
-    fileStorageService: FileStorageService,
+    localStorageService: LocalStorageService,
     sortValidator: SortValidator
-) : BaseProductController(productService, fileStorageService, sortValidator) {
+) : BaseProductController(productService, localStorageService, sortValidator) {
 
 
     // getAllProducts() is inherited from BaseProductController.

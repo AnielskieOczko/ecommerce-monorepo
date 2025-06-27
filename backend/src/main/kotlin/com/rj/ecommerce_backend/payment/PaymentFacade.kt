@@ -1,13 +1,13 @@
 package com.rj.ecommerce_backend.payment
 
-import com.rj.ecommerce.api.shared.enums.PaymentStatus
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionDTO
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentStatusDTO
 import com.rj.ecommerce_backend.messaging.payment.producer.PaymentMessageProducer
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
-import com.rj.ecommerce_backend.order.service.OrderService
+import com.rj.ecommerce_backend.order.service.OrderCommandService
 import com.rj.ecommerce_backend.payment.gateway.PaymentGatewayResolver
 import com.rj.ecommerce_backend.product.domain.Product
 import com.rj.ecommerce_backend.security.SecurityContext
@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger { PaymentFacade::class }
 @Transactional
 class PaymentFacade(
     private val securityContext: SecurityContext,
-    private val orderService: OrderService,
+    private val orderService: OrderCommandService,
     private val paymentMessageProducer: PaymentMessageProducer,
     private val gatewayResolver: PaymentGatewayResolver // Inject the new resolver
 ) {
@@ -110,7 +110,7 @@ class PaymentFacade(
         // Check for essential session details and a non-failed payment status
         if (order.paymentTransactionId == null ||
             order.checkoutSessionUrl == null ||
-            order.paymentStatus == PaymentStatus.FAILED
+            order.paymentStatus == CanonicalPaymentStatus.FAILED
         ) {
             logger.debug { "Checkout session for order ${order.id} is invalid due to missing details or failed status." }
             return false

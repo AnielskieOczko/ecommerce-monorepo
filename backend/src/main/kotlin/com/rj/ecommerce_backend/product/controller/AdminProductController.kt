@@ -5,11 +5,11 @@ import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
 import com.rj.ecommerce.api.shared.dto.product.ProductUpdateRequestDTO
 
 // Backend components
-import com.rj.ecommerce_backend.product.service.FileStorageService
 import com.rj.ecommerce_backend.product.service.ProductService
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.sorting.ProductSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
+import com.rj.ecommerce_backend.storage.service.LocalStorageService
 
 // Swagger/OpenAPI
 import io.swagger.v3.oas.annotations.Operation
@@ -41,9 +41,9 @@ import java.net.URI
 @PreAuthorize("hasRole('ADMIN')")
 class AdminProductController(
     productService: ProductService,
-    fileStorageService: FileStorageService,
+    localStorageService: LocalStorageService,
     sortValidator: SortValidator
-) : BaseProductController(productService, fileStorageService, sortValidator) {
+) : BaseProductController(productService, localStorageService, sortValidator) {
 
     @Operation(summary = "Get product by ID (Admin)", description = "Retrieves a specific product by its ID for admin.")
     @ApiResponses(

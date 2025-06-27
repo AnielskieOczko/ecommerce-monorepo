@@ -3,8 +3,7 @@ package com.rj.ecommerce_backend.payment
 import com.rj.ecommerce.api.shared.core.Money
 import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.Currency
-import com.rj.ecommerce.api.shared.enums.EmailTemplate
-import com.rj.ecommerce.api.shared.enums.PaymentStatus
+import com.rj.ecommerce.api.shared.enums.NotificationTemplate
 import com.rj.ecommerce.api.shared.messaging.contract.MessageVersioning.CURRENT_VERSION
 import com.rj.ecommerce.api.shared.messaging.email.PaymentEmailRequestDTO
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
@@ -53,7 +52,7 @@ class PaymentNotificationService(
         val emailRequest = PaymentEmailRequestDTO(
             version = CURRENT_VERSION,
             to = response.customerEmail,
-            template = EmailTemplate.PAYMENT_CONFIRMATION,
+            template = NotificationTemplate.PAYMENT_CONFIRMATION,
             orderId = response.orderId,
             paymentId = response.sessionId,
             paymentStatus = "SUCCEEDED",
@@ -79,7 +78,7 @@ class PaymentNotificationService(
         val emailRequest = PaymentEmailRequestDTO(
             version = CURRENT_VERSION,
             to = response.customerEmail,
-            template = EmailTemplate.PAYMENT_FAILED,
+            template = NotificationTemplate.PAYMENT_FAILED,
             orderId = response.orderId,
             paymentId = response.sessionId,
             paymentStatus = "FAILED",
@@ -106,7 +105,7 @@ class PaymentNotificationService(
         val adminNotification = PaymentEmailRequestDTO(
             version = CURRENT_VERSION,
             to = ADMIN_EMAIL,
-            template = EmailTemplate.PAYMENT_ERROR_ADMIN,
+            template = NotificationTemplate.PAYMENT_ERROR_ADMIN,
             orderId = response.orderId,
             paymentId = response.sessionId,
             paymentStatus = "ERROR",
@@ -126,7 +125,7 @@ class PaymentNotificationService(
         val customerNotification = PaymentEmailRequestDTO(
             version = CURRENT_VERSION,
             to = response.customerEmail,
-            template = EmailTemplate.PAYMENT_ERROR_CUSTOMER,
+            template = NotificationTemplate.PAYMENT_ERROR_CUSTOMER,
             orderId = response.orderId,
             paymentId = response.sessionId,
             paymentStatus = "ERROR",

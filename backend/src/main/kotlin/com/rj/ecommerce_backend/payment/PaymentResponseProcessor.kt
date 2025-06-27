@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.payment
 
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
-import com.rj.ecommerce_backend.order.service.OrderService
+import com.rj.ecommerce_backend.order.service.OrderCommandService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional // Annotation applies to the public method
 class PaymentResponseProcessor(
-    private val orderService: OrderService,
+    private val orderService: OrderCommandService,
     private val paymentNotificationService: PaymentNotificationService
 ) {
 
