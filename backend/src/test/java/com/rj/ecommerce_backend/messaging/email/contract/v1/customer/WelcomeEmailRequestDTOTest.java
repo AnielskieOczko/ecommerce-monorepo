@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.messaging.email.contract.v1.customer;
 
-import com.rj.ecommerce.api.shared.enums.EmailTemplate;
+import com.rj.ecommerce.api.shared.enums.NotificationTemplate;
 import com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ class WelcomeEmailRequestDTOTest {
         assertEquals(couponCode, dto.couponCode());
         assertEquals(additionalData, dto.additionalData());
         assertEquals(timestamp, dto.timestamp());
-        assertEquals(EmailTemplate.CUSTOMER_WELCOME, dto.getTemplate());
+        assertEquals(NotificationTemplate.CUSTOMER_WELCOME, dto.getTemplate());
     }
 
     @Test

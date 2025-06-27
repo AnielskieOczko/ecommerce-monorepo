@@ -10,7 +10,7 @@ import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.exception.OrderCancellationException;
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
-import com.rj.ecommerce_backend.order.service.OrderService;
+import com.rj.ecommerce_backend.order.service.OrderCommandService;
 import com.rj.ecommerce_backend.sorting.SortValidator;
 import com.rj.ecommerce_backend.testutil.OrderTestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ class OrderControllerExceptionHandlingTest {
     private MockMvc mockMvc;
 
     @Mock
-    private OrderService orderService;
+    private OrderCommandService orderService;
 
     @Mock
     private OrderMapper orderMapper;

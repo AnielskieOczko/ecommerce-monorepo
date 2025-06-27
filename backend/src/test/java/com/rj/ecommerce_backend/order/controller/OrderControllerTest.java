@@ -12,7 +12,7 @@ import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.enums.ShippingMethod;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria;
-import com.rj.ecommerce_backend.order.service.OrderService;
+import com.rj.ecommerce_backend.order.service.OrderCommandService;
 import com.rj.ecommerce_backend.sorting.OrderSortFilter;
 import com.rj.ecommerce_backend.sorting.SortValidator;
 import com.rj.ecommerce_backend.testutil.OrderTestDataFactory;
@@ -58,7 +58,7 @@ class OrderControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private OrderService orderService;
+    private OrderCommandService orderService;
 
     @Mock
     private OrderMapper orderMapper;
