@@ -10,5 +10,7 @@ enum class NotificationDispatchStatus {
     /** The notification was successfully sent to the message queue. */
     SENT,
     /** The attempt to send the notification to the message queue failed. */
-    FAILED
+    FAILED,
+
+    DELIVERED
 }
