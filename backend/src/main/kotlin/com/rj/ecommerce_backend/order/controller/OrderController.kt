@@ -3,9 +3,10 @@ package com.rj.ecommerce_backend.order.controller
 import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
-import com.rj.ecommerce_backend.order.mapper.OrderMapper
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
 import com.rj.ecommerce_backend.order.service.OrderCommandService
+import com.rj.ecommerce_backend.order.service.OrderQueryService
+import com.rj.ecommerce_backend.order.usecases.CreateOrderUseCase
 import com.rj.ecommerce_backend.sorting.OrderSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
 import io.swagger.v3.oas.annotations.Operation
@@ -19,26 +20,19 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @Tag(name = "Order", description = "APIs for customer order management")
 @RequestMapping("/api/v1")
 class OrderController(
-    private val orderService: OrderCommandService,
-    private val orderMapper: OrderMapper,
+    private val orderQueryService: OrderQueryService,
+    private val orderCommandService: OrderCommandService,
+    private val createOrderUseCase: CreateOrderUseCase,
     private val sortValidator: SortValidator
 ) {
     companion object {
-        val logger = KotlinLogging.logger { }
+        private val logger = KotlinLogging.logger {}
     }
 
     @GetMapping("/users/{userId}/orders")
@@ -48,40 +42,24 @@ class OrderController(
     @ApiResponse(responseCode = "403", description = "Forbidden access")
     @PreAuthorize("#pathUserId == authentication.principal.id or hasRole('ADMIN')")
     fun getAllOrdersForUser(
-        @PathVariable pathUserId: Long,
-
+        @PathVariable("userId") pathUserId: Long,
         criteriaInput: OrderSearchCriteria,
-
-        @RequestParam(defaultValue = "0", required = false) page: Int,
-        @RequestParam(defaultValue = "10", required = false) size: Int,
-        @RequestParam(defaultValue = "id:asc", required = false) sort: String?
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "id:asc") sort: String?
     ): ResponseEntity<Page<OrderDTO>> {
+        logger.info { "Request received: Get orders for user ID: $pathUserId with criteria: $criteriaInput, page: $page, size: $size, sort: $sort" }
 
-        logger.info {
-            "Request to get orders for user ID: $pathUserId with criteria: $criteriaInput, " +
-                    "page=$page, size=$size, sort=$sort"
-        }
-
-        val validatedSort: Sort = sortValidator.validateAndBuildSort(
-            sort,
-            OrderSortField::class.java
-        )
+        val validatedSort: Sort = sortValidator.validateAndBuildSort(sort, OrderSortField::class.java)
         val pageable = PageRequest.of(page, size, validatedSort)
 
-        val serviceCriteria = OrderSearchCriteria(
-            search = criteriaInput.search,
-            status = criteriaInput.status,
-            minAmount = criteriaInput.minAmount,
-            maxAmount = criteriaInput.maxAmount,
-            startDate = criteriaInput.startDate,
-            endDate = criteriaInput.endDate,
-            userId = pathUserId, // IMPORTANT: Always scope by the pathUserId for this endpoint
-            paymentMethod = criteriaInput.paymentMethod,
-            hasTransactionId = criteriaInput.hasTransactionId
-        )
+        // The criteria DTO is copied to ensure the userId from the path is enforced,
+        // preventing any potential manipulation from the request body.
+        val serviceCriteria = criteriaInput.copy(userId = pathUserId)
 
-        val ordersPage = orderService.getOrdersForUser(pageable, serviceCriteria)
-        logger.info { "Retrieved ${ordersPage.numberOfElements} orders for user ID $pathUserId on page $page." }
+        val ordersPage = orderQueryService.getOrdersForUser(pageable, serviceCriteria)
+
+        logger.info { "Successfully retrieved ${ordersPage.numberOfElements} orders on page $page for user ID $pathUserId (Total: ${ordersPage.totalElements})." }
         return ResponseEntity.ok(ordersPage)
     }
 
@@ -94,15 +72,13 @@ class OrderController(
         @PathVariable userId: Long,
         @PathVariable orderId: Long
     ): ResponseEntity<OrderDTO> {
-        logger.info { "Request to get order ID: $orderId for user ID: $userId" }
+        logger.info { "Request received: Get order ID: $orderId for user ID: $userId" }
 
-        val order = orderService.getOrderById(userId, orderId)
+        val orderDto = orderQueryService.getOrderById(userId, orderId)
             ?: throw OrderNotFoundException(orderId)
 
-        val orderDto = orderMapper.toDto(order)
-
+        logger.info { "Successfully retrieved order ID: $orderId for user ID: $userId." }
         return ResponseEntity.ok(orderDto)
-
     }
 
     @PostMapping("/users/{userId}/orders")
@@ -115,9 +91,11 @@ class OrderController(
         @PathVariable userId: Long,
         @Valid @RequestBody orderCreateRequestDTO: OrderCreateRequestDTO
     ): ResponseEntity<OrderDTO> {
-        logger.info { "Request to create order for user ID: $userId" }
-        val orderDto = orderService.createOrder(userId, orderCreateRequestDTO)
-        logger.info { "Successfully created order ID: ${orderDto.id} for user ID: $userId" }
+        logger.info { "Request received: Create order for user ID: $userId" }
+
+        val orderDto = createOrderUseCase.execute(userId, orderCreateRequestDTO)
+
+        logger.info { "Successfully created order ID: ${orderDto.id} for user ID: $userId." }
         return ResponseEntity.status(HttpStatus.CREATED).body(orderDto)
     }
 
@@ -131,10 +109,10 @@ class OrderController(
         @PathVariable userId: Long,
         @PathVariable orderId: Long
     ) {
-        logger.info { "Request to cancel order ID: $orderId for user ID: $userId" }
-        orderService.cancelOrder(userId, orderId)
-        logger.info { "Successfully processed cancellation for order ID: $orderId" }
+        logger.info { "Request received: Cancel order ID: $orderId for user ID: $userId" }
+
+        orderCommandService.cancelOrder(userId, orderId)
+
+        logger.info { "Successfully processed cancellation for order ID: $orderId." }
     }
-
-
 }
