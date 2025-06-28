@@ -7,9 +7,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface OrderQueryService {
-    fun getOrderById(userId: Long, orderId: Long): Order?
-    fun getOrderByIdAdmin(orderId: Long): Order?
-    fun getOrderByIdWithOrderItems(orderId: Long): Order?
+    fun getOrderById(userId: Long, orderId: Long): OrderDTO?
+    fun getOrderByIdAdmin(orderId: Long): OrderDTO?
+    fun getOrderByIdWithOrderItems(orderId: Long): OrderDTO?
     fun getOrdersForUser(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO>
     fun getAllOrders(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO>
 }

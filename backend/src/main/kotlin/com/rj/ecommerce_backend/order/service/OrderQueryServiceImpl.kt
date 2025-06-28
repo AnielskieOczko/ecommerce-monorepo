@@ -24,27 +24,34 @@ class OrderQueryServiceImpl(
     private val securityContext: SecurityContext
 ) : OrderQueryService {
 
-    override fun getOrderById(userId: Long, orderId: Long): Order? {
+    override fun getOrderById(userId: Long, orderId: Long): OrderDTO? {
         securityContext.ensureAccess(userId)
         val order = orderRepository.findById(orderId).orElse(null) ?: return null
         if (order.user?.id != userId) {
             logger.warn { "User $userId attempted to access order $orderId belonging to user ${order.user?.id}" }
             throw AccessDeniedException("User $userId is not authorized to access order $orderId")
         }
-        return order
+        // CORRECT: Map the found entity to a DTO before returning.
+        return orderMapper.toDto(order)
     }
 
-    override fun getOrderByIdAdmin(orderId: Long): Order? {
+    override fun getOrderByIdAdmin(orderId: Long): OrderDTO? {
         securityContext.ensureAdmin()
-        return orderRepository.findById(orderId).orElse(null)
+        // CORRECT: Use .map to safely transform the Optional<Order> to an Optional<OrderDTO>
+        return orderRepository.findById(orderId)
+            .map { orderMapper.toDto(it) }
+            .orElse(null)
     }
 
-    override fun getOrderByIdWithOrderItems(orderId: Long): Order? {
+    override fun getOrderByIdWithOrderItems(orderId: Long): OrderDTO? {
         val currentUser = securityContext.getCurrentUser()
-        return currentUser.id?.let { userId ->
-            securityContext.ensureAccess(userId)
-            orderRepository.findByIdWithOrderItems(orderId, userId)
-        } ?: throw IllegalStateException("Authenticated user has a null ID.")
+        val userId = currentUser.id ?: throw IllegalStateException("Authenticated user has a null ID.")
+
+        securityContext.ensureAccess(userId)
+
+        // CORRECT: Map the found entity to a DTO before returning.
+        return orderRepository.findByIdWithOrderItems(orderId, userId)
+            ?.let { orderMapper.toDto(it) }
     }
 
     override fun getOrdersForUser(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO> {
@@ -53,6 +60,8 @@ class OrderQueryServiceImpl(
 
         val spec: Specification<Order> = criteria.toSpecification()
         val pageOfOrders = orderRepository.findAll(spec, pageable)
+
+        // This was already correct: .map on a Page transforms its content.
         return pageOfOrders.map { orderMapper.toDto(it) }
     }
 
@@ -60,6 +69,8 @@ class OrderQueryServiceImpl(
         securityContext.ensureAdmin()
         val spec: Specification<Order> = criteria.toSpecification()
         val pageOfOrders = orderRepository.findAll(spec, pageable)
+
+        // This was already correct.
         return pageOfOrders.map { orderMapper.toDto(it) }
     }
 }
