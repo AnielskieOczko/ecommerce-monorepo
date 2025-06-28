@@ -37,7 +37,7 @@ class CartMapper {
         val productSummaryDTO = ProductSummaryDTO(
             id = cartItem.product.id
                 ?: throw IllegalStateException("Product in CartItem ${cartItem.id} must have an ID."),
-            name = cartItem.product.name?.value,
+            name = cartItem.product.name.value,
             unitPrice = cartItem.product.unitPrice
         )
 
