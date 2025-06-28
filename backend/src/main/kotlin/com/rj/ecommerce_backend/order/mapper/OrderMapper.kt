@@ -1,157 +1,114 @@
 package com.rj.ecommerce_backend.order.mapper
 
-import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.core.ZipCode
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
 import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
-import com.rj.ecommerce_backend.product.domain.Product // Assuming Product has productName property
-import com.rj.ecommerce.api.shared.enums.Currency // Use this one
+import com.rj.ecommerce_backend.product.domain.Product
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-import java.lang.IllegalStateException
 import java.math.BigDecimal
 
 @Component
-class OrderMapper {
+class OrderMapper(
+) {
 
-    fun toDto(order: Order?): OrderDTO? {
-        return order?.let { o ->
-            val orderItemDTOs = o.orderItems.mapNotNull { orderItem -> toDto(orderItem) }
+    /**
+     * Maps an Order domain entity to its corresponding DTO.
+     * This method now uses .map, relying on the item mapper to never return null.
+     */
+    fun toDto(order: Order): OrderDTO {
+        // The call to .map is now safe because our item mapper guarantees a non-null result.
+        val orderItemDTOs = order.orderItems.map { toDto(it) }
 
-            val shippingAddressDTO = o.shippingAddress?.let { sa ->
-                Address(
-                    street = sa.street,
-                    city = sa.city,
-                    zipCode = sa.zipCode?.let { ZipCode(it.value) },
-                    country = sa.country
-                )
-            }
-
-            OrderDTO(
-                id = o.id,
-                userId = o.user?.id,
-                customerEmail = o.user?.email?.value,
-                items = orderItemDTOs,
-                totalAmount = o.totalAmount?.let { Money(it, o.currency) },
-                shippingAddress = shippingAddressDTO,
-                shippingMethod = o.shippingMethod,
-                paymentMethod = o.paymentMethod,
-                orderStatus = o.orderStatus,
-                paymentStatus = o.paymentStatus,
-                paymentTransactionId = o.paymentTransactionId,
-                orderDate = o.orderDate,
-                checkoutSessionUrl = o.checkoutSessionUrl,
-                checkoutSessionExpiresAt = o.checkoutSessionExpiresAt,
-                receiptUrl = o.receiptUrl
-            )
-        }
+        return OrderDTO(
+            id = order.id,
+            userId = order.user?.id,
+            customerEmail = order.user?.email?.value,
+            items = orderItemDTOs, // This is now a non-nullable list
+            totalAmount = order.totalAmount?.let { Money(it, order.currency) },
+            shippingAddress = order.shippingAddress,
+            shippingMethod = order.shippingMethod,
+            paymentMethod = order.paymentMethod,
+            orderStatus = order.orderStatus,
+            paymentStatus = order.paymentStatus,
+            paymentTransactionId = order.paymentTransactionId,
+            orderDate = order.orderDate,
+            checkoutSessionUrl = order.checkoutSessionUrl,
+            checkoutSessionExpiresAt = order.checkoutSessionExpiresAt,
+            receiptUrl = order.receiptUrl
+        )
     }
 
-    fun toDto(orderItem: OrderItem?): OrderItemDTO? {
-        return orderItem?.let { oi ->
-            val productEntity: Product? = oi.product
+    /**
+     * Maps an OrderItem domain entity to its corresponding DTO.
+     * This method now accepts a non-nullable OrderItem and is guaranteed to return
+     * a non-nullable OrderItemDTO, or it will throw an exception if the entity data is invalid.
+     */
+    private fun toDto(orderItem: OrderItem): OrderItemDTO {
+        // Use requireNotNull to enforce data integrity. If any of these are null,
+        // it's a data corruption issue that should fail fast.
+        val product = requireNotNull(orderItem.product) { "Product cannot be null for OrderItem ID: ${orderItem.id}" }
+        val productId = requireNotNull(product.id) { "Product ID cannot be null for OrderItem ID: ${orderItem.id}" }
+        val productName = requireNotNull(product.name.value) { "Product name cannot be null for Product ID: $productId" }
+        val unitPrice = requireNotNull(orderItem.price) { "Price cannot be null for OrderItem ID: ${orderItem.id}" }
+        val orderCurrency = requireNotNull(orderItem.order?.currency) { "Order currency cannot be null for OrderItem ID: ${orderItem.id}" }
 
-            val productNameValue: String? = productEntity?.name?.value
-            if (productNameValue == null && productEntity != null) {
-                logger.error { "Product should name id." }
-                throw IllegalStateException("Product should have name.")
-            }
+        val productSummary = ProductSummaryDTO(
+            id = productId,
+            name = productName,
+            unitPrice = Money(unitPrice, orderCurrency)
+        )
 
-            val productId: Long = productEntity?.id ?: run {
-                logger.error { "Product should have id." }
-                throw IllegalStateException("Product should have id.")
-            }
+        val lineTotalAmount = unitPrice.multiply(BigDecimal.valueOf(orderItem.quantity.toLong()))
+        val lineTotal = Money(lineTotalAmount, orderCurrency)
 
-
-            val productSummary = ProductSummaryDTO(
-                id = productId,
-                name = productNameValue,
-                unitPrice = oi.price?.let { price ->
-                    Money(
-                        amount = price,
-                        currencyCode = oi.order?.currency ?: Currency.PLN
-                    )
-                }
-            )
-
-            OrderItemDTO(
-                product = productSummary,
-                quantity = oi.quantity,
-                lineTotal = getLineTotal(oi)
-            )
-        }
+        return OrderItemDTO(
+            product = productSummary,
+            quantity = orderItem.quantity,
+            lineTotal = lineTotal
+        )
     }
 
-    fun toEntity(orderDTO: OrderDTO?): Order? {
-        return orderDTO?.let { dto ->
-            val shippingAddressEntity = dto.shippingAddress?.let { saDto ->
-                Address(
-                    street = saDto.street,
-                    city = saDto.city,
-                    zipCode = saDto.zipCode,
-                    country = saDto.country
-                )
-            }
 
-            Order(
-                id = dto.id,
-                user = null,
-                totalAmount = dto.totalAmount?.amount,
-                currency = dto.totalAmount?.currencyCode?.let {
-                    try {
-                        Currency.valueOf(it.name)
-                    } catch (e: IllegalArgumentException) {
-                        Currency.PLN
-                    }
-                } ?: Currency.PLN,
-                shippingAddress = shippingAddressEntity,
-                shippingMethod = dto.shippingMethod,
-                paymentMethod = dto.paymentMethod,
-                paymentTransactionId = dto.paymentTransactionId,
-                checkoutSessionUrl = dto.checkoutSessionUrl,
-                checkoutSessionExpiresAt = dto.checkoutSessionExpiresAt,
-                receiptUrl = dto.receiptUrl,
-                paymentStatus = dto.paymentStatus,
-                orderStatus = dto.orderStatus
-            ).also { orderEntity ->
-                dto.items.forEach { itemDto ->
-                    toEntity(itemDto)?.let { orderItemEntity ->
-                        orderEntity.addOrderItem(orderItemEntity)
-                    }
-                }
-            }
-        }
+    /**
+     * Safely updates a managed Order entity with data from a DTO.
+     * This method assumes the entity has been fetched from the database within a transaction.
+     * It does NOT save the entity; that is the service's responsibility.
+     */
+    fun updateEntityFromDto(entity: Order, dto: OrderDTO, products: Map<Long, Product>) {
+        // ... update simple fields like shippingAddress, status, etc. ...
+
+        updateOrderItemsFromDto(entity, dto.items, products)
     }
 
-    fun toEntity(orderItemDTO: OrderItemDTO?): OrderItem? {
-        return orderItemDTO?.let { dto ->
-            OrderItem(
-                id = null,
-                quantity = dto.quantity,
-                price = dto.product.unitPrice?.amount
+    private fun updateOrderItemsFromDto(
+        order: Order,
+        itemDtos: List<OrderItemDTO>,
+        productsById: Map<Long, Product>
+    ) {
+        order.orderItems.clear()
+
+        itemDtos.forEach { itemDto ->
+            // Look up the product from the provided map.
+            // If it's not there, it's a logic error in the service, which should have validated it.
+            val product = requireNotNull(productsById[itemDto.product.id]) {
+                "Logic error: Product with ID ${itemDto.product.id} was not pre-fetched by the service."
+            }
+
+            val newOrderItem = OrderItem(
+                order = order,
+                product = product,
+                quantity = itemDto.quantity,
+                price = product.unitPrice.amount
             )
+            order.addOrderItem(newOrderItem)
         }
     }
 
     companion object {
         private val logger = KotlinLogging.logger {  }
-
-        private fun getLineTotal(orderItem: OrderItem): Money {
-            val itemPrice = orderItem.price ?: BigDecimal.ZERO
-            val quantity = BigDecimal.valueOf(orderItem.quantity.toLong())
-            val lineAmount = itemPrice.multiply(quantity)
-
-            // Handle null order or null currency on order
-            val currencyCode = orderItem.order?.currency ?: Currency.PLN
-
-            return Money(
-                amount = lineAmount,
-                currencyCode = currencyCode
-            )
-        }
     }
 }
