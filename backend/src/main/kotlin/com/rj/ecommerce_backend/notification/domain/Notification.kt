@@ -1,10 +1,20 @@
-package com.rj.ecommerce_backend.notification
+package com.rj.ecommerce_backend.notification.domain
 
 import com.rj.ecommerce.api.shared.enums.NotificationChannel
-import com.rj.ecommerce.api.shared.enums.NotificationTemplate
 import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce.api.shared.enums.NotificationEntityType
-import jakarta.persistence.*
+import com.rj.ecommerce.api.shared.enums.NotificationTemplate
+import com.rj.ecommerce_backend.notification.context.NotificationContext
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.annotation.CreatedBy

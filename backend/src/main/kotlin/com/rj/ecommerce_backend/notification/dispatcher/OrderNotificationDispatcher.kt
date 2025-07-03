@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.notification.dispatcher
 
 import com.rj.ecommerce.api.shared.enums.*
-import com.rj.ecommerce_backend.notification.Notification
-import com.rj.ecommerce_backend.notification.NotificationContext
+import com.rj.ecommerce_backend.notification.command.CreateNotificationCommand
+import com.rj.ecommerce_backend.notification.context.NotificationContext
 import com.rj.ecommerce_backend.notification.service.NotificationService
 import com.rj.ecommerce_backend.order.domain.Order
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -16,62 +16,47 @@ class OrderNotificationDispatcher(
 ) {
     fun sendOrderConfirmation(order: Order) {
         val user = order.user ?: return
-        val context = NotificationContext.OrderContext(order)
-        val notification = Notification(
+        val command = CreateNotificationCommand(
             recipient = user.email.value,
             subject = "Your Order Confirmation #${order.id}",
-            channel = NotificationChannel.EMAIL,
             template = NotificationTemplate.ORDER_CONFIRMATION,
             entityType = NotificationEntityType.ORDER,
             entityId = order.id.toString(),
-            context = context
+            context = NotificationContext.OrderContext(order),
+            // Business decision: Order confirmations go to Email and SMS
+            channels = setOf(NotificationChannel.EMAIL, NotificationChannel.SMS)
         )
-        dispatch(notification, "order confirmation")
-    }
-
-    fun sendPaymentSuccess(order: Order) {
-        val user = order.user ?: return
-        val context = NotificationContext.OrderContext(order)
-        val notification = Notification(
-            recipient = user.email.value,
-            subject = "Payment Received for Order #${order.id}",
-            channel = NotificationChannel.EMAIL,
-            template = NotificationTemplate.PAYMENT_CONFIRMATION,
-            entityType = NotificationEntityType.ORDER,
-            entityId = order.id.toString(),
-            context = context
-        )
-        dispatch(notification, "payment success")
-    }
-
-    fun sendPaymentFailed(order: Order) {
-        val user = order.user ?: return
-        val context = NotificationContext.OrderContext(order)
-        val notification = Notification(
-            recipient = user.email.value,
-            subject = "Payment Failed for Order #${order.id}",
-            channel = NotificationChannel.EMAIL,
-            template = NotificationTemplate.PAYMENT_FAILED,
-            entityType = NotificationEntityType.ORDER,
-            entityId = order.id.toString(),
-            context = context
-        )
-        dispatch(notification, "payment failure")
+        notificationService.dispatch(command)
     }
 
     fun sendOrderCancelled(order: Order) {
         val user = order.user ?: return
-        val context = NotificationContext.OrderContext(order)
-        val notification = Notification(
+        val command = CreateNotificationCommand(
             recipient = user.email.value,
             subject = "Your Order #${order.id} Has Been Cancelled",
-            channel = NotificationChannel.EMAIL,
             template = NotificationTemplate.ORDER_CANCELLED,
             entityType = NotificationEntityType.ORDER,
             entityId = order.id.toString(),
-            context = context
+            context = NotificationContext.OrderContext(order),
+            // Business decision: Cancellations only go to Email
+            channels = setOf(NotificationChannel.EMAIL)
         )
-        dispatch(notification, "order cancellation")
+        notificationService.dispatch(command)
+    }
+
+    fun sendPaymentFailed(order: Order) {
+        val user = order.user ?: return
+        val command = CreateNotificationCommand(
+            recipient = user.email.value,
+            subject = "Payment Failed for Order #${order.id}",
+            template = NotificationTemplate.PAYMENT_FAILED,
+            entityType = NotificationEntityType.ORDER,
+            entityId = order.id.toString(),
+            context = NotificationContext.OrderContext(order),
+            // Business decision: Cancellations only go to Email
+            channels = setOf(NotificationChannel.EMAIL)
+        )
+        notificationService.dispatch(command)
     }
 
     /**
@@ -82,27 +67,17 @@ class OrderNotificationDispatcher(
         // For status updates, the simple OrderContext is sufficient.
         // A more specific context is only needed if the template requires extra data
         // (like previousStatus), which is not the case for shipment/delivery emails.
-        val context = NotificationContext.OrderContext(order)
-
-        val notification = Notification(
+        val command = CreateNotificationCommand(
             recipient = user.email.value,
             subject = "Update on your order #${order.id}",
-            channel = NotificationChannel.EMAIL,
             template = template,
             entityType = NotificationEntityType.ORDER,
             entityId = order.id.toString(),
-            context = context
+            context = NotificationContext.OrderContext(order),
+            // Business decision: Cancellations only go to Email
+            channels = setOf(NotificationChannel.EMAIL)
         )
-        dispatch(notification, "order status update (${template.name})")
+        notificationService.dispatch(command)
     }
 
-
-
-    private fun dispatch(notification: Notification, type: String) {
-        try {
-            notificationService.dispatch(notification)
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to dispatch $type notification for order ID: ${notification.entityId}. The primary operation was not affected." }
-        }
-    }
 }

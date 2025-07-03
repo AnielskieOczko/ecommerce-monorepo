@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.notification
+package com.rj.ecommerce_backend.notification.context
 
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce_backend.order.domain.Order
