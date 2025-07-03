@@ -1,0 +1,20 @@
+# Build stage
+FROM maven:3.8.6-eclipse-temurin-17-alpine AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
+
+# Add explicit JAR path handling
+RUN mvn clean package -DskipTests && \
+    mv /app/target/*.jar /app/target/app.jar
+
+# Runtime stage
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# Copy with explicit filename
+COPY --from=build /app/target/app.jar app.jar
+
+# Use exec form with shell
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} -jar /app/app.jar"]

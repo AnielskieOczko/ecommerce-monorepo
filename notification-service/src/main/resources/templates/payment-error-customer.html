@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .message-box {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff4f4;
+            border-left: 4px solid #ff6b6b;
+            border-radius: 3px;
+        }
+        .order-details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .help-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Payment Processing Update</h1>
+    </div>
+    
+    <div class="message-box">
+        <p>We encountered an issue while processing your payment. Our team has been notified and is looking into it.</p>
+    </div>
+    
+    <div class="order-details">
+        <h2>Order Details</h2>
+        <p><strong>Order Number:</strong> <span th:text="${orderId}">ORD-12345</span></p>
+    </div>
+    
+    <div class="help-section">
+        <h2>What happens next?</h2>
+        <p>Your order is important to us. Here's what you can do:</p>
+        <ul>
+            <li>No action is required from you at this time. We'll process your order once the issue is resolved.</li>
+            <li>If you'd like to check on your order status, you can visit your account page on our website.</li>
+            <li>If you have any questions, please contact our customer support team at <span th:text="${supportEmail != null ? supportEmail : 'support@example.com'}">support@example.com</span>.</li>
+        </ul>
+        
+        <div th:if="${helpUrl != null}" style="text-align: center; margin: 20px 0;">
+            <a th:href="${helpUrl}" class="button">Get Help</a>
+        </div>
+    </div>
+    
+    <p>We apologize for any inconvenience this may have caused.</p>
+    
+    <div class="footer">
+        <p>Thank you for your patience and understanding.</p>
+        <p>&copy; 2025 Your Ecommerce Store. All rights reserved.</p>
+    </div>
+</body>
+</html>

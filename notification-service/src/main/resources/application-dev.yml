@@ -1,0 +1,92 @@
+# File: email-service/src/main/resources/application.yml
+
+# Spring Boot standard configuration
+spring:
+  application:
+    name: ecommerce-email-service
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+server:
+  port: 8090
+
+# Our custom, type-safe application properties
+app:
+  rabbitmq:
+    notification-request:
+      exchange: "notification.request.exchange"
+      queue: "notification.request.queue"
+      routing-key: "notification.request.key"
+      dlq:
+        exchange: "notification.request.exchange.dlx"
+        routing-key: "notification.request.key.dlq"
+
+    notification-receipt:
+      exchange: "notification.receipt.exchange"
+      queue: "notification.receipt.queue"
+      routing-key: "notification.receipt.key"
+      # This queue is for outgoing messages, so a DLQ on the consumer (backend) side is more relevant.
+      # Setting it to null here is fine.
+      dlq: null
+  notification:
+    channels:
+      email:
+        active-provider: "smtp"
+        default-from: "noreply@ecommerce.com"
+      sms:
+        active-provider: "twilio"
+        default-from: "+15551234567"
+
+    # Configuration for all possible vendors
+    vendors:
+      smtp:
+        host: ${SMTP_HOST:localhost} # Defaults to localhost for MailHog
+        port: ${SMTP_PORT:1025}
+        username: ${SMTP_USERNAME:} # Empty by default
+        password: ${SMTP_PASSWORD:} # Empty by default
+        properties:
+          mail.smtp.auth: "${SMTP_AUTH:false}" # Use strings for properties
+          mail.smtp.starttls.enable: "${SMTP_STARTTLS:false}"
+      sendgrid:
+        api-key: ${SENDGRID_API_KEY:}
+      twilio:
+        account-sid: ${TWILIO_ACCOUNT_SID:}
+        auth-token: ${TWILIO_AUTH_TOKEN:}
+  monitoring:
+    enabled: true
+    schedule: "0 */1 * * * *" # Cron expression for every minute
+
+---
+
+# Production profile overrides
+spring:
+  config:
+    activate:
+      on-profile: prod
+  mail:
+    host: smtp.yourprovider.com
+    port: 587
+    username: ${EMAIL_USER}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  thymeleaf:
+    cache: true
+
+app:
+  mail:
+    active-provider: "sendgrid" # Example: Use SendGrid in production

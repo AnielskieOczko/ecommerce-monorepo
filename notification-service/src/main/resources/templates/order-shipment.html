@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Shipped</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        .tracking-info {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .tracking-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .order-summary {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .order-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .order-items th, .order-items td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .order-items th {
+            background-color: #f2f2f2;
+        }
+        .shipping-details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Your Order Has Been Shipped!</h1>
+        <p>Get ready - your package is on its way!</p>
+    </div>
+
+    <p>Hello <span th:text="${customer != null ? (customer.fullName() != null ? customer.fullName() : customer.email) : 'Valued Customer'}">Customer</span>,</p>
+
+    <p>Great news! Your order has been shipped and is on its way to you.</p>
+
+    <div class="tracking-info" th:if="${additionalData != null && additionalData.trackingNumber != null}">
+        <h2>Tracking Information</h2>
+        <p>Shipping Carrier: <strong th:text="${shippingMethod != null ? shippingMethod : 'Standard Shipping'}">Standard Shipping</strong></p>
+        <p>Tracking Number: <strong th:text="${additionalData.trackingNumber}">1234567890</strong></p>
+        <a th:if="${additionalData.trackingUrl != null}" th:href="${additionalData.trackingUrl}" class="tracking-button">Track Your Package</a>
+    </div>
+
+    <div class="order-summary">
+        <h2>Order Summary</h2>
+        <p><strong>Order Number:</strong> <span th:text="${orderNumber != null ? orderNumber : orderId}">ORD-12345</span></p>
+        <p><strong>Order Date:</strong> <span th:text="${#temporals.format(orderDate, 'MMMM dd, yyyy')}">January 1, 2025</span></p>
+        <p th:if="${additionalData != null && additionalData.estimatedDelivery != null}">
+            <strong>Estimated Delivery:</strong> <span th:text="${#temporals.format(additionalData.estimatedDelivery, 'MMMM dd, yyyy')}">January 5, 2025</span>
+        </p>
+    </div>
+
+    <h2>Items Shipped</h2>
+    <table class="order-items">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.productName}">Product Name</td>
+                <td th:text="${item.quantity}">1</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="shipping-details" th:if="${shippingAddress != null}">
+        <h2>Shipping Address</h2>
+        <p th:text="${shippingAddress.street}">123 Main St</p>
+        <p th:text="${shippingAddress.city + ', ' + shippingAddress.zipCode}">City, 12345</p>
+        <p th:text="${shippingAddress.country}">Country</p>
+    </div>
+
+    <div class="footer">
+        <p>If you need any assistance, please don't hesitate to contact our customer service team.</p>
+        <p>Thank you for shopping with us!</p>
+        <p>&copy; 2025 Your Ecommerce Store. All rights reserved.</p>
+    </div>
+</body>
+</html>
