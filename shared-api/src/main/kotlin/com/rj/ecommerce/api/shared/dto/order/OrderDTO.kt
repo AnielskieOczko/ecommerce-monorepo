@@ -2,11 +2,9 @@ package com.rj.ecommerce.api.shared.dto.order
 
 import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
 import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.enums.OrderStatus
 import com.rj.ecommerce.api.shared.enums.PaymentMethod
-import com.rj.ecommerce.api.shared.enums.PaymentStatus
 import com.rj.ecommerce.api.shared.enums.ShippingMethod
 import java.time.LocalDateTime
 

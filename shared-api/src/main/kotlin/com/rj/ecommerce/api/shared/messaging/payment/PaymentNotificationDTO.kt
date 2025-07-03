@@ -2,7 +2,6 @@ package com.rj.ecommerce.api.shared.messaging.payment
 
 import com.rj.ecommerce.api.shared.core.Money
 import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce.api.shared.enums.PaymentStatus
 import java.time.LocalDateTime
 
 /**

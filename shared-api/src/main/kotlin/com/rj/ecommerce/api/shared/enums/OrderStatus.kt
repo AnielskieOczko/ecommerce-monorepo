@@ -9,7 +9,6 @@ enum class OrderStatus {
     CANCELLED,      // Order has been cancelled
     REFUNDED,       // Order has been refunded
     FAILED;         // Order failed (e.g., payment failed)
-    // Semicolon is optional here
 
     companion object {
         /**
