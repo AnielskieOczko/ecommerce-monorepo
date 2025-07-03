@@ -5,11 +5,10 @@ import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionDTO
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentStatusDTO
 import com.rj.ecommerce_backend.messaging.payment.producer.PaymentMessageProducer
 import com.rj.ecommerce_backend.order.domain.Order
-import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.service.OrderCommandService
+import com.rj.ecommerce_backend.order.service.OrderQueryService
 import com.rj.ecommerce_backend.payment.gateway.PaymentGatewayResolver
-import com.rj.ecommerce_backend.product.domain.Product
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -24,7 +23,8 @@ private val logger = KotlinLogging.logger { PaymentFacade::class }
 @Transactional
 class PaymentFacade(
     private val securityContext: SecurityContext,
-    private val orderService: OrderCommandService,
+    private val orderCommandService: OrderCommandService,
+    private val orderQueryService: OrderQueryService,
     private val paymentMessageProducer: PaymentMessageProducer,
     private val gatewayResolver: PaymentGatewayResolver // Inject the new resolver
 ) {
@@ -37,7 +37,7 @@ class PaymentFacade(
         val userId = securityContext.getCurrentUser().id ?: throw UserAuthenticationException("User not authenticated.")
 
         // 1. All validation and business logic live here.
-        val order = orderService.getOrderById(userId, orderId)
+        val order = orderQueryService.findOrderEntityById(orderId)
             ?: throw OrderNotFoundException("Order not found with ID: $orderId")
 
         if (isValidCheckoutSession(order)) {
@@ -64,7 +64,7 @@ class PaymentFacade(
         val paymentRequestDTO = gateway.buildPaymentRequest(order, successUrl, cancelUrl)
 
         // 4. Update our order state before sending the message.
-        orderService.updatePaymentDetailsOnInitiation(order)
+        orderCommandService.updatePaymentDetailsOnInitiation(order)
 
         // 5. Send the request to the Payment Microservice.
         paymentMessageProducer.sendCheckoutSessionRequest(paymentRequestDTO, order.id.toString())
@@ -88,7 +88,7 @@ class PaymentFacade(
         // e.g., NotAuthenticatedException or similar, rather than IllegalStateException.
 
         // 2. Fetch and Validate Order
-        val order = orderService.getOrderById(currentUserId, orderId)
+        val order = orderQueryService.findOrderEntityById(orderId)
             ?: run {
                 logger.warn { "Order not found with ID: $orderId for user ID: $currentUserId, or user does not have access." }
                 throw OrderNotFoundException("Order not found with ID: $orderId, or access denied.") // Message reflects both possibilities
@@ -130,10 +130,4 @@ class PaymentFacade(
         }
         return isValid
     }
-
-    // Helper extension functions for logging nullable IDs (place in a suitable utility file)
-    fun Order?.idStringForLog(): String = this?.id?.toString() ?: "UNKNOWN_ORDER_ID"
-    fun OrderItem?.idStringForLog(): String = this?.id?.toString() ?: "UNKNOWN_ORDER_ITEM_ID"
-    fun Product?.idStringForLog(): String = this?.id?.toString() ?: "UNKNOWN_PRODUCT_ID"
-
 }

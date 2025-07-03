@@ -1,65 +1,58 @@
 package com.rj.ecommerce_backend.payment
 
+import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
 import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
+import com.rj.ecommerce_backend.events.payment.PaymentFailedEvent
+import com.rj.ecommerce_backend.events.payment.PaymentSucceededEvent
 import com.rj.ecommerce_backend.order.service.OrderCommandService
+import com.rj.ecommerce_backend.order.service.OrderQueryService
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional // Annotation applies to the public method
 class PaymentResponseProcessor(
-    private val orderService: OrderCommandService,
-    private val paymentNotificationService: PaymentNotificationService
+    private val orderCommandService: OrderCommandService,
+    private val orderQueryService: OrderQueryService,
+    private val eventPublisher: ApplicationEventPublisher
 ) {
-
     companion object {
-        // Use a more standard logger name for consistency
         private val log = KotlinLogging.logger {}
     }
 
-    /**
-     * Processes a checkout session response from a payment provider webhook.
-     * 1. Updates the order status transactionally.
-     * 2. Send a notification. A failure here does NOT roll back the order update.
-     */
+    @Transactional
     fun processCheckoutSessionResponse(response: PaymentResponseDTO) {
-        val orderId = response.orderId
-        log.info { "Processing webhook response for orderId: $orderId, status: ${response.paymentStatus}" }
+        log.info { "Processing webhook response for orderId: ${response.orderId}, status: ${response.paymentStatus}" }
 
         try {
-            // --- Step 1: Critical Transactional Update ---
-            orderService.updateOrderWithCheckoutSession(response)
+            // This call now only handles the state change of the order.
+            orderCommandService.updateOrderWithCheckoutSession(response)
 
-            // --- Step 2: Non-Critical Notification ---
-            try {
-                paymentNotificationService.sendPaymentNotification(response)
-                log.info { "Successfully sent payment notification for orderId: $orderId" }
-            } catch (notificationError: Exception) {
-                log.error(notificationError) { "Failed to send payment notification for orderId: $orderId after successful update." }
+            // After the state is successfully updated and committed, publish an event.
+            // We need to re-fetch the order to ensure we have the fully updated state.
+            val updatedOrder = orderQueryService.findOrderEntityById(response.orderId)
+                ?: run {
+                    log.error { "Could not re-fetch order ${response.orderId} after update. Cannot publish event." }
+                    return
+                }
+
+            when (response.paymentStatus) {
+                CanonicalPaymentStatus.SUCCEEDED -> {
+                    eventPublisher.publishEvent(PaymentSucceededEvent(this, updatedOrder, response))
+                }
+                CanonicalPaymentStatus.FAILED, CanonicalPaymentStatus.EXPIRED -> {
+                    eventPublisher.publishEvent(PaymentFailedEvent(this, updatedOrder, response))
+                }
+                else -> {
+                    log.info { "No event published for payment status: ${response.paymentStatus}" }
+                }
             }
-
         } catch (e: Exception) {
-            log.error(e) { "Failed to process webhook for orderId: $orderId. Sending error notification." }
-
-            // Attempt to send an error notification as a best-effort.
-            // This should not throw an exception that would mask the original one.
-            sendErrorNotificationSafely(response, e)
-
-            // Re-throw the original, critical exception to ensure the transaction is rolled back
-            // and the caller (e.g., the webhook listener) knows the processing failed.
+            log.error(e) { "Failed to process webhook for orderId: ${response.orderId}." }
+            // No need to send an error notification here, as the transaction will roll back,
+            // and the message will likely be retried or sent to a DLQ.
             throw e
-        }
-    }
-
-    /**
-     * Sends an error notification in a safe way, ensuring it doesn't throw an exception itself.
-     */
-    private fun sendErrorNotificationSafely(response: PaymentResponseDTO, originalError: Exception) {
-        try {
-            paymentNotificationService.sendPaymentErrorNotification(response, originalError)
-        } catch (notificationError: Exception) {
-            log.error(notificationError) { "CRITICAL: Failed to send ERROR notification for orderId: ${response.orderId} after processing failure." }
         }
     }
 }
