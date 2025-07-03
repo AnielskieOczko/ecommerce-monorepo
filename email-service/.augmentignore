@@ -1,7 +1,0 @@
-# Ignore secrets and sensitive files
-src/main/resources/secrets.properties
-
-# You can also use patterns similar to .gitignore
-*.key
-*.pem
-**/secrets.*
