@@ -1,15 +1,19 @@
 package com.rj.ecommerce_backend.product.controller
 
+import com.rj.ecommerce.api.shared.core.ImageInfo
 import com.rj.ecommerce.api.shared.dto.product.ProductCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
 import com.rj.ecommerce.api.shared.dto.product.ProductUpdateRequestDTO
 
 // Backend components
-import com.rj.ecommerce_backend.product.service.ProductService
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
+import com.rj.ecommerce_backend.product.service.image.ProductImageService
+import com.rj.ecommerce_backend.product.service.ProductQueryService
+import com.rj.ecommerce_backend.product.usecases.CreateProductUseCase
+import com.rj.ecommerce_backend.product.usecases.DeleteProductUseCase
+import com.rj.ecommerce_backend.product.usecases.UpdateProductUseCase
 import com.rj.ecommerce_backend.sorting.ProductSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
-import com.rj.ecommerce_backend.storage.service.LocalStorageService
 
 // Swagger/OpenAPI
 import io.swagger.v3.oas.annotations.Operation
@@ -40,10 +44,13 @@ import java.net.URI
 @RequestMapping("/api/v1/admin/products")
 @PreAuthorize("hasRole('ADMIN')")
 class AdminProductController(
-    productService: ProductService,
-    localStorageService: LocalStorageService,
+    productQueryService: ProductQueryService,
+    private val createProductUseCase: CreateProductUseCase,
+    private val updateProductUseCase: UpdateProductUseCase,
+    private val deleteProductUseCase: DeleteProductUseCase,
+    private val productImageService: ProductImageService,
     sortValidator: SortValidator
-) : BaseProductController(productService, localStorageService, sortValidator) {
+) : BaseProductController(productQueryService, sortValidator) {
 
     @Operation(summary = "Get product by ID (Admin)", description = "Retrieves a specific product by its ID for admin.")
     @ApiResponses(
@@ -58,7 +65,7 @@ class AdminProductController(
     ): ResponseEntity<ProductResponseDTO> {
         logger.info { "Admin request to get product by ID: $productId" }
 
-        val productDto = productService.getProductById(productId)
+        val productDto = productQueryService.getProductById(productId)
             ?: throw ProductNotFoundException(productId)
         return ResponseEntity.ok(productDto)
     }
@@ -90,7 +97,7 @@ class AdminProductController(
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
         val pageable: Pageable = PageRequest.of(page, size, validatedSort)
 
-        val productPage = productService.findProductsByCategory(categoryId, pageable)
+        val productPage = productQueryService.findProductsByCategory(categoryId, pageable)
         return ResponseEntity.ok(productPage)
     }
 
@@ -109,7 +116,7 @@ class AdminProductController(
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
         val pageable: Pageable = PageRequest.of(page, size, validatedSort)
 
-        val searchResults = productService.findProductsByName(productName, pageable)
+        val searchResults = productQueryService.findProductsByName(productName, pageable)
         return ResponseEntity.ok(searchResults)
     }
 
@@ -129,7 +136,7 @@ class AdminProductController(
         @RequestPart(value = "imageFiles", required = false) imageFiles: List<MultipartFile>?
     ): ResponseEntity<ProductResponseDTO> {
         logger.info { "Admin request to create product: ${productCreateDTO.productData.name} with ${imageFiles?.size ?: 0} images." }
-        val createdProduct = productService.createProduct(productCreateDTO, imageFiles ?: emptyList())
+        val createdProduct = createProductUseCase.execute(productCreateDTO, imageFiles ?: emptyList())
 
         val location: URI = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -160,10 +167,23 @@ class AdminProductController(
     ): ResponseEntity<ProductResponseDTO> {
         logger.info { "Admin request to update core details for product ID: $productId" }
 
-        val updatedProduct = productService.updateProduct(productId, productUpdateDTO)
+        val updatedProduct = updateProductUseCase.execute(productId, productUpdateDTO)
 
         logger.info { "Admin successfully updated core details for product ID: $productId." }
         return ResponseEntity.ok(updatedProduct)
+    }
+
+    @Operation(summary = "Add images to an existing product", description = "Uploads one or more new images and associates them with a product.")
+    @PostMapping("/{productId}/images", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun addImagesToProduct(
+        @Parameter(description = "ID of the product to add images to") @PathVariable productId: Long,
+        @Parameter(description = "A common alt text for all uploaded images (optional)") @RequestParam(required = false) altText: String?,
+        @Parameter(description = "List of image files to upload") @RequestPart("imageFiles") imageFiles: List<MultipartFile>
+    ): ResponseEntity<List<ImageInfo>> {
+        logger.info { "Admin request to add ${imageFiles.size} images to product ID: $productId" }
+        val imageInfos = productImageService.addImagesToProduct(productId, imageFiles, altText)
+        logger.info { "Successfully added ${imageInfos.size} new images to product ID: $productId" }
+        return ResponseEntity.status(HttpStatus.CREATED).body(imageInfos)
     }
 
     @Operation(summary = "Delete product image (Admin)", description = "Deletes a specific image from a product.")
@@ -176,11 +196,11 @@ class AdminProductController(
     @DeleteMapping("/{productId}/images/{imageId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteProductImage(
-        @Parameter(description = "ID of the product") @PathVariable productId: Long,
-        @Parameter(description = "ID of the image to delete") @PathVariable imageId: Long
+        @PathVariable productId: Long,
+        @PathVariable imageId: Long
     ) {
         logger.info { "Admin request to delete image ID: $imageId from product ID: $productId" }
-        productService.deleteProductImage(productId, imageId)
+        productImageService.deleteImage(productId, imageId)
         logger.info { "Admin successfully processed delete request for image ID: $imageId on product ID: $productId" }
     }
 
@@ -195,7 +215,7 @@ class AdminProductController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteProduct(@Parameter(description = "ID of the product to delete") @PathVariable productId: Long) {
         logger.info { "Admin request to delete product ID: $productId" }
-        productService.deleteProduct(productId)
+        deleteProductUseCase.execute(productId)
         logger.info { "Admin successfully processed delete request for product ID: $productId" }
     }
 }

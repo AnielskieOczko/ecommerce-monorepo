@@ -4,13 +4,11 @@ package com.rj.ecommerce_backend.product.controller
 import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
 
 // Backend components
-import com.rj.ecommerce_backend.product.service.FileStorageService
-import com.rj.ecommerce_backend.product.service.ProductService
-import com.rj.ecommerce_backend.product.exception.ProductNotFoundException // For getPublicProductById
-import com.rj.ecommerce_backend.product.search.ProductSearchCriteria // For getAllProducts if used
+import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
+import com.rj.ecommerce_backend.product.service.ProductQueryService
 import com.rj.ecommerce_backend.sorting.ProductSortField
 import com.rj.ecommerce_backend.sorting.SortValidator
-import com.rj.ecommerce_backend.storage.service.LocalStorageService
+import com.rj.ecommerce_backend.storage.service.StorageService
 
 // Swagger/OpenAPI
 import io.swagger.v3.oas.annotations.Operation
@@ -18,26 +16,31 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.core.io.Resource
 
 
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.awt.PageAttributes
+import java.nio.file.Files
 
 @Tag(name = "Public Product API", description = "Public APIs for viewing products")
 @RestController
 @RequestMapping("/api/v1/public/products")
 class PublicProductController(
-    productService: ProductService,
-    localStorageService: LocalStorageService,
-    sortValidator: SortValidator
-) : BaseProductController(productService, localStorageService, sortValidator) {
+    productQueryService: ProductQueryService,
+    sortValidator: SortValidator,
+    private val storageService: StorageService
+) : BaseProductController(productQueryService, sortValidator) {
 
 
     // getAllProducts() is inherited from BaseProductController.
@@ -56,7 +59,7 @@ class PublicProductController(
         @Parameter(description = "ID of the product to retrieve") @PathVariable productId: Long
     ): ResponseEntity<ProductResponseDTO> {
         logger.info { "Public request for product ID: $productId" }
-        val productDto = productService.getProductById(productId)
+        val productDto = productQueryService.getProductById(productId)
             ?: throw ProductNotFoundException(productId)
         return ResponseEntity.ok(productDto)
     }
@@ -78,7 +81,7 @@ class PublicProductController(
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
         val pageable: Pageable = PageRequest.of(page, size, validatedSort)
 
-        val productPage = productService.findProductsByCategory(categoryId, pageable)
+        val productPage = productQueryService.findProductsByCategory(categoryId, pageable)
         return ResponseEntity.ok(productPage)
     }
 
@@ -100,7 +103,26 @@ class PublicProductController(
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
         val pageable: Pageable = PageRequest.of(page, size, validatedSort)
 
-        val searchResults = productService.findProductsByName(productName, pageable)
+        val searchResults = productQueryService.findProductsByName(productName, pageable)
         return ResponseEntity.ok(searchResults)
+    }
+
+    @GetMapping("/images/{fileName:.+}")
+    fun getProductImage(@PathVariable fileName: String): ResponseEntity<Resource> {
+        logger.info { "Request to get public product image: '$fileName'" }
+        val resource = storageService.loadAsResource(fileName)
+
+        val contentType = try {
+            MediaType.parseMediaType(Files.probeContentType(resource.file.toPath()))
+        } catch (e: Exception) {
+            // Fallback if the MIME type cannot be determined.
+            logger.warn { "Could not determine content type for file '$fileName'. Defaulting to application/octet-stream." }
+            MediaType.APPLICATION_OCTET_STREAM
+        }
+
+        return ResponseEntity.ok()
+            .contentType(contentType)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"${resource.filename}\"")
+            .body(resource)
     }
 }

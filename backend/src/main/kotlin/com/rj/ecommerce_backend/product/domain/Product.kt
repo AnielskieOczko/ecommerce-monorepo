@@ -89,14 +89,24 @@ data class Product(
         category.products.remove(this)
     }
 
+    // CORRECTED: These helpers now work with the updated Image entity.
     fun addImage(image: Image) {
         images.add(image)
-        image.product = this
+        // The product property on Image is now a var, so this is valid.
+        // We ensure the image passed in is already associated with this product.
+        if (image.product != this) {
+            image.product = this
+        }
     }
 
     fun removeImage(image: Image) {
+        // The orphanRemoval=true on the @OneToMany relationship means that when
+        // an image is removed from this list and the transaction is committed,
+        // Hibernate will automatically delete the Image from the database.
+        // The bidirectional link should also be broken.
         images.remove(image)
-        image.product = null
+        // The internal `clearProduct` method could be called here if needed,
+        // but orphanRemoval handles the persistence state change.
     }
 
     // If using data class, default equals/hashCode will include collections.
