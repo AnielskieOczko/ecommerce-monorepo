@@ -4,8 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "app.rabbitmq")
 data class RabbitMQProperties(
-    val email: TopicConfig,
-    val emailNotification: TopicConfig,
+    val notificationRequest: TopicConfig,
+    val notificationReceipt: TopicConfig,
     val checkoutSession: TopicConfig,
     val checkoutSessionResponse: TopicConfig,
     val paymentOptionsRequest: TopicConfig,

@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.messaging.email.consumer
 
-import com.rj.ecommerce.api.shared.messaging.email.EmailDeliveryReceiptDTO
+import com.rj.ecommerce.api.shared.messaging.email.NotificationDeliveryReceipt
 import com.rj.ecommerce_backend.notification.service.NotificationService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -25,18 +25,16 @@ class NotificationStatusListener(
      * (e.g., NotificationNotFoundException), it will propagate, triggering
      * RabbitMQ's retry/dead-lettering mechanism, preventing message loss.
      */
-    @RabbitListener(queues = ["\${app.rabbitmq.email-notification.queue}"])
-    fun handleDeliveryReceipt(receipt: EmailDeliveryReceiptDTO) {
-        log.info { "Received delivery receipt for original message (correlationId): ${receipt.correlationId}, status: ${receipt.status}" }
-
+    @RabbitListener(queues = ["\${app.rabbitmq.notification-receipt.queue}"]) // Corrected property name
+    fun handleDeliveryReceipt(receipt: NotificationDeliveryReceipt) {
+        log.info { "Received delivery receipt for correlationId: ${receipt.correlationId}, channel: ${receipt.channel}, status: ${receipt.status}" }
         try {
-            // The listener's responsibility is now just one line: delegate to the service.
             notificationService.updateStatusFromReceipt(receipt)
         } catch (e: Exception) {
-            // This catch block is a safety net. The service should handle known exceptions.
-            // Re-throwing is crucial for the messaging infrastructure to work correctly.
-            log.error(e) { "Error processing receipt for correlationId: ${receipt.correlationId}. The message will be retried or sent to DLQ." }
+            // SIMPLIFIED: Log a clear error message. The framework will log the stack trace.
+            log.error { "Unhandled exception while processing receipt for correlationId: ${receipt.correlationId}. Message will be rejected/re-queued." }
             throw e
         }
     }
+
 }

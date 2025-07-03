@@ -80,33 +80,33 @@ class RabbitMQConfig {
 
     @Bean
     fun emailExchange(props: RabbitMQProperties): TopicExchange =
-        TopicExchange(props.email.exchange, true, false)
+        TopicExchange(props.notificationRequest.exchange, true, false)
 
     @Bean
     fun emailQueue(props: RabbitMQProperties): Queue =
-        Queue(props.email.queue, true)
+        Queue(props.notificationRequest.queue, true)
 
     @Bean
     fun emailBinding(emailQueue: Queue, emailExchange: TopicExchange, props: RabbitMQProperties): Binding =
-        BindingBuilder.bind(emailQueue).to(emailExchange).with(props.email.routingKey)
+        BindingBuilder.bind(emailQueue).to(emailExchange).with(props.notificationRequest.routingKey)
 
 
     // --- Topology for Email Notification Status ---
 
     @Bean
     fun emailNotificationExchange(props: RabbitMQProperties): TopicExchange =
-        TopicExchange(props.emailNotification.exchange, true, false)
+        TopicExchange(props.notificationReceipt.exchange, true, false)
 
     @Bean
     fun emailNotificationQueue(props: RabbitMQProperties): Queue =
-        Queue(props.emailNotification.queue, true)
+        Queue(props.notificationReceipt.queue, true)
 
     @Bean
     fun emailNotificationBinding(
         emailNotificationQueue: Queue,
         emailNotificationExchange: TopicExchange,
         props: RabbitMQProperties
-    ): Binding = BindingBuilder.bind(emailNotificationQueue).to(emailNotificationExchange).with(props.emailNotification.routingKey)
+    ): Binding = BindingBuilder.bind(emailNotificationQueue).to(emailNotificationExchange).with(props.notificationReceipt.routingKey)
 
 
     // --- Topology for Checkout Session Creation ---
