@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.product.service
+package com.rj.ecommerce_backend.product.service.category
 
 import com.rj.ecommerce.api.shared.dto.product.category.CategoryDTO
 import com.rj.ecommerce.api.shared.dto.product.category.CategoryRequestDTO
