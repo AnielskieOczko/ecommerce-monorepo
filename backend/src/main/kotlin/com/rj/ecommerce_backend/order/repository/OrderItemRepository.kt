@@ -7,4 +7,10 @@ import org.springframework.stereotype.Repository
 @Repository
 interface OrderItemRepository: JpaRepository<OrderItem, Long> {
 
+    /**
+     * Efficiently checks if any OrderItem references a given product ID.
+     * This is much faster than fetching all items.
+     */
+    fun existsByProductId(productId: Long): Boolean
+
 }

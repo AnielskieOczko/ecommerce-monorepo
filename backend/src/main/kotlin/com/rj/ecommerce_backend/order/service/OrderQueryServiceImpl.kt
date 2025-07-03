@@ -73,4 +73,32 @@ class OrderQueryServiceImpl(
         // This was already correct.
         return pageOfOrders.map { orderMapper.toDto(it) }
     }
+
+    // --- Internal Service Method ---
+    /**
+     * Retrieves the full Order domain entity for internal business logic.
+     * This should be used by other services (like PaymentFacade) that need to operate
+     * on the rich domain model, not the DTO.
+     *
+     * @return The full, managed Order entity, or null if not found.
+     */
+    override fun findOrderEntityById(orderId: Long): Order? {
+        return orderRepository.findById(orderId).orElse(null)
+    }
+
+    override fun getOrderEntityByIdForUser(userId: Long, orderId: Long): Order? {
+        // 1. Ensure the calling user has the right to act for this userId.
+        securityContext.ensureAccess(userId)
+
+        // 2. Fetch the data.
+        val order = orderRepository.findById(orderId).orElse(null) ?: return null
+
+        // 3. Perform the critical ownership check.
+        if (order.user?.id != userId) {
+            logger.warn { "User $userId attempted to access order $orderId belonging to user ${order.user?.id}" }
+            throw AccessDeniedException("User $userId is not authorized to access order $orderId")
+        }
+
+        return order
+    }
 }

@@ -4,13 +4,9 @@ import com.rj.ecommerce.api.shared.dto.cart.CartDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
 import com.rj.ecommerce.api.shared.dto.order.OrderDTO
 import com.rj.ecommerce.api.shared.enums.*
-import com.rj.ecommerce_backend.notification.Notification
-import com.rj.ecommerce_backend.notification.NotificationContext
-import com.rj.ecommerce_backend.notification.dispatcher.OrderNotificationDispatcher
-import com.rj.ecommerce_backend.notification.service.NotificationService
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
-import com.rj.ecommerce_backend.order.domain.events.OrderCreatedEvent
+import com.rj.ecommerce_backend.events.order.OrderCreatedEvent
 import com.rj.ecommerce_backend.order.exception.OrderServiceException
 import com.rj.ecommerce_backend.order.mapper.OrderMapper
 import com.rj.ecommerce_backend.order.repository.OrderRepository
@@ -46,7 +42,6 @@ class CreateOrderUseCase(
             eventPublisher.publishEvent(OrderCreatedEvent(this, order))
 
             return orderMapper.toDto(order)
-                ?: throw OrderServiceException("Failed to map created order to DTO for order ID: ${order.id}")
         } catch (e: Exception) {
             logger.error(e) { "Error creating order for user $userId" }
             throw OrderServiceException("Error creating order for user $userId", e)
