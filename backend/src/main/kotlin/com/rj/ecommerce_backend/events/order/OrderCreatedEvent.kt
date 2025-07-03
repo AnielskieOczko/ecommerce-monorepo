@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.order.domain.events
+package com.rj.ecommerce_backend.events.order
 
 import com.rj.ecommerce_backend.order.domain.Order
 import org.springframework.context.ApplicationEvent
