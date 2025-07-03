@@ -61,16 +61,15 @@ server:
 # This is a best practice to separate your config from Spring's.
 # ===================================================================
 app:
-  # --- NEW: RabbitMQ topology configuration ---
   rabbitmq:
-    email:
-      exchange: email.exchange
-      queue: email.queue
-      routing-key: email.routing.key
-    email-notification:
-      exchange: email.notification.exchange
-      queue: email.notification.queue
-      routing-key: email.notification.routing.key
+    notification-request:
+      exchange: "notification.request.exchange"
+      queue: "notification.request.queue"
+      routing-key: "notification.request.key"
+    notification-receipt:
+      exchange: "notification.receipt.exchange"
+      queue: "notification.receipt.queue"
+      routing-key: "notification.receipt.key"
     checkout-session:
       exchange: checkout.session.exchange
       queue: checkout.session.queue

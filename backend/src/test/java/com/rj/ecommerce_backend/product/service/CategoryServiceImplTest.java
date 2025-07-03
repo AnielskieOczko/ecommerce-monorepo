@@ -9,6 +9,7 @@ import com.rj.ecommerce_backend.product.exception.CategoryAlreadyExistsException
 import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException;
 import com.rj.ecommerce_backend.product.exception.InvalidCategoryDataException;
 import com.rj.ecommerce_backend.product.repository.CategoryRepository;
+import com.rj.ecommerce_backend.product.service.category.CategoryServiceImpl;
 import com.rj.ecommerce_backend.testutil.CategoryTestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
