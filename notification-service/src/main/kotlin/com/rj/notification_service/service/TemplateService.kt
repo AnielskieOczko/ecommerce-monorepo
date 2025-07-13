@@ -1,4 +1,3 @@
-// File: email-service/src/main/kotlin/com/rj/ecommerce_email_service/service/TemplateService.kt
 package com.rj.notification_service.service
 
 import com.fasterxml.jackson.databind.ObjectMapper

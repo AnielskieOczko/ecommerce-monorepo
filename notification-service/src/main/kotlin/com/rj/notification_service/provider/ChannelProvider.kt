@@ -1,7 +1,7 @@
 package com.rj.notification_service.provider
 
 import com.rj.ecommerce.api.shared.enums.NotificationChannel
-import com.rj.ecommerce.api.shared.messaging.email.NotificationRequest
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
 
 /**
  * Defines the contract for a component that can process a notification for a specific channel (e.g., EMAIL, SMS).

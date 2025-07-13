@@ -57,7 +57,7 @@ class RabbitMQConfig {
         // CORRECT: The main queue is now defined in one place, with its DLQ arguments attached.
         return QueueBuilder.durable(props.rabbitmq.notificationRequest.queue)
             .withArgument("x-dead-letter-exchange", props.rabbitmq.notificationRequest.dlq!!.exchange)
-            .withArgument("x-dead-letter-routing-key", props.rabbitmq.notificationRequest.dlq!!.routingKey)
+            .withArgument("x-dead-letter-routing-key", props.rabbitmq.notificationRequest.dlq.routingKey)
             .build()
     }
 

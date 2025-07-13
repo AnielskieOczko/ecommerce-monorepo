@@ -1,8 +1,8 @@
 package com.rj.payment_service.service
 
 import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionResponseDTO
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentRequestDTO
+import com.rj.ecommerce.api.shared.messaging.payment.request.PaymentInitiationRequest
+import com.rj.ecommerce.api.shared.messaging.payment.response.PaymentInitiationResponse
 import com.rj.payment_service.config.StripeProperties
 import com.rj.payment_service.producer.MessageProducer
 import com.stripe.exception.StripeException
@@ -35,7 +35,7 @@ class StripeProviderStrategy(
      * 4. On success, builds and sends a detailed success response DTO.
      * 5. On failure, catches the exception, builds, and sends a detailed error response DTO.
      */
-    override fun initiatePayment(request: PaymentRequestDTO, correlationId: String?) {
+    override fun initiatePayment(request: PaymentInitiationRequest, correlationId: String?) {
         logger.info { "StripeProviderStrategy: Initiating payment for Order ID ${request.orderId}" }
         try {
             // Step 1: Validate the request data before making any API calls.
@@ -157,7 +157,7 @@ class StripeProviderStrategy(
             else -> CanonicalPaymentStatus.UNKNOWN
         }
 
-        val response = CheckoutSessionResponseDTO(
+        val response = PaymentInitiationResponse(
             orderId = orderId,
             customerEmail = session.customerEmail,
             sessionId = session.id,
@@ -189,9 +189,9 @@ class StripeProviderStrategy(
      */
     private fun mapSessionToResponseDTO(
         session: Session,
-        request: PaymentRequestDTO,
+        request: PaymentInitiationRequest,
         correlationId: String?
-    ): CheckoutSessionResponseDTO {
+    ): PaymentInitiationResponse {
 
         // --- Translation Logic for Payment Status ---
         // This `when` block translates Stripe's specific "payment_status" strings
@@ -220,7 +220,7 @@ class StripeProviderStrategy(
         }
 
         // Construct the final, clean DTO using the translated values.
-        return CheckoutSessionResponseDTO(
+        return PaymentInitiationResponse(
             sessionId = session.id,
             orderId = request.orderId,
             checkoutUrl = session.url,
@@ -242,11 +242,11 @@ class StripeProviderStrategy(
     }
 
     private fun buildErrorResponse(
-        request: PaymentRequestDTO,
+        request: PaymentInitiationRequest,
         correlationId: String?,
         errorMessage: String
-    ): CheckoutSessionResponseDTO {
-        return CheckoutSessionResponseDTO(
+    ): PaymentInitiationResponse {
+        return PaymentInitiationResponse(
             sessionId = "N/A",
             orderId = request.orderId,
             sessionStatus = CanonicalPaymentStatus.UNKNOWN,
@@ -261,7 +261,7 @@ class StripeProviderStrategy(
         )
     }
 
-    private fun buildStripeLineItemsFromRequest(request: PaymentRequestDTO): List<SessionCreateParams.LineItem> {
+    private fun buildStripeLineItemsFromRequest(request: PaymentInitiationRequest): List<SessionCreateParams.LineItem> {
         return request.lineItems.map { item ->
             SessionCreateParams.LineItem.builder()
                 .setQuantity(item.quantity.toLong())
@@ -280,7 +280,7 @@ class StripeProviderStrategy(
     }
 
 
-    private fun validateRequest(request: PaymentRequestDTO) {
+    private fun validateRequest(request: PaymentInitiationRequest) {
         require(request.successUrl.isNotBlank()) { "Success URL is required" }
         require(request.cancelUrl.isNotBlank()) { "Cancel URL is required" }
         require(request.lineItems.isNotEmpty()) { "At least one line item is required" }

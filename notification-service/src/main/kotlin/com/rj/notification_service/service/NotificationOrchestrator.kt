@@ -1,6 +1,6 @@
 package com.rj.notification_service.service
 
-import com.rj.ecommerce.api.shared.messaging.email.NotificationRequest
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
 import com.rj.notification_service.provider.ChannelProviderFactory
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service

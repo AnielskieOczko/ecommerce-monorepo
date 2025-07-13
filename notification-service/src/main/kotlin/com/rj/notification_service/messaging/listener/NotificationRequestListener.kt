@@ -2,8 +2,8 @@ package com.rj.notification_service.messaging.listener
 
 import com.rj.ecommerce.api.shared.enums.NotificationChannel
 import com.rj.ecommerce.api.shared.enums.NotificationDeliveryStatus
-import com.rj.ecommerce.api.shared.messaging.email.NotificationDeliveryReceipt
-import com.rj.ecommerce.api.shared.messaging.email.NotificationRequest
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationDeliveryReceipt
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
 import com.rj.notification_service.messaging.producer.MessageProducer
 import com.rj.notification_service.service.NotificationOrchestrator
 import io.github.oshai.kotlinlogging.KotlinLogging

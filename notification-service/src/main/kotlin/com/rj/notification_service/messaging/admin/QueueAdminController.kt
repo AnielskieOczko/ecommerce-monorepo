@@ -1,4 +1,3 @@
-// File: email-service/src/main/kotlin/com/rj/ecommerce_email_service/messaging/admin/QueueAdminController.kt
 package com.rj.notification_service.messaging.admin
 
 import com.rj.notification_service.config.AppProperties

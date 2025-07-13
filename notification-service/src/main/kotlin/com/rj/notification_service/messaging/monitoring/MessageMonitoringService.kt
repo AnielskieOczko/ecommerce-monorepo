@@ -48,11 +48,6 @@ class MessageMonitoringService(
         try {
             val queueProperties = rabbitAdmin.getQueueProperties(queueName)
 
-            if (queueProperties == null) {
-                log.warn { "Could not get properties for queue '$queueName'. It may not exist." }
-                return
-            }
-
             val messageCount = queueProperties[RabbitAdmin.QUEUE_MESSAGE_COUNT] as? Int ?: 0
             val consumerCount = queueProperties[RabbitAdmin.QUEUE_CONSUMER_COUNT] as? Int ?: 0
 

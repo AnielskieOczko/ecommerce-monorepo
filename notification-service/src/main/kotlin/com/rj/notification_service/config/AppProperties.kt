@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AppProperties(
     val rabbitmq: RabbitMQProperties,
     val notification: NotificationConfig,
-    val monitoring: MonitoringProperties
+    val monitoring: MonitoringProperties,
 ) {
     data class RabbitMQProperties(
         val notificationRequest: TopicConfig,

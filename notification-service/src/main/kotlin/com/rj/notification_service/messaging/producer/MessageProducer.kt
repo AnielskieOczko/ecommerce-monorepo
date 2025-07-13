@@ -1,6 +1,6 @@
 package com.rj.notification_service.messaging.producer
 
-import com.rj.ecommerce.api.shared.messaging.email.NotificationDeliveryReceipt
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationDeliveryReceipt
 import com.rj.notification_service.config.AppProperties
 import com.rj.notification_service.messaging.exception.MessagePublishException
 import io.github.oshai.kotlinlogging.KotlinLogging
