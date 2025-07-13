@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.cart.service
 
-import com.rj.ecommerce.api.shared.dto.cart.CartDTO
+import com.rj.ecommerce.api.shared.dto.cart.response.CartResponse
 import com.rj.ecommerce_backend.cart.domain.Cart
 import com.rj.ecommerce_backend.cart.domain.CartItem
 import com.rj.ecommerce_backend.cart.exception.CartItemNotFoundException
@@ -35,7 +35,7 @@ class CartServiceImpl(
     }
 
     @Transactional(readOnly = true)
-    override fun getCartForUser(userId: Long): CartDTO {
+    override fun getCartForUser(userId: Long): CartResponse {
         logger.debug { "Fetching cart for user ID: $userId" }
         securityContext.ensureAccess(userId) // Authorize
 
@@ -48,7 +48,7 @@ class CartServiceImpl(
         return cartMapper.toDto(cart)
     }
 
-    override fun addItemToCart(userId: Long, productId: Long, quantity: Int): CartDTO {
+    override fun addItemToCart(userId: Long, productId: Long, quantity: Int): CartResponse {
         logger.info { "Adding product ID: $productId with quantity: $quantity to cart for user ID: $userId" }
         securityContext.ensureAccess(userId)
 
@@ -77,7 +77,7 @@ class CartServiceImpl(
 
     }
 
-    override fun updateCartItemQuantity(userId: Long, cartItemId: Long, newQuantity: Int): CartDTO {
+    override fun updateCartItemQuantity(userId: Long, cartItemId: Long, newQuantity: Int): CartResponse {
         logger.info { "Updating quantity for cart item ID: $cartItemId to $newQuantity for user ID: $userId" }
         securityContext.ensureAccess(userId)
 
@@ -108,7 +108,7 @@ class CartServiceImpl(
 
     }
 
-    override fun removeItemFromCart(userId: Long, cartItemId: Long): CartDTO {
+    override fun removeItemFromCart(userId: Long, cartItemId: Long): CartResponse {
         logger.info { "Removing cart item ID: $cartItemId for user ID: $userId" }
         securityContext.ensureAccess(userId)
 
@@ -132,7 +132,7 @@ class CartServiceImpl(
 
     }
 
-    override fun clearCart(userId: Long): CartDTO {
+    override fun clearCart(userId: Long): CartResponse {
         logger.info { "Clearing cart for user ID: $userId" }
         securityContext.ensureAccess(userId)
 

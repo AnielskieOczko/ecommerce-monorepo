@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.product.controller
 
 import com.rj.ecommerce.api.shared.core.ImageInfo
-import com.rj.ecommerce.api.shared.dto.product.ProductCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductUpdateRequestDTO
+import com.rj.ecommerce.api.shared.dto.product.request.ProductCreateRequest
+import com.rj.ecommerce.api.shared.dto.product.request.ProductUpdateRequest
+import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
 
 // Backend components
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
@@ -62,7 +62,7 @@ class AdminProductController(
     @GetMapping("/{productId}")
     fun getProductByIdAdmin(
         @Parameter(description = "ID of the product to retrieve") @PathVariable productId: Long
-    ): ResponseEntity<ProductResponseDTO> {
+    ): ResponseEntity<ProductResponse> {
         logger.info { "Admin request to get product by ID: $productId" }
 
         val productDto = productQueryService.getProductById(productId)
@@ -91,7 +91,7 @@ class AdminProductController(
         @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") size: Int,
         @Parameter(description = "Sort parameters (e.g., name:asc or price:desc)")
         @RequestParam(defaultValue = "id:asc", required = false) sort: String?
-    ): ResponseEntity<Page<ProductResponseDTO>> {
+    ): ResponseEntity<Page<ProductResponse>> {
         logger.info { "Admin request for products in category ID: $categoryId, Page: $page, Size: $size, Sort: $sort" }
 
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
@@ -110,7 +110,7 @@ class AdminProductController(
         @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") size: Int,
         @Parameter(description = "Sort parameters (e.g., name:asc or price:desc)")
         @RequestParam(defaultValue = "id:asc", required = false) sort: String?
-    ): ResponseEntity<Page<ProductResponseDTO>> {
+    ): ResponseEntity<Page<ProductResponse>> {
         logger.info { "Admin product search by name: '$productName', Page: $page, Size: $size, Sort: $sort" }
 
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
@@ -131,10 +131,10 @@ class AdminProductController(
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]) // Explicitly state consumes
     fun createProduct(
         @Parameter(description = "Product data (JSON part)")
-        @RequestPart("productData") @Valid productCreateDTO: ProductCreateRequestDTO,
+        @RequestPart("productData") @Valid productCreateDTO: ProductCreateRequest,
         @Parameter(description = "Product images (optional file parts)")
         @RequestPart(value = "imageFiles", required = false) imageFiles: List<MultipartFile>?
-    ): ResponseEntity<ProductResponseDTO> {
+    ): ResponseEntity<ProductResponse> {
         logger.info { "Admin request to create product: ${productCreateDTO.productData.name} with ${imageFiles?.size ?: 0} images." }
         val createdProduct = createProductUseCase.execute(productCreateDTO, imageFiles ?: emptyList())
 
@@ -163,8 +163,8 @@ class AdminProductController(
     fun updateProductCoreDetails(
         @Parameter(description = "ID of the product to update") @PathVariable productId: Long,
         @Parameter(description = "Product update data (JSON)")
-        @Valid @RequestBody productUpdateDTO: ProductUpdateRequestDTO // No @RequestPart needed for files
-    ): ResponseEntity<ProductResponseDTO> {
+        @Valid @RequestBody productUpdateDTO: ProductUpdateRequest // No @RequestPart needed for files
+    ): ResponseEntity<ProductResponse> {
         logger.info { "Admin request to update core details for product ID: $productId" }
 
         val updatedProduct = updateProductUseCase.execute(productId, productUpdateDTO)

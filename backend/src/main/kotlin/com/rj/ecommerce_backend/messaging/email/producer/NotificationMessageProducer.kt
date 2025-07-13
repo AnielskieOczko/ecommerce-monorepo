@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.messaging.email.producer
 
-import com.rj.ecommerce.api.shared.messaging.email.NotificationRequest
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
 import com.rj.ecommerce_backend.messaging.common.producer.AbstractMessageProducer
 import com.rj.ecommerce_backend.messaging.config.RabbitMQProperties
 import org.springframework.amqp.rabbit.core.RabbitTemplate

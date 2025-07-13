@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.messaging.email.consumer
 
-import com.rj.ecommerce.api.shared.messaging.email.NotificationDeliveryReceipt
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationDeliveryReceipt
 import com.rj.ecommerce_backend.notification.service.NotificationService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.annotation.RabbitListener

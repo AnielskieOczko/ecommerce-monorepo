@@ -1,12 +1,12 @@
 package com.rj.ecommerce_backend.notification.service
 
-import com.rj.ecommerce.api.shared.enums.EmailDeliveryReceiptStatus
 import com.rj.ecommerce.api.shared.enums.NotificationDeliveryStatus
 import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
 import com.rj.ecommerce_backend.notification.command.CreateNotificationCommand
-import com.rj.ecommerce.api.shared.messaging.email.NotificationDeliveryReceipt
-import com.rj.ecommerce.api.shared.messaging.email.NotificationEnvelope
-import com.rj.ecommerce.api.shared.messaging.email.NotificationRequest
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationDeliveryReceipt
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationEnvelope
+import com.rj.ecommerce.api.shared.messaging.notification.payload.OrderStatusUpdatePayload
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
 import com.rj.ecommerce_backend.messaging.email.producer.NotificationMessageProducer
 import com.rj.ecommerce_backend.notification.domain.Notification
 import com.rj.ecommerce_backend.notification.context.NotificationContext
@@ -84,7 +84,7 @@ class NotificationServiceImpl(
                 // This mapping logic should also be in a dedicated mapper.
                 // For now, we do it here for simplicity.
                 val order = context.order
-                com.rj.ecommerce.api.shared.messaging.email.payload.OrderStatusUpdatePayload(
+                OrderStatusUpdatePayload(
                     orderId = order.id.toString(),
                     orderNumber = order.id.toString(),
                     customerName = order.user?.firstName,

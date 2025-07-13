@@ -2,12 +2,12 @@ package com.rj.ecommerce_backend.user.service
 
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce.api.shared.core.Password
-import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
+import com.rj.ecommerce.api.shared.dto.security.response.AuthResponse
+import com.rj.ecommerce.api.shared.dto.user.request.ChangeAccountStatusRequest
+import com.rj.ecommerce.api.shared.dto.user.request.ChangeEmailRequest
+import com.rj.ecommerce.api.shared.dto.user.request.PasswordChangeRequest
+import com.rj.ecommerce.api.shared.dto.user.request.UserUpdateDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.security.repository.RefreshTokenRepository
 import com.rj.ecommerce_backend.security.service.AuthenticationService
@@ -42,7 +42,7 @@ class UserServiceImpl(
     }
 
     @Transactional(readOnly = true)
-    override fun getProfile(userId: Long): UserInfoDTO {
+    override fun getProfile(userId: Long): UserResponse {
         logger.debug { "Attempting to get profile data for user ID: $userId" }
 
         securityContext.ensureAccess(userId)
@@ -51,14 +51,14 @@ class UserServiceImpl(
         val user: User = findUserByIdOrThrow(userId)
 
         logger.info { "Successfully retrieved profile data for user ID: $userId" }
-        return userMapper.toUserInfoDTO(user)
+        return userMapper.toUserResponse(user)
     }
 
     @Transactional(readOnly = true)
     override fun updateBasicDetails(
         userId: Long,
-        request: UpdateBasicDetailsRequestDTO
-    ): UserInfoDTO {
+        request: UserUpdateDetailsRequest
+    ): UserResponse {
         securityContext.ensureAccess(userId)
 
         val user: User = findUserByIdOrThrow(userId)
@@ -66,16 +66,16 @@ class UserServiceImpl(
         userMapper.updateUserFromBasicDetails(user, request)
         val savedUser: User = userRepository.save(user)
 
-        return userMapper.toUserInfoDTO(savedUser)
+        return userMapper.toUserResponse(savedUser)
     }
 
-    @Transactional // Ensure this method is transactional for data changes
+    @Transactional
     override fun changeEmail(
         userId: Long,
-        changeEmailRequest: ChangeEmailRequestDTO,
+        changeEmailRequest: ChangeEmailRequest,
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): AuthResponseDTO {
+    ): AuthResponse {
         logger.debug { "Processing email change request for user: $userId to new email: ${changeEmailRequest.newEmail}" }
 
         // 1. Authorization
@@ -111,14 +111,14 @@ class UserServiceImpl(
             response
         )
 
-        logger.info { "Email change process completed for user ID: ${user.id}. Success: ${authResponse.success}" }
+        logger.info { "Email change process completed for user ID: ${user.id}. Success: ${authResponse.type}" }
         return authResponse
     }
 
     @Transactional
     override fun changePassword(
         userId: Long,
-        request: ChangePasswordRequestDTO
+        request: PasswordChangeRequest
     ) {
         securityContext.ensureAccess(userId)
 
@@ -139,8 +139,8 @@ class UserServiceImpl(
     @Transactional
     override fun updateAccountStatus(
         userId: Long,
-        request: ChangeAccountStatusDTO
-    ): UserInfoDTO {
+        request: ChangeAccountStatusRequest
+    ): UserResponse {
         securityContext.ensureAccess(userId)
 
         val user: User = findUserByIdOrThrow(userId)
@@ -149,7 +149,7 @@ class UserServiceImpl(
         user.isActive = request.isActive
         val savedUser: User = userRepository.save(user)
         logger.info { "Successfully updated account status for user id ${savedUser.id} from $oldStatus to ${savedUser.isActive}" }
-        return userMapper.toUserInfoDTO(savedUser)
+        return userMapper.toUserResponse(savedUser)
     }
 
     override fun requestPasswordReset(email: String) {

@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
+import com.rj.ecommerce.api.shared.dto.user.request.AdminChangeUserAuthorityRequest
+import com.rj.ecommerce.api.shared.dto.user.request.AdminUpdateUserRequest
+import com.rj.ecommerce.api.shared.dto.user.request.ChangeAccountStatusRequest
+import com.rj.ecommerce.api.shared.dto.user.request.UserCreateRequest
+import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.sorting.SortValidator
 import com.rj.ecommerce_backend.sorting.UserSortField
 import com.rj.ecommerce_backend.user.search.UserSearchCriteria
@@ -41,7 +41,7 @@ class AdminController(
 
     @GetMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    fun getUserById(@PathVariable userId: Long): UserInfoDTO {
+    fun getUserById(@PathVariable userId: Long): UserResponse {
         return adminService.getUserById(userId)
     }
 
@@ -54,7 +54,7 @@ class AdminController(
         // Spring will automatically bind request parameters to fields of UserSearchCriteria
         // if the parameter names in the HTTP request match the field names in UserSearchCriteria.
         userSearchCriteria: UserSearchCriteria
-    ): ResponseEntity<Page<UserInfoDTO>> {
+    ): ResponseEntity<Page<UserResponse>> {
 
         logger.info { "Admin request to get all users. Page: $page, Size: $size, Sort: '$sort', Criteria: $userSearchCriteria" }
 
@@ -73,11 +73,11 @@ class AdminController(
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     fun createUser(
-        @Valid @RequestBody createUserRequest: UserCreateRequestDTO,
+        @Valid @RequestBody createUserRequest: UserCreateRequest,
         @RequestHeader(value = "X-Request-ID", required = false) requestId: String?
-    ): ResponseEntity<UserInfoDTO> {
+    ): ResponseEntity<UserResponse> {
         logger.info { "Admin request to create user. Email: ${createUserRequest.email}, RequestId: ${requestId ?: "N/A"}" }
-        val createdUser: UserInfoDTO = adminService.createUser(createUserRequest)
+        val createdUser: UserResponse = adminService.createUser(createUserRequest)
         logger.info { "Admin successfully created user. ID: ${createdUser.id}, Email: ${createdUser.email}, RequestId: ${requestId ?: "N/A"}" }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser)
     }
@@ -86,10 +86,10 @@ class AdminController(
     @PreAuthorize("hasRole('ADMIN')")
     fun updateUserData(
         @PathVariable userId: Long,
-        @Valid @RequestBody adminUserUpdateDTO: AdminUpdateUserRequestDTO
-    ): ResponseEntity<UserInfoDTO> {
+        @Valid @RequestBody adminUserUpdateDTO: AdminUpdateUserRequest
+    ): ResponseEntity<UserResponse> {
         logger.info { "Admin request to update user data for ID: $userId" }
-        val updatedUser: UserInfoDTO = adminService.updateUser(userId, adminUserUpdateDTO)
+        val updatedUser: UserResponse = adminService.updateUser(userId, adminUserUpdateDTO)
         logger.info { "Admin successfully updated user data for ID: $userId" }
 
         return ResponseEntity.ok(updatedUser)
@@ -99,11 +99,11 @@ class AdminController(
     @PreAuthorize("hasRole('ADMIN')")
     fun updateUserAccountStatus(
         @PathVariable userId: Long,
-        @Valid @RequestBody changeAccountStatusDTO: ChangeAccountStatusDTO
-    ): ResponseEntity<UserInfoDTO> {
+        @Valid @RequestBody changeAccountStatusDTO: ChangeAccountStatusRequest
+    ): ResponseEntity<UserResponse> {
 
         logger.info { "Admin request to update account status for ID: $userId to active=${changeAccountStatusDTO.isActive}" }
-        val updatedUser: UserInfoDTO = adminService.updateAccountStatus(
+        val updatedUser: UserResponse = adminService.updateAccountStatus(
             userId,
             changeAccountStatusDTO
         )
@@ -116,8 +116,8 @@ class AdminController(
     @PreAuthorize("hasRole('ADMIN')")
     fun updateUserAuthorities(
         @PathVariable userId: Long,
-        @Valid @RequestBody adminChangeUserAuthorityRequest: AdminChangeUserAuthorityRequestDTO
-    ): ResponseEntity<UserInfoDTO> {
+        @Valid @RequestBody adminChangeUserAuthorityRequest: AdminChangeUserAuthorityRequest
+    ): ResponseEntity<UserResponse> {
         logger.info { "Admin request to update authorities for user ID: $userId" }
         val updatedUser = adminService.updateUserAuthorities(userId, adminChangeUserAuthorityRequest)
         logger.info { "Admin successfully updated authorities for user ID: $userId" }

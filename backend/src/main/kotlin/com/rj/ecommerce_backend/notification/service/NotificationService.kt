@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.notification.service
 
 import com.rj.ecommerce_backend.notification.command.CreateNotificationCommand
-import com.rj.ecommerce.api.shared.messaging.email.NotificationDeliveryReceipt
+import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationDeliveryReceipt
 import com.rj.ecommerce_backend.notification.domain.Notification
 
 /**

@@ -1,11 +1,11 @@
 package com.rj.ecommerce_backend.payment
 
-import com.rj.ecommerce.api.shared.dto.payment.PaymentOptionDTO
-import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionDTO
-import com.rj.ecommerce.api.shared.messaging.payment.CheckoutUrlsRequestDTO
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentStatusDTO
+
+import com.rj.ecommerce.api.shared.dto.payment.request.PaymentSessionUrlRequest
+import com.rj.ecommerce.api.shared.dto.payment.response.PaymentOptionDetails
+import com.rj.ecommerce.api.shared.dto.payment.response.PaymentSessionResponse
+import com.rj.ecommerce.api.shared.dto.payment.response.PaymentStatusResponse
 import com.rj.ecommerce_backend.security.SecurityContext
-import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -24,13 +24,13 @@ class PaymentController(
 
 
     @GetMapping("/options")
-    fun getPaymentOptions(): ResponseEntity<List<PaymentOptionDTO>> {
+    fun getPaymentOptions(): ResponseEntity<List<PaymentOptionDetails>> {
         // This call now triggers the RabbitMQ request-reply flow.
         return ResponseEntity.ok(paymentOptionsService.getAvailablePaymentOptions())
     }
 
     @GetMapping("/checkout/session/{orderId}")
-    fun getPaymentStatus(@PathVariable orderId: Long): ResponseEntity<PaymentStatusDTO> {
+    fun getPaymentStatus(@PathVariable orderId: Long): ResponseEntity<PaymentStatusResponse> {
         log.info { "Fetching payment status for orderId: $orderId" }
         val paymentStatus = paymentFacade.getOrderPaymentStatus(orderId)
         return ResponseEntity.ok(paymentStatus)
@@ -39,8 +39,8 @@ class PaymentController(
     @PostMapping("/checkout/session/{orderId}")
     fun createOrGetCheckoutSession(
         @PathVariable orderId: Long,
-        @RequestBody request: CheckoutUrlsRequestDTO
-    ): ResponseEntity<CheckoutSessionDTO> {
+        @RequestBody request: PaymentSessionUrlRequest
+    ): ResponseEntity<PaymentSessionResponse> {
         log.info { "Request to create/get checkout session for orderId: $orderId" }
         val sessionDto = paymentFacade.createCheckoutSession(
             orderId,
@@ -50,11 +50,4 @@ class PaymentController(
         return ResponseEntity.ok(sessionDto)
     }
 
-    /**
-     * Private helper to encapsulate user retrieval and make the controller method cleaner.
-     */
-    private fun getCurrentUserId(): Long {
-        return securityContext.getCurrentUser().id
-            ?: throw UserAuthenticationException("User is not authenticated or does not have an ID.")
-    }
 }

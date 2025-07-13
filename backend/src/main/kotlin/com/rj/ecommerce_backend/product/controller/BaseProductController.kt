@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
+import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria
 import com.rj.ecommerce_backend.product.service.ProductQueryService
 import com.rj.ecommerce_backend.sorting.ProductSortField
@@ -28,7 +28,7 @@ abstract class BaseProductController(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "id:asc") sort: String?
-    ): ResponseEntity<Page<ProductResponseDTO>> {
+    ): ResponseEntity<Page<ProductResponse>> {
         logger.info { "Request to get all products. Criteria: $productSearchCriteria, Page: $page, Size: $size, Sort: '$sort'" }
         val validatedSort: Sort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
         val pageable = PageRequest.of(page, size, validatedSort)

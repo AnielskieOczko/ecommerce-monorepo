@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.payment
 
-import com.rj.ecommerce.api.shared.dto.payment.PaymentOptionDTO
-import com.rj.ecommerce.api.shared.messaging.payment.GetPaymentOptionsReplyDTO
-import com.rj.ecommerce.api.shared.messaging.payment.GetPaymentOptionsRequestDTO
+import com.rj.ecommerce.api.shared.dto.payment.response.PaymentOptionDetails
+import com.rj.ecommerce.api.shared.messaging.payment.response.GetPaymentOptionsResponse
+import com.rj.ecommerce.api.shared.messaging.payment.request.GetPaymentOptionsRequest
 import com.rj.ecommerce_backend.messaging.config.RabbitMQProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -20,10 +20,10 @@ class PaymentOptionsService(
 
     // The response is highly cacheable to avoid messaging overhead on every request.
     @Cacheable("payment-options")
-    fun getAvailablePaymentOptions(): List<PaymentOptionDTO> {
+    fun getAvailablePaymentOptions(): List<PaymentOptionDetails> {
         logger.info { "Requesting payment options from Payment Microservice." }
 
-        val request = GetPaymentOptionsRequestDTO()
+        val request = GetPaymentOptionsRequest()
         val requestConfig = rabbitMQProperties.paymentOptionsRequest
         val replyConfig = rabbitMQProperties.paymentOptionsReply
 
@@ -34,7 +34,7 @@ class PaymentOptionsService(
                 requestConfig.exchange,
                 requestConfig.routingKey,
                 request
-            ) as? GetPaymentOptionsReplyDTO // Cast the generic object response
+            ) as? GetPaymentOptionsResponse // Cast the generic object response
 
             if (reply == null) {
                 logger.error { "Did not receive a reply for payment options request. Timed out?" }

@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.messaging.payment.consumer
 
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
+import com.rj.ecommerce.api.shared.messaging.payment.response.PaymentInitiationResponse
 import com.rj.ecommerce_backend.payment.PaymentResponseProcessor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -31,7 +31,7 @@ class CheckoutSessionResponseListener(
      * @param response The DTO containing the result of the checkout session.
      */
     @RabbitListener(queues = ["\${app.rabbitmq.checkout-session-response.queue}"])
-    fun handleCheckoutSessionResponse(response: PaymentResponseDTO) {
+    fun handleCheckoutSessionResponse(response: PaymentInitiationResponse) {
         log.info { "Received checkout session response for orderId: ${response.orderId}, status: ${response.paymentStatus}" }
 
         // NO try-catch block here. Let the service handle its own errors and let

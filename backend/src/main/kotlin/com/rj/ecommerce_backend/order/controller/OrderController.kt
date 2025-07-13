@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.order.controller
 
-import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.order.OrderDTO
+import com.rj.ecommerce.api.shared.dto.order.request.OrderCreateRequest
+import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
 import com.rj.ecommerce_backend.order.service.OrderCommandService
@@ -47,7 +47,7 @@ class OrderController(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "id:asc") sort: String?
-    ): ResponseEntity<Page<OrderDTO>> {
+    ): ResponseEntity<Page<OrderResponse>> {
         logger.info { "Request received: Get orders for user ID: $pathUserId with criteria: $criteriaInput, page: $page, size: $size, sort: $sort" }
 
         val validatedSort: Sort = sortValidator.validateAndBuildSort(sort, OrderSortField::class.java)
@@ -71,7 +71,7 @@ class OrderController(
     fun getOrder(
         @PathVariable userId: Long,
         @PathVariable orderId: Long
-    ): ResponseEntity<OrderDTO> {
+    ): ResponseEntity<OrderResponse> {
         logger.info { "Request received: Get order ID: $orderId for user ID: $userId" }
 
         val orderDto = orderQueryService.getOrderById(userId, orderId)
@@ -89,8 +89,8 @@ class OrderController(
     @PreAuthorize("#userId == authentication.principal.id")
     fun createOrder(
         @PathVariable userId: Long,
-        @Valid @RequestBody orderCreateRequestDTO: OrderCreateRequestDTO
-    ): ResponseEntity<OrderDTO> {
+        @Valid @RequestBody orderCreateRequestDTO: OrderCreateRequest
+    ): ResponseEntity<OrderResponse> {
         logger.info { "Request received: Create order for user ID: $userId" }
 
         val orderDto = createOrderUseCase.execute(userId, orderCreateRequestDTO)

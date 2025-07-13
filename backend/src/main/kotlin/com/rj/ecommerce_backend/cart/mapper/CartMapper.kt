@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.cart.mapper
 
-import com.rj.ecommerce.api.shared.dto.cart.CartDTO
-import com.rj.ecommerce.api.shared.dto.cart.CartItemDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO
+import com.rj.ecommerce.api.shared.dto.cart.response.CartItemDetails
+import com.rj.ecommerce.api.shared.dto.cart.response.CartResponse
+import com.rj.ecommerce.api.shared.dto.product.common.ProductSummary
 import com.rj.ecommerce_backend.cart.domain.Cart
 import com.rj.ecommerce_backend.cart.domain.CartItem
 import com.rj.ecommerce_backend.product.domain.Product
@@ -17,13 +17,13 @@ class CartMapper {
         private val logger = KotlinLogging.logger { }
     }
 
-    fun toDto(cart: Cart): CartDTO {
+    fun toDto(cart: Cart): CartResponse {
 
-        val cartItemsDto: List<CartItemDTO> = cart.cartItems.map { cartItem ->
+        val cartItemsDto: List<CartItemDetails> = cart.cartItems.map { cartItem ->
             toDto(cartItem)
         }.toList()
 
-        return CartDTO(
+        return CartResponse(
             id = cart.id,
             userId = cart.user?.id,
             items = cartItemsDto,
@@ -32,16 +32,16 @@ class CartMapper {
         )
     }
 
-    fun toDto(cartItem: CartItem): CartItemDTO {
+    fun toDto(cartItem: CartItem): CartItemDetails {
 
-        val productSummaryDTO = ProductSummaryDTO(
+        val productSummaryDTO = ProductSummary(
             id = cartItem.product.id
                 ?: throw IllegalStateException("Product in CartItem ${cartItem.id} must have an ID."),
             name = cartItem.product.name.value,
             unitPrice = cartItem.product.unitPrice
         )
 
-        val cartItemDto = CartItemDTO(
+        val cartItemDto = CartItemDetails(
             id = cartItem.id,
             product = productSummaryDTO,
             quantity = cartItem.quantity
@@ -50,16 +50,16 @@ class CartMapper {
         return cartItemDto
     }
 
-    fun toNewEntity(cartDto: CartDTO, owner: User): Cart {
-        logger.debug { "Mapping CartDTO to new Cart entity for user ID: ${owner.id}" }
+    fun toNewEntity(cartDto: CartResponse, owner: User): Cart {
+        logger.debug { "Mapping CartResponse to new Cart entity for user ID: ${owner.id}" }
         return Cart(
             user = owner // The User entity is provided by the service
             // cartItems will be an empty mutableListOf() by default from Cart constructor
         )
     }
 
-    fun toNewEntity(cartItemDto: CartItemDTO, productEntity: Product): CartItem {
-        logger.debug { "Mapping CartItemDTO to new CartItem entity for product ID: ${productEntity.id}" }
+    fun toNewEntity(cartItemDto: CartItemDetails, productEntity: Product): CartItem {
+        logger.debug { "Mapping CartResponse to new CartItem entity for product ID: ${productEntity.id}" }
         return CartItem(
             product = productEntity, // The actual Product entity is provided by the service
             quantity = cartItemDto.quantity

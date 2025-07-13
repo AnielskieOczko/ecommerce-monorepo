@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.dto.product.category.CategoryDTO
-import com.rj.ecommerce.api.shared.dto.product.category.CategoryRequestDTO
+import com.rj.ecommerce.api.shared.dto.product.common.CategoryDetails
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria
 import com.rj.ecommerce_backend.product.service.category.CategoryService
 import com.rj.ecommerce_backend.sorting.CategorySortField
@@ -30,14 +29,14 @@ class AdminCategoryController(
     }
 
     @PostMapping
-    fun createCategory(@RequestBody @Valid requestDTO: CategoryRequestDTO): ResponseEntity<CategoryDTO> {
+    fun createCategory(@RequestBody @Valid requestDTO: CategoryDetails): ResponseEntity<CategoryDetails> {
         logger.info { "Admin request to create category with name: '${requestDTO.name}'" }
         val createdCategory = categoryService.createCategory(requestDTO)
 
         // Build URI for the newly created resource for the Location header
         val location: URI = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(createdCategory.id)
+            .buildAndExpand(createdCategory)
             .toUri()
 
         logger.info { "Admin successfully created category. ID: ${createdCategory.id}, Name: ${createdCategory.name}, Location: $location" }
@@ -45,7 +44,7 @@ class AdminCategoryController(
     }
 
     @GetMapping("/{categoryId}")
-    fun getCategoryById(@PathVariable categoryId: Long): ResponseEntity<CategoryDTO> {
+    fun getCategoryById(@PathVariable categoryId: Long): ResponseEntity<CategoryDetails> {
         logger.info { "Admin request to get category by ID: $categoryId" }
         val categoryDto = categoryService.getCategoryById(categoryId)
         return ResponseEntity.ok(categoryDto)
@@ -57,7 +56,7 @@ class AdminCategoryController(
         @RequestParam(defaultValue = "0", required = false) page: Int,
         @RequestParam(defaultValue = "10", required = false) size: Int,
         @RequestParam(defaultValue = "id:asc", required = false) sort: String?
-    ): ResponseEntity<Page<CategoryDTO>> {
+    ): ResponseEntity<Page<CategoryDetails>> {
         logger.info {
             "Admin request to get all categories. Criteria: $categorySearchCriteria, " +
                     "Page: $page, Size: $size, Sort: '$sort'"
@@ -77,8 +76,8 @@ class AdminCategoryController(
     @PutMapping("/{categoryId}")
     fun updateCategory(
         @PathVariable categoryId: Long,
-        @RequestBody @Valid requestDTO: CategoryRequestDTO
-    ): ResponseEntity<CategoryDTO> {
+        @RequestBody @Valid requestDTO: CategoryDetails
+    ): ResponseEntity<CategoryDetails> {
         logger.info { "Admin request to update category ID: $categoryId with new name: '${requestDTO.name}'" }
         val updatedCategory = categoryService.updateCategory(categoryId, requestDTO)
         logger.info { "Admin successfully updated category ID: $categoryId to name: '${updatedCategory.name}'" }

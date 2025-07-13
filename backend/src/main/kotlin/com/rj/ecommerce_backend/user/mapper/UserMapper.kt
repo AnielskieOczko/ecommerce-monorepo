@@ -2,10 +2,10 @@ package com.rj.ecommerce_backend.user.mapper
 
 import com.rj.ecommerce.api.shared.core.Email
 
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UserBaseDetails
-import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
+import com.rj.ecommerce.api.shared.dto.user.request.UserUpdateDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.common.UserBaseDetails
+import com.rj.ecommerce.api.shared.dto.user.request.AdminUpdateUserRequest
+import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.user.domain.User
 import com.rj.ecommerce_backend.user.repository.UserRepository
 import org.springframework.stereotype.Component
@@ -15,7 +15,7 @@ class UserMapper(
     private val userRepository: UserRepository
 ) {
 
-    fun updateUserFromBasicDetails(user: User, request: UpdateBasicDetailsRequestDTO) {
+    fun updateUserFromBasicDetails(user: User, request: UserUpdateDetailsRequest) {
         user.firstName = request.firstName
         user.lastName = request.lastName
         user.address = request.address
@@ -23,7 +23,7 @@ class UserMapper(
         user.dateOfBirth = request.dateOfBirth
     }
 
-    fun updateUserFromAdminRequest(user: User, request: AdminUpdateUserRequestDTO) {
+    fun updateUserFromAdminRequest(user: User, request: AdminUpdateUserRequest) {
 
         user.firstName = request.firstName
 
@@ -61,7 +61,7 @@ class UserMapper(
      * @throws IllegalArgumentException if the User object is missing required fields (id, firstName, lastName)
      *                                  that are non-nullable in the DTO.
      */
-    fun toUserInfoDTO(user: User): UserInfoDTO {
+    fun toUserResponse(user: User): UserResponse {
         // Use `requireNotNull` for clear, concise, and immediate validation.
         val userId = requireNotNull(user.id) { "User ID cannot be null for UserInfoDTO" }
         val userFirstName = requireNotNull(user.firstName) { "User firstName cannot be null for UserInfoDTO" }
@@ -77,7 +77,7 @@ class UserMapper(
         )
 
         // Then, construct the final DTO using the nested object.
-        return UserInfoDTO(
+        return UserResponse(
             id = userId,
             userDetails = userDetails,
             email = user.email.value,

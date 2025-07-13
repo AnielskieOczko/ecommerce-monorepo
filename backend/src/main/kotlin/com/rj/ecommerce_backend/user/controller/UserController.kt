@@ -1,11 +1,10 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangeEmailRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.ChangePasswordRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.ResetPasswordRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UpdateBasicDetailsRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
+import com.rj.ecommerce.api.shared.dto.security.response.AuthResponse
+import com.rj.ecommerce.api.shared.dto.user.request.ChangeEmailRequest
+import com.rj.ecommerce.api.shared.dto.user.request.PasswordChangeRequest
+import com.rj.ecommerce.api.shared.dto.user.request.UserUpdateDetailsRequest
+import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.user.service.UserService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
@@ -37,7 +36,7 @@ class UserController(
 
     @GetMapping("/{userId}/profile")
     @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
-    fun getUserProfile(@PathVariable userId: Long): ResponseEntity<UserInfoDTO> {
+    fun getUserProfile(@PathVariable userId: Long): ResponseEntity<UserResponse> {
         logger.info { "Request to get profile for user ID: $userId" }
         return ResponseEntity.ok(userService.getProfile(userId))
     }
@@ -46,12 +45,12 @@ class UserController(
     @PreAuthorize("#userId == authentication.principal.id")
     fun updateUserEmail(
         @PathVariable userId: Long,
-        @Valid @RequestBody changeEmailRequest: ChangeEmailRequestDTO,
+        @Valid @RequestBody changeEmailRequest: ChangeEmailRequest,
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): ResponseEntity<AuthResponseDTO> {
+    ): ResponseEntity<AuthResponse> {
         logger.info { "Request to update email for user ID: $userId" }
-        val authResponse: AuthResponseDTO = userService.changeEmail(
+        val authResponse: AuthResponse = userService.changeEmail(
             userId, changeEmailRequest, request, response
         )
 
@@ -63,7 +62,7 @@ class UserController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateUserPassword(
         @PathVariable userId: Long,
-        @Valid @RequestBody changePasswordRequestDTO: ChangePasswordRequestDTO
+        @Valid @RequestBody changePasswordRequestDTO: PasswordChangeRequest
     ) {
         logger.info { "Request to update password for user ID: $userId" }
         userService.changePassword(userId, changePasswordRequestDTO)
@@ -73,8 +72,8 @@ class UserController(
     @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
     fun updateUserBasicDetails(
         @PathVariable userId: Long,
-        @Valid @RequestBody updateBasicDetailsRequest: UpdateBasicDetailsRequestDTO
-    ): UserInfoDTO {
+        @Valid @RequestBody updateBasicDetailsRequest: UserUpdateDetailsRequest
+    ): UserResponse {
         logger.info { "Request to update basic details for user ID: $userId" }
         return userService.updateBasicDetails(userId, updateBasicDetailsRequest)
     }
@@ -100,7 +99,7 @@ class UserController(
     fun resetPassword(
         @RequestParam token: String,
         // Typically new password comes in request body for security, not query param
-        @Valid @RequestBody newPasswordRequest: ResetPasswordRequestDTO
+        @Valid @RequestBody newPasswordRequest: PasswordChangeRequest
     ) {
         logger.info { "Attempting to reset password with token." }
         userService.resetPassword(token, newPasswordRequest.newPassword)

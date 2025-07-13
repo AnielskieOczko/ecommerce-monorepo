@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.order.controller
 
-import com.rj.ecommerce.api.shared.dto.order.OrderDTO
-import com.rj.ecommerce.api.shared.dto.order.OrderStatusUpdateRequestDTO
+import com.rj.ecommerce.api.shared.dto.order.request.OrderStatusUpdateRequest
+import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
 import com.rj.ecommerce_backend.order.service.OrderCommandService
@@ -36,7 +36,7 @@ class OrderAdminController(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "id:asc") sort: String?
-    ): ResponseEntity<Page<OrderDTO>> {
+    ): ResponseEntity<Page<OrderResponse>> {
         logger.info { "Admin request to get all orders. Criteria: $orderSearchCriteria, Page: $page, Size: $size, Sort: '$sort'" }
         val validatedSort: Sort = sortValidator.validateAndBuildSort(sort, OrderSortField::class.java)
         val pageable = PageRequest.of(page, size, validatedSort)
@@ -48,7 +48,7 @@ class OrderAdminController(
     }
 
     @GetMapping("/{orderId}")
-    fun getOrderById(@PathVariable orderId: Long): ResponseEntity<OrderDTO> {
+    fun getOrderById(@PathVariable orderId: Long): ResponseEntity<OrderResponse> {
         logger.info { "Admin request to get order by ID: $orderId" }
 
         val orderDto = orderQueryService.getOrderByIdAdmin(orderId)
@@ -61,8 +61,8 @@ class OrderAdminController(
     @PutMapping("/{orderId}/status")
     fun updateOrderStatus(
         @PathVariable orderId: Long,
-        @Valid @RequestBody statusUpdateRequest: OrderStatusUpdateRequestDTO
-    ): ResponseEntity<OrderDTO> {
+        @Valid @RequestBody statusUpdateRequest: OrderStatusUpdateRequest
+    ): ResponseEntity<OrderResponse> {
         logger.info { "Admin request to update status for order ID: $orderId to ${statusUpdateRequest.newStatus}" }
 
         val updatedOrderDto = orderCommandService.updateOrderStatus(orderId, statusUpdateRequest.newStatus)

@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.dto.product.category.CategoryDTO
+import com.rj.ecommerce.api.shared.dto.product.common.CategoryDetails
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria
 import com.rj.ecommerce_backend.product.service.category.CategoryService
 import com.rj.ecommerce_backend.sorting.CategorySortField
@@ -32,7 +32,7 @@ class PublicCategoryController(
         @RequestParam(defaultValue = "0", required = false) page: Int,
         @RequestParam(defaultValue = "10", required = false) size: Int,
         @RequestParam(defaultValue = "id:asc", required = false) sort: String?
-    ): ResponseEntity<Page<CategoryDTO>> {
+    ): ResponseEntity<Page<CategoryDetails>> {
         logger.info {
             "Public request to get all categories. Criteria: $categorySearchCriteria, " +
                     "Page: $page, Size: $size, Sort: '$sort'"
@@ -52,7 +52,7 @@ class PublicCategoryController(
 
 
     @GetMapping("/{categoryId}")
-    fun getCategoryById(@PathVariable categoryId: Long): ResponseEntity<CategoryDTO> {
+    fun getCategoryById(@PathVariable categoryId: Long): ResponseEntity<CategoryDetails> {
         logger.info { "Public request to get category by ID: $categoryId" }
         val categoryDto = categoryService.getCategoryById(categoryId)
         return ResponseEntity.ok(categoryDto)

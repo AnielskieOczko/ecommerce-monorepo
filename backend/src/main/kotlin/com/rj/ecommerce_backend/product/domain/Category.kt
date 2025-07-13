@@ -46,10 +46,10 @@ data class Category(
         if (javaClass != other?.javaClass) return false
         other as Category
         // Prefer ID-based equality after persistence, or natural key if ID is null
-        return if (id != null) id == other.id else name != null && name == other.name
+        return if (id != null) id == other.id else name == other.name
     }
 
-    override fun hashCode(): Int = id?.hashCode() ?: name?.hashCode() ?: javaClass.hashCode()
+    override fun hashCode(): Int = id?.hashCode() ?: name.hashCode()
 
     override fun toString(): String {
         return "Category(id=$id, name=$name)"

@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.dto.user.AuthorityDTO
-import com.rj.ecommerce.api.shared.dto.user.AuthorityRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.common.AuthorityDetails
 import com.rj.ecommerce_backend.user.domain.Authority
 import com.rj.ecommerce_backend.user.exception.AuthorityAlreadyExistsException
 import com.rj.ecommerce_backend.user.exception.AuthorityNotFoundException
@@ -21,7 +20,7 @@ class AuthorityServiceImpl(
     }
 
     @Transactional
-    override fun createAuthority(authorityCreateRequestDTO: AuthorityRequestDTO): AuthorityDTO {
+    override fun createAuthority(authorityCreateRequestDTO: AuthorityDetails): AuthorityDetails {
 
         if (authorityRepository.findByName(authorityCreateRequestDTO.name) != null) {
             logger.warn { "Attempt to add duplicate authority name: ${authorityCreateRequestDTO.name}" }
@@ -35,16 +34,16 @@ class AuthorityServiceImpl(
         val savedAuthority = authorityRepository.save(authority)
         logger.info { "New authority added ${savedAuthority.name}" }
 
-        return AuthorityDTO(savedAuthority.id, savedAuthority.name)
+        return AuthorityDetails(savedAuthority.id, savedAuthority.name)
     }
 
     @Transactional(readOnly = true)
-    override fun getAllAuthoritiesDTO(): Set<AuthorityDTO> {
+    override fun getAllAuthoritiesDTO(): Set<AuthorityDetails> {
         logger.debug { "Fetching all authorities and mapping to DTOs." }
         val authorities: Set<Authority> = authorityRepository.findAll().toSet()
 
         return authorities.map { authority ->
-            AuthorityDTO(
+            AuthorityDetails(
                 id = authority.id,
                 name = authority.name
             )
@@ -67,12 +66,12 @@ class AuthorityServiceImpl(
         return authorityRepository.findByName(roleName)
     }
 
-    override fun getAuthorityById(authorityId: Long): AuthorityDTO? {
+    override fun getAuthorityById(authorityId: Long): AuthorityDetails? {
 
         val authority = authorityRepository.findById(authorityId).orElseThrow {
             throw AuthorityNotFoundException("Authority not found.")
         }
-        val authorityDTO = AuthorityDTO(
+        val authorityDTO = AuthorityDetails(
             id = authority.id,
             name = authority.name
         )

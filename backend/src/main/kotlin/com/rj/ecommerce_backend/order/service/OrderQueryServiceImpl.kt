@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.order.service
 
-import com.rj.ecommerce.api.shared.dto.order.OrderDTO
+import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.exception.AccessDeniedException
 import com.rj.ecommerce_backend.order.mapper.OrderMapper
@@ -24,7 +24,7 @@ class OrderQueryServiceImpl(
     private val securityContext: SecurityContext
 ) : OrderQueryService {
 
-    override fun getOrderById(userId: Long, orderId: Long): OrderDTO? {
+    override fun getOrderById(userId: Long, orderId: Long): OrderResponse? {
         securityContext.ensureAccess(userId)
         val order = orderRepository.findById(orderId).orElse(null) ?: return null
         if (order.user?.id != userId) {
@@ -35,15 +35,15 @@ class OrderQueryServiceImpl(
         return orderMapper.toDto(order)
     }
 
-    override fun getOrderByIdAdmin(orderId: Long): OrderDTO? {
+    override fun getOrderByIdAdmin(orderId: Long): OrderResponse? {
         securityContext.ensureAdmin()
-        // CORRECT: Use .map to safely transform the Optional<Order> to an Optional<OrderDTO>
+        // CORRECT: Use .map to safely transform the Optional<Order> to an Optional<OrderResponse>
         return orderRepository.findById(orderId)
             .map { orderMapper.toDto(it) }
             .orElse(null)
     }
 
-    override fun getOrderByIdWithOrderItems(orderId: Long): OrderDTO? {
+    override fun getOrderByIdWithOrderItems(orderId: Long): OrderResponse? {
         val currentUser = securityContext.getCurrentUser()
         val userId = currentUser.id ?: throw IllegalStateException("Authenticated user has a null ID.")
 
@@ -54,7 +54,7 @@ class OrderQueryServiceImpl(
             ?.let { orderMapper.toDto(it) }
     }
 
-    override fun getOrdersForUser(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO> {
+    override fun getOrdersForUser(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderResponse> {
         criteria.userId?.let { securityContext.ensureAccess(it) }
             ?: throw IllegalArgumentException("User ID must be provided for this query.")
 
@@ -65,7 +65,7 @@ class OrderQueryServiceImpl(
         return pageOfOrders.map { orderMapper.toDto(it) }
     }
 
-    override fun getAllOrders(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderDTO> {
+    override fun getAllOrders(pageable: Pageable, criteria: OrderSearchCriteria): Page<OrderResponse> {
         securityContext.ensureAdmin()
         val spec: Specification<Order> = criteria.toSpecification()
         val pageOfOrders = orderRepository.findAll(spec, pageable)

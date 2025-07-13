@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.notification.mapper
 
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.customer.CustomerInfoDTO
-import com.rj.ecommerce.api.shared.dto.order.MessagingOrderItemDTO
+import com.rj.ecommerce.api.shared.dto.customer.common.CustomerInfo
 import com.rj.ecommerce.api.shared.enums.Currency
-import com.rj.ecommerce.api.shared.messaging.email.payload.OrderPayload
+import com.rj.ecommerce.api.shared.messaging.notification.payload.OrderPayload
+import com.rj.ecommerce.api.shared.messaging.order.common.MessagingOrderItem
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.exception.OrderDataInvalidException
 import com.rj.ecommerce_backend.user.domain.User
@@ -42,8 +42,8 @@ class OrderNotificationMapper {
         )
     }
 
-    private fun mapToCustomerInfoDTO(user: User, missing: (String) -> Nothing): CustomerInfoDTO {
-        return CustomerInfoDTO(
+    private fun mapToCustomerInfoDTO(user: User, missing: (String) -> Nothing): CustomerInfo {
+        return CustomerInfo(
             id = user.id?.toString() ?: missing("user.id"),
             firstName = user.firstName,
             lastName = user.lastName,
@@ -52,12 +52,12 @@ class OrderNotificationMapper {
         )
     }
 
-    private fun mapToMessagingOrderItems(order: Order, missing: (String) -> Nothing): List<MessagingOrderItemDTO> {
+    private fun mapToMessagingOrderItems(order: Order, missing: (String) -> Nothing): List<MessagingOrderItem> {
         val orderCurrency = order.currency
         return order.orderItems.map { item ->
             val product = item.product ?: missing("orderItem(${item.id}).product")
 
-            MessagingOrderItemDTO(
+            MessagingOrderItem(
                 id = item.id?.toString(),
                 productId = product.id?.toString() ?: missing("product.id"),
                 productName = product.name.value, // Name is non-nullable in Product entity

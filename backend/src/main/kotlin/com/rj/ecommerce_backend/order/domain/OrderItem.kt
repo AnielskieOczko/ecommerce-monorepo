@@ -28,7 +28,7 @@ data class OrderItem(
 
     var quantity: Int = 0,
 
-    var price: BigDecimal? = null,
+    var price: BigDecimal,
 
 ) {
     @CreationTimestamp

@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.order.mapper
 
 import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.order.OrderDTO
-import com.rj.ecommerce.api.shared.dto.order.OrderItemDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductSummaryDTO
+import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
+import com.rj.ecommerce.api.shared.dto.order.response.OrderItemDetails
+import com.rj.ecommerce.api.shared.dto.product.common.ProductSummary
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.product.domain.Product
@@ -19,11 +19,11 @@ class OrderMapper(
      * Maps an Order domain entity to its corresponding DTO.
      * This method now uses .map, relying on the item mapper to never return null.
      */
-    fun toDto(order: Order): OrderDTO {
+    fun toDto(order: Order): OrderResponse {
         // The call to .map is now safe because our item mapper guarantees a non-null result.
         val orderItemDTOs = order.orderItems.map { toDto(it) }
 
-        return OrderDTO(
+        return OrderResponse(
             id = order.id,
             userId = order.user?.id,
             customerEmail = order.user?.email?.value,
@@ -38,16 +38,16 @@ class OrderMapper(
             orderDate = order.orderDate,
             checkoutSessionUrl = order.checkoutSessionUrl,
             checkoutSessionExpiresAt = order.checkoutSessionExpiresAt,
-            receiptUrl = order.receiptUrl
+            receiptUrl = order.receiptUrl,
         )
     }
 
     /**
      * Maps an OrderItem domain entity to its corresponding DTO.
      * This method now accepts a non-nullable OrderItem and is guaranteed to return
-     * a non-nullable OrderItemDTO, or it will throw an exception if the entity data is invalid.
+     * a non-nullable OrderItemDetails, or it will throw an exception if the entity data is invalid.
      */
-    private fun toDto(orderItem: OrderItem): OrderItemDTO {
+    private fun toDto(orderItem: OrderItem): OrderItemDetails {
         // Use requireNotNull to enforce data integrity. If any of these are null,
         // it's a data corruption issue that should fail fast.
         val product = requireNotNull(orderItem.product) { "Product cannot be null for OrderItem ID: ${orderItem.id}" }
@@ -56,7 +56,7 @@ class OrderMapper(
         val unitPrice = requireNotNull(orderItem.price) { "Price cannot be null for OrderItem ID: ${orderItem.id}" }
         val orderCurrency = requireNotNull(orderItem.order?.currency) { "Order currency cannot be null for OrderItem ID: ${orderItem.id}" }
 
-        val productSummary = ProductSummaryDTO(
+        val productSummary = ProductSummary(
             id = productId,
             name = productName,
             unitPrice = Money(unitPrice, orderCurrency)
@@ -65,7 +65,7 @@ class OrderMapper(
         val lineTotalAmount = unitPrice.multiply(BigDecimal.valueOf(orderItem.quantity.toLong()))
         val lineTotal = Money(lineTotalAmount, orderCurrency)
 
-        return OrderItemDTO(
+        return OrderItemDetails(
             product = productSummary,
             quantity = orderItem.quantity,
             lineTotal = lineTotal
@@ -78,7 +78,7 @@ class OrderMapper(
      * This method assumes the entity has been fetched from the database within a transaction.
      * It does NOT save the entity; that is the service's responsibility.
      */
-    fun updateEntityFromDto(entity: Order, dto: OrderDTO, products: Map<Long, Product>) {
+    fun updateEntityFromDto(entity: Order, dto: OrderResponse, products: Map<Long, Product>) {
         // ... update simple fields like shippingAddress, status, etc. ...
 
         updateOrderItemsFromDto(entity, dto.items, products)
@@ -86,7 +86,7 @@ class OrderMapper(
 
     private fun updateOrderItemsFromDto(
         order: Order,
-        itemDtos: List<OrderItemDTO>,
+        itemDtos: List<OrderItemDetails>,
         productsById: Map<Long, Product>
     ) {
         order.orderItems.clear()

@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.order.service
 
-import com.rj.ecommerce.api.shared.dto.order.OrderDTO
+import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
 import com.rj.ecommerce.api.shared.enums.*
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
+import com.rj.ecommerce.api.shared.messaging.payment.response.PaymentInitiationResponse
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.events.CancellationActor
 import com.rj.ecommerce_backend.events.order.OrderCancelledEvent
@@ -29,7 +29,7 @@ class OrderCommandServiceImpl(
 ) : OrderCommandService {
 
     @Transactional
-    override fun updateOrderStatus(orderId: Long, newStatus: OrderStatus): OrderDTO {
+    override fun updateOrderStatus(orderId: Long, newStatus: OrderStatus): OrderResponse {
         val order = orderRepository.findById(orderId).orElseThrow { OrderNotFoundException(orderId) }
         val previousStatus = order.orderStatus
 
@@ -68,7 +68,7 @@ class OrderCommandServiceImpl(
     }
 
     @Transactional
-    override fun updateOrderWithCheckoutSession(response: PaymentResponseDTO) {
+    override fun updateOrderWithCheckoutSession(response: PaymentInitiationResponse) {
         val order = orderRepository.findById(response.orderId).orElseThrow { OrderNotFoundException(response.orderId) }
         // ... (update order fields)
 

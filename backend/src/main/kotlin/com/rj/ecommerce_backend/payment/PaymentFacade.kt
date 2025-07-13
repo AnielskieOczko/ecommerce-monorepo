@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.payment
 
+import com.rj.ecommerce.api.shared.dto.payment.response.PaymentSessionResponse
+import com.rj.ecommerce.api.shared.dto.payment.response.PaymentStatusResponse
 import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce.api.shared.messaging.payment.CheckoutSessionDTO
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentStatusDTO
 import com.rj.ecommerce_backend.messaging.payment.producer.PaymentMessageProducer
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
@@ -14,7 +14,6 @@ import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.IllegalStateException
 import java.time.LocalDateTime
 
 private val logger = KotlinLogging.logger { PaymentFacade::class }
@@ -26,30 +25,43 @@ class PaymentFacade(
     private val orderCommandService: OrderCommandService,
     private val orderQueryService: OrderQueryService,
     private val paymentMessageProducer: PaymentMessageProducer,
-    private val gatewayResolver: PaymentGatewayResolver // Inject the new resolver
+    private val gatewayResolver: PaymentGatewayResolver
 ) {
 
+    /**
+     * Creates or retrieves a payment session for a given order.
+     *
+     * This method has two paths:
+     * 1.  **Existing Valid Session:** If the order already has a valid, unexpired payment session URL,
+     *     it returns the existing session details immediately.
+     * 2.  **New Session:** If no valid session exists, it initiates a new one by sending an
+     *     asynchronous request to the payment service. It then **synchronously returns a PENDING response**.
+     *     The client must then poll the `getOrderPaymentStatus` endpoint to get the actual session URL
+     *     once it has been processed.
+     *
+     * @param orderId The ID of the order to pay for.
+     * @param successUrl The client-side URL to redirect to on successful payment.
+     * @param cancelUrl The client-side URL to redirect to on payment cancellation.
+     * @return A [PaymentSessionResponse] containing either the existing session details or a pending status.
+     */
     fun createCheckoutSession(
         orderId: Long,
         successUrl: String,
         cancelUrl: String
-    ): CheckoutSessionDTO {
-        val userId = securityContext.getCurrentUser().id ?: throw UserAuthenticationException("User not authenticated.")
+    ): PaymentSessionResponse {
+        securityContext.getCurrentUser().id
+            ?: throw UserAuthenticationException("User not authenticated.")
 
-        // 1. All validation and business logic live here.
         val order = orderQueryService.findOrderEntityById(orderId)
             ?: throw OrderNotFoundException("Order not found with ID: $orderId")
 
         if (isValidCheckoutSession(order)) {
             logger.info { "Found existing valid checkout session for order ID: $orderId. Session ID: ${order.paymentTransactionId}" }
-            return CheckoutSessionDTO(
-                orderId = order.id
-                    ?: throw IllegalStateException("Order ID is null on a supposedly valid order."), // Should have ID
+            return PaymentSessionResponse(
+                orderId = order.id!!,
                 paymentStatus = order.paymentStatus,
-                sessionId = order.paymentTransactionId
-                    ?: throw IllegalStateException("paymentTransactionId is null for an existing valid session on order $orderId."),
-                sessionUrl = order.checkoutSessionUrl
-                    ?: throw IllegalStateException("checkoutSessionUrl is null for an existing valid session on order $orderId."),
+                sessionId = order.paymentTransactionId,
+                sessionUrl = order.checkoutSessionUrl,
                 expiresAt = order.checkoutSessionExpiresAt
             )
         }
@@ -58,48 +70,41 @@ class PaymentFacade(
             "Order ID ${order.id} does not have a payment method selected."
         }
 
-        // The facade's job is now simple: ask the resolver for the correct gateway.
         val gateway = gatewayResolver.resolve(orderPaymentMethod)
-
         val paymentRequestDTO = gateway.buildPaymentRequest(order, successUrl, cancelUrl)
 
-        // 4. Update our order state before sending the message.
         orderCommandService.updatePaymentDetailsOnInitiation(order)
-
-        // 5. Send the request to the Payment Microservice.
         paymentMessageProducer.sendCheckoutSessionRequest(paymentRequestDTO, order.id.toString())
 
-        // 6. Return a PENDING response to the client.
-        return CheckoutSessionDTO(
+        // REFACTOR: Return the correct PENDING response DTO to the client.
+        // The client understands that sessionId and sessionUrl will be null initially
+        // and will poll for the updated status.
+        return PaymentSessionResponse(
             orderId = order.id!!,
             paymentStatus = order.paymentStatus,
-            sessionId = null, // Will be updated asynchronously
-            sessionUrl = null, // Will be updated asynchronously
+            sessionId = null, // Will be populated asynchronously
+            sessionUrl = null, // Will be populated asynchronously
             expiresAt = null
         )
     }
 
+    /**
+     * Retrieves the current payment status for a given order.
+     *
+     * @param orderId The ID of the order to check.
+     * @return A [PaymentStatusResponse] with the latest payment details.
+     */
     @Transactional(readOnly = true)
-    fun getOrderPaymentStatus(orderId: Long): PaymentStatusDTO {
-        // 1. Get current user's ID
+    fun getOrderPaymentStatus(orderId: Long): PaymentStatusResponse {
         val currentUserId = securityContext.getCurrentUser().id
-            ?: throw IllegalStateException("Authenticated user ID could not be determined.")
-        // It's generally better to throw an authentication-related exception here,
-        // e.g., NotAuthenticatedException or similar, rather than IllegalStateException.
+            ?: throw UserAuthenticationException("Authenticated user ID could not be determined.")
 
-        // 2. Fetch and Validate Order
-        val order = orderQueryService.findOrderEntityById(orderId)
-            ?: run {
-                logger.warn { "Order not found with ID: $orderId for user ID: $currentUserId, or user does not have access." }
-                throw OrderNotFoundException("Order not found with ID: $orderId, or access denied.") // Message reflects both possibilities
-            }
+        // REFACTOR: This logic was already correct, but we confirm it uses the new DTO.
+        val order = orderQueryService.getOrderEntityByIdForUser(currentUserId, orderId)
+            ?: throw OrderNotFoundException("Order not found with ID: $orderId, or access denied.")
 
-        // 3. Construct and Return DTO
-        val orderActualId = order.id
-            ?: throw IllegalStateException("Order ID is null on a fetched order (ID: $orderId). Data consistency issue.")
-
-        return PaymentStatusDTO(
-            orderId = orderActualId,
+        return PaymentStatusResponse(
+            orderId = order.id!!,
             paymentStatus = order.paymentStatus,
             paymentTransactionId = order.paymentTransactionId,
             lastUpdate = order.updatedAt
@@ -107,7 +112,6 @@ class PaymentFacade(
     }
 
     private fun isValidCheckoutSession(order: Order): Boolean {
-        // Check for essential session details and a non-failed payment status
         if (order.paymentTransactionId == null ||
             order.checkoutSessionUrl == null ||
             order.paymentStatus == CanonicalPaymentStatus.FAILED
@@ -116,15 +120,9 @@ class PaymentFacade(
             return false
         }
 
-        // A session must have an expiration date to be considered valid for continuation.
-        // If checkoutSessionExpiresAt is null, treat it as invalid.
-        val expiresAt = order.checkoutSessionExpiresAt ?: run {
-            logger.debug { "Checkout session for order ${order.id} is invalid because it has no expiration time." }
-            return false
-        }
-
-        // A session is valid if its expiration time is after the current time.
+        val expiresAt = order.checkoutSessionExpiresAt ?: return false
         val isValid = expiresAt.isAfter(LocalDateTime.now())
+
         if (!isValid) {
             logger.info { "Checkout session for order ${order.id} has expired. Expiration: $expiresAt, Current time: ${LocalDateTime.now()}" }
         }

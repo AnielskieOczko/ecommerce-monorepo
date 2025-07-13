@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.user.AuthorityDTO
-import com.rj.ecommerce.api.shared.dto.user.AuthorityRequestDTO
+import com.rj.ecommerce.api.shared.dto.user.common.AuthorityDetails
 import com.rj.ecommerce_backend.user.service.AuthorityService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
@@ -28,7 +27,7 @@ class AdminAuthorityController(
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    fun getAllAuthorities(): ResponseEntity<Set<AuthorityDTO>> {
+    fun getAllAuthorities(): ResponseEntity<Set<AuthorityDetails>> {
         logger.info { "Admin request to get all authorities." }
         val authorities = authorityService.getAllAuthoritiesDTO()
         return ResponseEntity.ok(authorities)
@@ -44,7 +43,7 @@ class AdminAuthorityController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun createAuthority(@RequestBody authorityCreateRequest: AuthorityRequestDTO): AuthorityDTO {
+    fun createAuthority(@RequestBody authorityCreateRequest: AuthorityDetails): AuthorityDetails {
         logger.info { "Admin request to create new authority with name: ${authorityCreateRequest.name}" }
 
         val createdAuthority = authorityService.createAuthority(authorityCreateRequest)
@@ -54,7 +53,7 @@ class AdminAuthorityController(
 
     // GET a specific Authority by ID (often useful)
     @GetMapping("/{authorityId}")
-    fun getAuthorityById(@PathVariable authorityId: Long): ResponseEntity<AuthorityDTO> {
+    fun getAuthorityById(@PathVariable authorityId: Long): ResponseEntity<AuthorityDetails> {
         logger.info { "Admin request to get authority by ID: $authorityId" }
         // AuthorityService would need: fun getAuthorityById(id: Long): AuthorityDTO? (or throws)
         val authority = authorityService.getAuthorityById(authorityId)

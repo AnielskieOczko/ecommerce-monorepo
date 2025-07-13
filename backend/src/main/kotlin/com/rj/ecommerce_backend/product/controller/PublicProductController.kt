@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.product.controller
 
 // Shared DTOs
-import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
+import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
 
 // Backend components
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.awt.PageAttributes
 import java.nio.file.Files
 
 @Tag(name = "Public Product API", description = "Public APIs for viewing products")
@@ -57,7 +56,7 @@ class PublicProductController(
     @GetMapping("/{productId}")
     fun getPublicProductById(
         @Parameter(description = "ID of the product to retrieve") @PathVariable productId: Long
-    ): ResponseEntity<ProductResponseDTO> {
+    ): ResponseEntity<ProductResponse> {
         logger.info { "Public request for product ID: $productId" }
         val productDto = productQueryService.getProductById(productId)
             ?: throw ProductNotFoundException(productId)
@@ -75,7 +74,7 @@ class PublicProductController(
         @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") size: Int,
         @Parameter(description = "Sort parameters (e.g., name:asc)")
         @RequestParam(defaultValue = "name:asc", required = false) sort: String?
-    ): ResponseEntity<Page<ProductResponseDTO>> {
+    ): ResponseEntity<Page<ProductResponse>> {
         logger.info { "Public request for products in category ID: $categoryId, Page: $page, Size: $size, Sort: $sort" }
 
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)
@@ -97,7 +96,7 @@ class PublicProductController(
         @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") size: Int,
         @Parameter(description = "Sort parameters")
         @RequestParam(defaultValue = "name:asc", required = false) sort: String?
-    ): ResponseEntity<Page<ProductResponseDTO>> {
+    ): ResponseEntity<Page<ProductResponse>> {
         logger.info { "Public product search by name: '$productName', Page: $page, Size: $size, Sort: $sort" }
 
         val validatedSort = sortValidator.validateAndBuildSort(sort, ProductSortField::class.java)

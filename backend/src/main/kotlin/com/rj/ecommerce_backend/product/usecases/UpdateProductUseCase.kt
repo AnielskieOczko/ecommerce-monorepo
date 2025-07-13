@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.product.usecases
 
-import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductUpdateRequestDTO
+import com.rj.ecommerce.api.shared.dto.product.request.ProductUpdateRequest
+import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.product.mapper.ProductMapper
@@ -22,7 +22,7 @@ class UpdateProductUseCase(
     private val productMapper: ProductMapper
 ) {
     @Transactional
-    fun execute(productId: Long, dto: ProductUpdateRequestDTO): ProductResponseDTO {
+    fun execute(productId: Long, dto: ProductUpdateRequest): ProductResponse {
         logger.info { "Executing UpdateProductUseCase for product ID: $productId" }
 
         // 1. Fetch the primary entity

@@ -4,11 +4,11 @@ import com.rj.ecommerce.api.shared.core.Address
 import com.rj.ecommerce.api.shared.core.Email
 import com.rj.ecommerce.api.shared.core.Password
 import com.rj.ecommerce.api.shared.core.ZipCode
-import com.rj.ecommerce.api.shared.dto.user.ChangeAccountStatusDTO
-import com.rj.ecommerce.api.shared.dto.user.AdminChangeUserAuthorityRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.AdminUpdateUserRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UserCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.user.UserInfoDTO
+import com.rj.ecommerce.api.shared.dto.user.request.ChangeAccountStatusRequest
+import com.rj.ecommerce.api.shared.dto.user.request.AdminChangeUserAuthorityRequest
+import com.rj.ecommerce.api.shared.dto.user.request.AdminUpdateUserRequest
+import com.rj.ecommerce.api.shared.dto.user.request.UserCreateRequest
+import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.user.domain.Authority
 import com.rj.ecommerce_backend.user.domain.User
@@ -48,7 +48,7 @@ class AdminServiceImpl(
     override fun getAllUsers(
         pageable: Pageable,
         criteria: UserSearchCriteria
-    ): Page<UserInfoDTO> {
+    ): Page<UserResponse> {
         logger.info { "Admin retrieving users with search criteria: $criteria" }
 
         securityContext.ensureAdmin()
@@ -56,22 +56,21 @@ class AdminServiceImpl(
         val spec: Specification<User> = criteria.toSpecification()
         val usersPage: Page<User> = userRepository.findAll(spec, pageable)
 
-        return usersPage.map { user -> userMapper.toUserInfoDTO(user) }
+        return usersPage.map { user -> userMapper.toUserResponse(user) }
 
     }
 
     @Transactional(readOnly = true)
-    override fun getUserById(userId: Long): UserInfoDTO {
+    override fun getUserById(userId: Long): UserResponse {
         logger.info { "Admin retrieving user with ID: $userId" }
         securityContext.ensureAdmin()
-        val user = findUserByIdOrThrow(userId)
 
-        return userMapper.toUserInfoDTO(findUserByIdOrThrow(userId))
+        return userMapper.toUserResponse(findUserByIdOrThrow(userId))
 
     }
 
     @Transactional
-    override fun createUser(request: UserCreateRequestDTO): UserInfoDTO {
+    override fun createUser(request: UserCreateRequest): UserResponse {
         logger.info { "Processing new request for user creation: $request" }
 
         val newEmailVO = Email(request.email) // Throws if format is invalid
@@ -102,14 +101,14 @@ class AdminServiceImpl(
         val newUser = userRepository.save(user)
         logger.info { "New user with ID: ${newUser.id}  created." }
 
-        return userMapper.toUserInfoDTO(newUser)
+        return userMapper.toUserResponse(newUser)
 
     }
 
     override fun updateUser(
         userId: Long,
-        request: AdminUpdateUserRequestDTO
-    ): UserInfoDTO {
+        request: AdminUpdateUserRequest
+    ): UserResponse {
         logger.info { "Admin updating user with ID: $userId" }
         securityContext.ensureAdmin()
 
@@ -132,7 +131,7 @@ class AdminServiceImpl(
 
         val savedUser = userRepository.save(user)
         logger.info { "Admin updated user with ID: ${savedUser.id}." }
-        return userMapper.toUserInfoDTO(savedUser)
+        return userMapper.toUserResponse(savedUser)
 
 
     }
@@ -159,8 +158,8 @@ class AdminServiceImpl(
 
     override fun updateAccountStatus(
         userId: Long,
-        request: ChangeAccountStatusDTO
-    ): UserInfoDTO {
+        request: ChangeAccountStatusRequest
+    ): UserResponse {
         logger.info { "Admin attempts to update account status for user ID: $userId to active=${request.isActive}" }
         securityContext.ensureAdmin()
 
@@ -173,14 +172,14 @@ class AdminServiceImpl(
 
         logger.info { "Admin updated account's status for user ID: $user.id from $oldStatus to ${user.isActive}" }
 
-        return userMapper.toUserInfoDTO(savedUser)
+        return userMapper.toUserResponse(savedUser)
 
     }
 
     override fun updateUserAuthorities(
         userId: Long,
-        request: AdminChangeUserAuthorityRequestDTO
-    ): UserInfoDTO {
+        request: AdminChangeUserAuthorityRequest
+    ): UserResponse {
         logger.info { "Admin explicitly updating authorities for user ID: $userId" }
         securityContext.ensureAdmin()
 
@@ -191,7 +190,7 @@ class AdminServiceImpl(
 
         val savedUser = userRepository.save(user)
         logger.info { "Admin explicitly updated authorities for user ID: ${user.id}." }
-        return userMapper.toUserInfoDTO(savedUser)
+        return userMapper.toUserResponse(savedUser)
     }
 
     override fun enableUsers(userIds: List<Long>): Int {
@@ -254,7 +253,7 @@ class AdminServiceImpl(
                 // It's good to know WHO tried to access a non-existent user after passing initial security checks
                 val currentAuthUser = try {
                     securityContext.getCurrentUser().id
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     "UNKNOWN_OR_ANONYMOUS"
                 }
                 logger.warn { "$USER_NOT_FOUND_MSG_PREFIX$userId (operation initiated by authenticated user: $currentAuthUser)" }

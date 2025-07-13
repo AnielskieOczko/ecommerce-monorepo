@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.payment.gateway
 
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentLineItemDTO
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentRequestDTO
+import com.rj.ecommerce.api.shared.messaging.payment.common.PaymentLineItem
+import com.rj.ecommerce.api.shared.messaging.payment.request.PaymentInitiationRequest
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.payment.exception.PaymentLineItemCreationException
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -23,7 +23,7 @@ class StripeGateway : PaymentGateway {
      * @throws PaymentLineItemCreationException if the order data is invalid or
      *         insufficient to create a valid payment request.
      */
-    override fun buildPaymentRequest(order: Order, successUrl: String, cancelUrl: String): PaymentRequestDTO {
+    override fun buildPaymentRequest(order: Order, successUrl: String, cancelUrl: String): PaymentInitiationRequest {
         logger.debug { "Building Stripe payment request for Order ID: ${order.id}" }
 
         // --- 1. Pre-condition Checks: Ensure the Order object is valid for payment ---
@@ -73,7 +73,7 @@ class StripeGateway : PaymentGateway {
                 .setScale(0, RoundingMode.HALF_UP)
                 .longValueExact()
 
-            PaymentLineItemDTO(
+            PaymentLineItem(
                 name = productName,
                 description = product.description?.value,
                 unitAmountCents = itemPriceInCents,
@@ -83,7 +83,7 @@ class StripeGateway : PaymentGateway {
         }
 
         // --- 4. Construct and Return the Final DTO ---
-        val request = PaymentRequestDTO(
+        val request = PaymentInitiationRequest(
             orderId = orderId,
             customerEmail = userEmail,
             successUrl = successUrl,

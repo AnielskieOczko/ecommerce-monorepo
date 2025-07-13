@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.payment
 
 import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce.api.shared.messaging.payment.PaymentResponseDTO
+import com.rj.ecommerce.api.shared.messaging.payment.response.PaymentInitiationResponse
 import com.rj.ecommerce_backend.events.payment.PaymentFailedEvent
 import com.rj.ecommerce_backend.events.payment.PaymentSucceededEvent
 import com.rj.ecommerce_backend.order.service.OrderCommandService
@@ -22,7 +22,7 @@ class PaymentResponseProcessor(
     }
 
     @Transactional
-    fun processCheckoutSessionResponse(response: PaymentResponseDTO) {
+    fun processCheckoutSessionResponse(response: PaymentInitiationResponse) {
         log.info { "Processing webhook response for orderId: ${response.orderId}, status: ${response.paymentStatus}" }
 
         try {

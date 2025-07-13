@@ -1,11 +1,8 @@
 package com.rj.ecommerce_backend.security.service
 
-import com.rj.ecommerce.api.shared.dto.security.AuthResponseDTO
-import com.rj.ecommerce.api.shared.dto.security.JwtResponseDTO
-import com.rj.ecommerce.api.shared.dto.security.LoginRequestDTO
-import com.rj.ecommerce.api.shared.dto.security.TokenRefreshRequestDTO
-import com.rj.ecommerce_backend.security.domain.RefreshToken
-import com.rj.ecommerce_backend.security.exception.TokenRefreshException
+import com.rj.ecommerce.api.shared.dto.security.request.LoginRequest
+import com.rj.ecommerce.api.shared.dto.security.request.TokenRefreshRequest
+import com.rj.ecommerce.api.shared.dto.security.response.AuthResponse
 import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
 import com.rj.ecommerce_backend.security.util.JwtUtils
 import com.rj.ecommerce_backend.user.domain.User
@@ -31,66 +28,19 @@ class AuthenticationServiceImpl(
     private val logoutService: LogoutService
 ) : AuthenticationService {
 
-    companion object {
-        private const val AUTH_HEADER = "Authorization"
-        private const val TOKEN_PREFIX = "Bearer "
-    }
-
-    override fun authenticateUser(loginRequest: LoginRequestDTO): AuthResponseDTO {
+    override fun authenticateUser(loginRequest: LoginRequest): AuthResponse {
         logger.info { "Attempting to authenticate user: ${loginRequest.email}" }
-        return try {
-            val authentication: Authentication = performAuthentication(loginRequest)
-            val jwtResponse: JwtResponseDTO = generateAuthResponse(authentication)
-            logger.info { "User authenticated successfully: ${loginRequest.email}" }
-            AuthResponseDTO(
-                success = true,
-                message = "Authentication successful",
-                data = jwtResponse
-            )
-        } catch (e: UserAuthenticationException) {
-            logger.warn(e) { "Authentication failed for user ${loginRequest.email}: ${e.message}" }
-            AuthResponseDTO(
-                success = false,
-                message = e.localizedMessage ?: "Authentication failed.", // Use exception's message
-                data = null
-            )
-        } catch (e: Exception) {
-            logger.error(e) { "Unexpected error during authentication for user ${loginRequest.email}" }
-            AuthResponseDTO(
-                success = false,
-                message = "An unexpected error occurred during authentication.",
-                data = null
-            )
-        }
+        val authentication = performAuthentication(loginRequest)
+        logger.info { "User authenticated successfully: ${loginRequest.email}" }
+        return generateAndPersistTokens(authentication)
     }
 
-    override fun refreshToken(tokenRefreshRequest: TokenRefreshRequestDTO): AuthResponseDTO {
+    override fun refreshToken(tokenRefreshRequest: TokenRefreshRequest): AuthResponse {
         logger.info { "Attempting to refresh token." }
-        return try {
-            val refreshToken: RefreshToken = refreshTokenService
-                .verifyRefreshToken(tokenRefreshRequest.refreshToken)
-            val jwtResponse: JwtResponseDTO = generateNewTokens(user = refreshToken.user)
-            logger.info { "Token refreshed successfully for user ID: ${refreshToken.user.id}" }
-            AuthResponseDTO(
-                success = true,
-                message = "Token refresh successful",
-                data = jwtResponse
-            )
-        } catch (e: TokenRefreshException) {
-            logger.warn(e) { "Token refresh failed: ${e.message}" }
-            AuthResponseDTO(
-                success = false,
-                message = e.localizedMessage ?: "Token refresh failed.",
-                data = null
-            )
-        } catch (e: Exception) {
-            logger.error(e) { "Unexpected error during token refresh." }
-            AuthResponseDTO(
-                success = false,
-                message = "An unexpected error occurred during token refresh.",
-                data = null
-            )
-        }
+        val refreshToken = refreshTokenService.verifyRefreshToken(tokenRefreshRequest.refreshToken)
+        val newAuthResponse = generateNewTokensForUser(refreshToken.user)
+        logger.info { "Token refreshed successfully for user ID: ${refreshToken.user.id}" }
+        return newAuthResponse
     }
 
     override fun handleEmailUpdate(
@@ -98,86 +48,26 @@ class AuthenticationServiceImpl(
         currentPassword: String,
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): AuthResponseDTO {
-        val userEmail = user.email.value // Cache for logging
+    ): AuthResponse {
+        val userEmail = user.email.value
         logger.info { "Attempting to handle email update for user: $userEmail" }
-        return try {
-            val userId = user.id
-                ?: run {
-                    logger.error { "User ID is null during email update attempt for email: $userEmail" }
-                    throw IllegalStateException("User ID cannot be null when updating email and generating tokens for user: $userEmail")
-                }
-            logger.debug { "User ID $userId obtained for email update." }
 
-            logoutCurrentUser(request, response)
-            logger.debug { "Current user logged out for email update process for user: $userEmail" }
+        val userId = user.id
+            ?: throw IllegalStateException("User ID cannot be null when updating email for user: $userEmail")
 
-            val newAuth: Authentication = authenticateWithNewEmail(userEmail, currentPassword)
-            logger.debug { "Successfully re-authenticated user $userEmail with new credentials." }
+        logoutCurrentUser(request, response)
+        val newAuth = authenticateWithNewEmail(userEmail, currentPassword)
 
-
-            val newAccessToken = jwtUtils.generateJwtToken(authentication = newAuth)
-            val newRefreshToken: RefreshToken = refreshTokenService.createRefreshToken(userId)
-            logger.debug { "Generated new access and refresh tokens for user ID: $userId after email update." }
-
-
-            // It's generally better to return the token in the response body rather than setting it as a header
-            // in an API context, but if this is a requirement, it's fine.
-            // response.setHeader(AUTH_HEADER, TOKEN_PREFIX + newAccessToken) // Consider if this is truly needed or if JwtResponse is sufficient
-
-            val jwtResponse = JwtResponseDTO(
-                token = newAccessToken,
-                refreshToken = newRefreshToken.token,
-                id = userId,
-                email = userEmail,
-                roles = extractRoles(newAuth),
-                type = "Bearer"
-            )
-
-            logger.info { "Email update and re-authentication successful for user ID: $userId" }
-            AuthResponseDTO(
-                success = true,
-                message = "Authentication updated successfully after email change.",
-                data = jwtResponse
-            )
-
-        } catch (e: IllegalStateException) {
-            logger.error(e) { "Error during email update for $userEmail: ${e.message}" }
-            AuthResponseDTO(
-                success = false,
-                message = e.localizedMessage ?: "Failed to update authentication due to invalid user state.",
-                data = null
-            )
-        } catch (e: UserAuthenticationException) {
-            logger.warn(e) { "Re-authentication failed during email update for $userEmail: ${e.message}" }
-            AuthResponseDTO(
-                success = false,
-                message = e.localizedMessage ?: "Failed to update authentication due to re-authentication failure.",
-                data = null
-            )
-        }
-        catch (e: Exception) {
-            logger.error(e) { "Unexpected error during email update for $userEmail" }
-            AuthResponseDTO(
-                success = false,
-                message = "Failed to update authentication due to an unexpected error.",
-                data = null
-            )
-        }
+        logger.info { "Email update and re-authentication successful for user ID: $userId" }
+        return generateNewTokensForUser(user)
     }
 
-
-    private fun performAuthentication(loginRequest: LoginRequestDTO): Authentication {
-        logger.debug { "Performing authentication for: ${loginRequest.email}" }
+    private fun performAuthentication(loginRequest: LoginRequest): Authentication {
         try {
-            val authentication: Authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(
-                    loginRequest.email,
-                    loginRequest.password
-                )
+            val authentication = authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken(loginRequest.email, loginRequest.password)
             )
-            SecurityContextHolder.getContext().authentication = authentication // Set authentication in context
-            logger.debug { "Authentication successful for: ${loginRequest.email}" }
+            SecurityContextHolder.getContext().authentication = authentication
             return authentication
         } catch (e: BadCredentialsException) {
             logger.warn { "Invalid credentials for user: ${loginRequest.email}" }
@@ -188,88 +78,57 @@ class AuthenticationServiceImpl(
         }
     }
 
-    private fun generateAuthResponse(authentication: Authentication): JwtResponseDTO {
-        val userDetails: UserDetailsImpl = authentication.principal as UserDetailsImpl
-        logger.debug { "Generating auth response for user: ${userDetails.username}" }
-        val accessToken: String = jwtUtils.generateJwtToken(authentication)
-        val refreshToken: RefreshToken = refreshTokenService.createRefreshToken(userDetails.id)
+    private fun generateAndPersistTokens(authentication: Authentication): AuthResponse {
+        val userDetails = authentication.principal as UserDetailsImpl
+        logger.debug { "Generating and persisting tokens for user: ${userDetails.username}" }
 
-        val roles: List<String> = userDetails.authorities.map { grantedAuthority ->
-            grantedAuthority.authority
-        }
+        val accessToken = jwtUtils.generateJwtToken(authentication)
+        val refreshToken = refreshTokenService.createRefreshToken(userDetails.id)
 
-        return JwtResponseDTO(
+        return AuthResponse(
             token = accessToken,
             refreshToken = refreshToken.token,
             id = userDetails.id,
-            email = userDetails.username, // Assuming username here is the email
-            roles = roles,
-            type = "Bearer" // Consistent with companion object constant if used
+            email = userDetails.username,
+            roles = userDetails.authorities.map { it.authority }
         )
     }
 
-    private fun generateNewTokens(user: User): JwtResponseDTO {
-        val userEmailForLog = user.email.value
-        logger.debug { "Generating new tokens for user: $userEmailForLog" }
-        try {
-            val userId = user.id
-                ?: run {
-                    logger.error { "User ID is null when trying to generate new tokens for user: $userEmailForLog" }
-                    throw IllegalStateException("User ID cannot be null when generating tokens for user: $userEmailForLog")
-                }
+    private fun generateNewTokensForUser(user: User): AuthResponse {
+        val userId = user.id ?: throw IllegalStateException("Cannot generate tokens for a user with a null ID.")
+        logger.debug { "Generating new tokens for user ID: $userId" }
 
-            val userDetails: UserDetailsImpl = UserDetailsImpl.build(user)
-            val authentication: Authentication = UsernamePasswordAuthenticationToken(
-                userDetails,
-                null, // No credentials needed for this internal authentication object for token generation
-                userDetails.authorities
-            )
+        val userDetails = UserDetailsImpl.build(user)
+        val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
 
-            val accessToken: String = jwtUtils.generateJwtToken(authentication)
-            val newRefreshToken: RefreshToken = refreshTokenService.createRefreshToken(userId)
+        val newAccessToken = jwtUtils.generateJwtToken(authentication)
+        val newRefreshToken = refreshTokenService.createRefreshToken(userId)
 
-            val roles: List<String> = userDetails.authorities.map { grantedAuthority ->
-                grantedAuthority.authority
-            }
-            logger.debug { "Successfully generated new tokens for user ID: $userId" }
-            return JwtResponseDTO(
-                token = accessToken,
-                refreshToken = newRefreshToken.token,
-                id = userId,
-                email = user.email.value, // email from User object
-                roles = roles,
-                type = "Bearer"
-            )
-
-        } catch (e: IllegalStateException) {
-            throw TokenRefreshException("Failed to generate new tokens due to invalid user state: ${e.message}", e)
-        }
-        catch (e: Exception) {
-            logger.error(e) { "Failed to generate new tokens for user $userEmailForLog" }
-            throw TokenRefreshException("Failed to generate new tokens for user $userEmailForLog.", e)
-        }
+        return AuthResponse(
+            token = newAccessToken,
+            refreshToken = newRefreshToken.token,
+            id = userId,
+            email = user.email.value,
+            roles = userDetails.authorities.map { it.authority }
+        )
     }
 
     private fun logoutCurrentUser(request: HttpServletRequest, response: HttpServletResponse) {
-        val currentAuth: Authentication? = SecurityContextHolder.getContext().authentication
+        val currentAuth = SecurityContextHolder.getContext().authentication
         if (currentAuth != null && currentAuth.isAuthenticated && currentAuth.name != "anonymousUser") {
             logger.debug { "Logging out current authenticated user: ${currentAuth.name}" }
             logoutService.logout(request, response, currentAuth)
-            SecurityContextHolder.clearContext() // Ensure context is cleared
+            SecurityContextHolder.clearContext()
         } else {
-            logger.debug { "No current authenticated user found to logout, or user is anonymous." }
+            logger.debug { "No current authenticated user found to logout." }
         }
     }
 
     private fun authenticateWithNewEmail(email: String, password: String): Authentication {
-        logger.debug { "Authenticating with new email: $email" }
         try {
-            val newAuth: Authentication = authenticationManager.authenticate(
+            val newAuth = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken(email, password)
             )
-            // Setting the new authentication in the context might be desired if subsequent operations
-            // in the same request rely on it. Otherwise, it might not be strictly necessary if you're
-            // just generating a token to be used by the client for future requests.
             SecurityContextHolder.getContext().authentication = newAuth
             logger.debug { "Successfully authenticated with new email: $email and set in SecurityContext." }
             return newAuth
@@ -279,12 +138,6 @@ class AuthenticationServiceImpl(
         } catch (e: Exception) {
             logger.error(e) { "Authentication failed for new email $email" }
             throw UserAuthenticationException("Authentication failed with new email.", e)
-        }
-    }
-
-    private fun extractRoles(authentication: Authentication): List<String> {
-        return authentication.authorities.map { grantedAuthority ->
-            grantedAuthority.authority
         }
     }
 }

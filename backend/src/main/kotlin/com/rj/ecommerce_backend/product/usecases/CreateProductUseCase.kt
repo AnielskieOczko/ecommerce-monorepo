@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.product.usecases
 
-import com.rj.ecommerce.api.shared.dto.product.ProductCreateRequestDTO
-import com.rj.ecommerce.api.shared.dto.product.ProductResponseDTO
+import com.rj.ecommerce.api.shared.dto.product.request.ProductCreateRequest
+import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException
 import com.rj.ecommerce_backend.product.mapper.ProductMapper
 import com.rj.ecommerce_backend.product.repository.CategoryRepository
@@ -22,7 +22,7 @@ class CreateProductUseCase(
     private val productMapper: ProductMapper
 ) {
     @Transactional
-    fun execute(dto: ProductCreateRequestDTO, images: List<MultipartFile>): ProductResponseDTO {
+    fun execute(dto: ProductCreateRequest, images: List<MultipartFile>): ProductResponse {
         logger.info { "Executing CreateProductUseCase for: ${dto.productData.name}" }
 
         // 1. Fetch and validate related entities
