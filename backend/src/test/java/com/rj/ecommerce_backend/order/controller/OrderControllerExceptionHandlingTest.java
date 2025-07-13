@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.order.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rj.ecommerce.api.shared.dto.order.OrderCreateRequestDTO;
-import com.rj.ecommerce.api.shared.dto.order.OrderDTO;
+import com.rj.ecommerce.api.shared.dto.order.request.OrderCreateRequest;
+import com.rj.ecommerce.api.shared.dto.order.response.OrderDTO;
 import com.rj.ecommerce.api.shared.enums.ShippingMethod;
 import com.rj.ecommerce_backend.cart.dtos.CartDTO;
 import com.rj.ecommerce_backend.cart.dtos.CartItemDTO;
@@ -56,7 +56,7 @@ class OrderControllerExceptionHandlingTest {
 
     private ObjectMapper objectMapper;
     private OrderDTO testOrderDTO;
-    private OrderCreateRequestDTO testOrderCreationRequest;
+    private OrderCreateRequest testOrderCreationRequest;
 
     @BeforeEach
     void setUp() {
@@ -81,7 +81,7 @@ class OrderControllerExceptionHandlingTest {
 
         CartDTO cart = new CartDTO(1L, 1L, cartItems, LocalDateTime.now(), LocalDateTime.now());
 
-        testOrderCreationRequest = new OrderCreateRequestDTO(
+        testOrderCreationRequest = new OrderCreateRequest(
 
                 shippingAddress,
                 PaymentMethod.CREDIT_CARD,
@@ -95,7 +95,7 @@ class OrderControllerExceptionHandlingTest {
         // Given
         Long userId = 1L;
 
-        when(orderService.createOrder(eq(userId), any(OrderCreateRequestDTO.class)))
+        when(orderService.createOrder(eq(userId), any(OrderCreateRequest.class)))
                 .thenThrow(new AccessDeniedException("Access denied"));
 
         // When & Then

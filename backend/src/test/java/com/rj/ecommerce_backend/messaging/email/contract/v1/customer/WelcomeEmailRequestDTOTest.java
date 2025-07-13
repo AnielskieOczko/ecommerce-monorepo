@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.messaging.email.contract.v1.customer;
 
 import com.rj.ecommerce.api.shared.enums.NotificationTemplate;
-import com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO;
+import com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ class WelcomeEmailRequestDTOTest {
         LocalDateTime timestamp = LocalDateTime.now();
 
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                 messageId, version, to, subject, customerName, couponCode, additionalData, timestamp
         );
 
@@ -51,7 +51,7 @@ class WelcomeEmailRequestDTOTest {
         String customerName = "John Doe";
 
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                 messageId, version, to, null, customerName, null, null, null
         );
 
@@ -68,7 +68,7 @@ class WelcomeEmailRequestDTOTest {
         String customerName = "John Doe";
 
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                 messageId, version, to, "", customerName, null, null, null
         );
 
@@ -85,7 +85,7 @@ class WelcomeEmailRequestDTOTest {
         String customerName = "John Doe";
 
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                 messageId, version, to, "Subject", customerName, null, null, null
         );
 
@@ -102,7 +102,7 @@ class WelcomeEmailRequestDTOTest {
         String customerName = "John Doe";
 
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                 messageId, version, to, "Subject", customerName, null, null, LocalDateTime.now()
         );
 
@@ -121,7 +121,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -137,7 +137,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -153,7 +153,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -169,7 +169,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -185,7 +185,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -201,7 +201,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -217,7 +217,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -233,7 +233,7 @@ class WelcomeEmailRequestDTOTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+            new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                     messageId, version, to, "Subject", customerName, null, null, null
             );
         });
@@ -252,7 +252,7 @@ class WelcomeEmailRequestDTOTest {
         additionalData.put("key2", 123);
 
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO(
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = new com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO(
                 messageId, version, to, "Subject", customerName, couponCode, additionalData, LocalDateTime.now()
         );
         Map<String, Object> templateData = dto.getTemplateData();
@@ -267,7 +267,7 @@ class WelcomeEmailRequestDTOTest {
     @Test
     void shouldCreateInstanceWithDefaultBuilder() {
         // When
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO dto = com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO.defaultBuilder()
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO dto = com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO.defaultBuilder()
                 .to("customer@example.com")
                 .customerName("John Doe")
                 .build();
@@ -285,7 +285,7 @@ class WelcomeEmailRequestDTOTest {
     @Test
     void shouldCreateImmutableCopyWithWith() {
         // Given
-        com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO original = com.rj.ecommerce.api.shared.messaging.email.WelcomeEmailRequestDTO.defaultBuilder()
+        com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO original = com.rj.ecommerce.api.shared.messaging.notification.WelcomeEmailRequestDTO.defaultBuilder()
                 .to("customer@example.com")
                 .customerName("John Doe")
                 .build();
