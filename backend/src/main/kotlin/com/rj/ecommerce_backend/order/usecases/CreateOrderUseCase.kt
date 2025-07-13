@@ -12,7 +12,9 @@ import com.rj.ecommerce_backend.order.mapper.OrderMapper
 import com.rj.ecommerce_backend.order.repository.OrderRepository
 import com.rj.ecommerce_backend.product.exception.InsufficientStockException
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
-import com.rj.ecommerce_backend.product.service.ProductService
+import com.rj.ecommerce_backend.product.service.ProductCommandServiceImpl
+import com.rj.ecommerce_backend.product.service.ProductQueryService
+
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.user.domain.User
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -26,7 +28,8 @@ private val logger = KotlinLogging.logger {}
 @Component
 class CreateOrderUseCase(
     private val orderRepository: OrderRepository,
-    private val productService: ProductService,
+    private val productCommandServiceImpl: ProductCommandServiceImpl,
+    private val productQueryService: ProductQueryService,
     private val securityContext: SecurityContext,
     private val orderMapper: OrderMapper,
     private val eventPublisher: ApplicationEventPublisher
@@ -72,7 +75,7 @@ class CreateOrderUseCase(
 
     private fun validateCartAvailability(cartDTO: CartDTO) {
         cartDTO.items.forEach { item ->
-            val product = productService.getProductEntityForValidation(item.product.id)
+            val product = productQueryService.getProductEntityForValidation(item.product.id)
                 ?: throw ProductNotFoundException(item.product.id)
             if ((product.quantityInStock.value) < item.quantity) {
                 throw InsufficientStockException("Insufficient stock for product: ${product.name.value}")
@@ -82,10 +85,10 @@ class CreateOrderUseCase(
 
     private fun createOrderItemsAndReduceStock(order: Order, cartDTO: CartDTO): List<OrderItem> {
         return cartDTO.items.map { cartItemDTO ->
-            val product = productService.getProductEntityForValidation(cartItemDTO.product.id)
+            val product = productQueryService.getProductEntityForValidation(cartItemDTO.product.id)
                 ?: throw ProductNotFoundException(cartItemDTO.product.id)
 
-            productService.reduceProductQuantity(product.id!!, cartItemDTO.quantity)
+            productCommandServiceImpl.reduceProductQuantity(product.id!!, cartItemDTO.quantity)
 
             OrderItem(
                 order = order,
