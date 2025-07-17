@@ -8,7 +8,6 @@
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>com.rj</groupId>
 	<artifactId>shared-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>shared-api</name>
