@@ -16,13 +16,13 @@ interface ProductRepository :
     JpaRepository<Product, Long>,
     JpaSpecificationExecutor<Product> {
 
-    @Query("SELECT p FROM Product p WHERE p.productName.value LIKE %:name%")
+    @Query("SELECT p FROM Product p WHERE p.name.value LIKE %:name%")
     fun findProductByNameLike(@Param("name") name: String): List<Product>
 
     fun findByCategoriesId(categoryId: Long, pageable: Pageable): Page<Product>
 
-    fun findByProductNameValueContainingIgnoreCase(
-        productName: String,
+    fun findByName_ValueContainingIgnoreCase(
+        name: String,
         pageable: Pageable
     ): Page<Product>
 

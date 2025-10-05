@@ -53,7 +53,7 @@ class ProductQueryServiceImpl(
     override fun findProductsByName(name: String, pageable: Pageable): Page<ProductResponse> {
         logger.debug { "Finding products by name containing: '$name' with pageable: $pageable" }
         val productsPage = productRepository
-            .findByProductNameValueContainingIgnoreCase(name, pageable).map { product ->
+            .findByName_ValueContainingIgnoreCase(name, pageable).map { product ->
                 val imageInfos = productImageService.getImageInfosForProduct(product)
                 productMapper.toDto(product, imageInfos)
             }
