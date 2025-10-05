@@ -11,7 +11,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 
-@ConfigurationProperties(prefix = "storage")
+@ConfigurationProperties(prefix = "app.storage")
 @Validated
 class StorageProperties {
 

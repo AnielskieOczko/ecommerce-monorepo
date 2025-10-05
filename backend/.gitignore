@@ -19,6 +19,9 @@ target/
 *.iml
 *.ipr
 
+# Local storage for user-generated content
+/storage-local/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

@@ -17,6 +17,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
     # ddl-auto and show-sql are best set per-profile
   # RabbitMQ connection details (host will be overridden)
   rabbitmq:
@@ -79,6 +80,7 @@ app:
       queue: checkout.session.response.queue
       routing-key: checkout.session.response.routing-key
     payment-options-request:
+      queue: payment.options.request.q
       exchange: payment.events
       routing-key: payment.options.request
     payment-options-reply:
@@ -146,7 +148,7 @@ spring:
 
 app:
   storage:
-    location: ${DEV_STORAGE_PATH:/tmp/ecommerce/product-images}
+    location: /app/product-images # This matches the container path in the volume
     cleanup-schedule: "0 * * * * *"  # Override to run hourly for testing
 
 ---
@@ -174,7 +176,7 @@ spring:
 
 app:
   storage:
-    location: ${user.home}/ecommerce/product-images/local
+    location: ./storage-local # This path is relative to where the app is run (your project root)
 
 ---
 # ===================================================================

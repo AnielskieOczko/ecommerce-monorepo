@@ -45,8 +45,8 @@ services:
   # Spring Boot Backend Service
   app_backend:
     build:
-      context: ../backend/
-      dockerfile: Dockerfile_dev
+      context: ../
+      dockerfile: backend/Dockerfile_dev
     container_name: ecommerce_backend
     restart: unless-stopped
     ports:
@@ -54,6 +54,7 @@ services:
       - "5005:5005"
     volumes:
       - ../backend/:/app
+      - ../ecommerce-monorepo/backend/storage-local:/app/product-images
     depends_on:
       - mysql
     environment:
@@ -81,8 +82,8 @@ services:
 
   app_frontend:
     build:
-      context: ../frontend/
-      dockerfile: Dockerfile_dev
+      context: ../
+      dockerfile: frontend/Dockerfile_dev
     container_name: ecommerce_frontend
     restart: unless-stopped
     ports:
@@ -120,17 +121,18 @@ services:
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
+    platform: linux/amd64
     ports:
       - "1025:1025"
       - "8025:8025"
     networks:
       - backend_network
 
-  app_email_service:
+  app_notification_service:
     build:
-      context: ../email-service/
-      dockerfile: Dockerfile_dev
-    container_name: ecommerce_email_service
+      context: ../
+      dockerfile: notification-service/Dockerfile_dev
+    container_name: ecommerce_notification_service
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_RABBITMQ_HOST: rabbitmq
@@ -152,8 +154,8 @@ services:
 
   app_payment_service:
     build:
-      context: ../payment-service/
-      dockerfile: Dockerfile_dev
+      context: ../
+      dockerfile: payment-service/Dockerfile_dev
     container_name: ecommerce_payment_service
     environment:
       SPRING_PROFILES_ACTIVE: dev
