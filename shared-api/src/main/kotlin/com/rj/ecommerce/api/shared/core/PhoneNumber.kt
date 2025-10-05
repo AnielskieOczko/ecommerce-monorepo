@@ -1,5 +1,7 @@
 package com.rj.ecommerce.api.shared.core
 
+import jakarta.persistence.Embeddable
+
 /**
  * Represents a phone number.
  *
@@ -8,6 +10,7 @@ package com.rj.ecommerce.api.shared.core
  * Requirements:
  * - value must be a valid phone number format
  */
+@Embeddable
 data class PhoneNumber(
     val value: String
 )

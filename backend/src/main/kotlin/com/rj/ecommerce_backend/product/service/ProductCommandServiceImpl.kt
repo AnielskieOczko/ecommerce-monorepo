@@ -5,10 +5,12 @@ import com.rj.ecommerce_backend.product.exception.InsufficientStockException
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.product.repository.ProductRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.stereotype.Service
 
 
 private val logger = KotlinLogging.logger { ProductCommandServiceImpl::class }
 
+@Service
 class ProductCommandServiceImpl(
     private val productRepository: ProductRepository,
 ) : ProductCommandService {

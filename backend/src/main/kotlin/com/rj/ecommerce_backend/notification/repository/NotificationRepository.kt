@@ -11,8 +11,6 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
 
     fun findByCorrelationId(correlationId: String): Notification?
 
-    fun findByMessageId(messageId: String): Notification?
-
     fun findByEntityTypeAndEntityId(entityType: NotificationEntityType, entityId: String):
             List<Notification>
 

@@ -1,6 +1,7 @@
 package com.rj.ecommerce.api.shared.core
 
 import com.rj.ecommerce.api.shared.enums.Currency
+import jakarta.persistence.Embeddable
 import java.math.BigDecimal
 
 /**
@@ -12,6 +13,7 @@ import java.math.BigDecimal
  * Requirements:
  * - currencyCode must be a 3-letter ISO 4217 code (e.g., USD, EUR, GBP)
  */
+@Embeddable
 data class Money(
     val amount: BigDecimal,
     val currencyCode: Currency

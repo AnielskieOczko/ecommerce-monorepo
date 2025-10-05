@@ -274,7 +274,7 @@ class ProductServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Product> productPage = new PageImpl<>(Collections.singletonList(testProduct), pageable, 1);
 
-        when(productRepository.findByProductNameValueContainingIgnoreCase(productName, pageable)).thenReturn(productPage);
+        when(productRepository.findByName_ValueContainingIgnoreCase(productName, pageable)).thenReturn(productPage);
         when(productMapper.mapToDTO(testProduct)).thenReturn(testProductResponseDTO);
 
         // When
@@ -284,7 +284,7 @@ class ProductServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals(testProductResponseDTO, result.getContent().get(0));
-        verify(productRepository).findByProductNameValueContainingIgnoreCase(productName, pageable);
+        verify(productRepository).findByName_ValueContainingIgnoreCase(productName, pageable);
     }
 
     @Test
