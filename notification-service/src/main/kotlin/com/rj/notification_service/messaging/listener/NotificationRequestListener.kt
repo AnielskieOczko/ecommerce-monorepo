@@ -23,7 +23,7 @@ class NotificationRequestListener(
      * This is an "at-least-once" delivery mechanism. If processing fails,
      * the message will be rejected and, after retries, sent to the DLQ.
      */
-    @RabbitListener(queues = ["\${app.rabbitmq.notification-request.queue}"])
+    @RabbitListener(queues = ["\${app.rabbitmq.notificationRequest.queue}"])
     fun handleNotificationRequest(request: NotificationRequest<Any>) {
         val envelope = request.envelope
         logger.info { "Received email request. Correlation ID: ${envelope.correlationId}, Template: ${envelope.template.name}" }
