@@ -35,8 +35,8 @@ class MessageProducer(
 
     fun <T : Any> sendCheckoutSessionResponse(response: T, correlationId: String?) {
         sendMessage(
-            exchange = rabbitMQProperties.checkoutSessionExchange,
-            routingKey = rabbitMQProperties.checkoutSessionResponseRoutingKey,
+            exchange = rabbitMQProperties.checkoutSessionResponse.exchange,
+            routingKey = rabbitMQProperties.checkoutSessionResponse.routingKey,
             message = response,
             correlationId = correlationId
 

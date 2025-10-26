@@ -15,7 +15,7 @@ class CheckOutSessionListener(
         private val logger = KotlinLogging.logger { }
     }
 
-    @RabbitListener(queues = ["\${app.rabbitmq.checkout-session-queue}"])
+    @RabbitListener(queues = ["\${app.rabbitmq.checkout-session-request.queue}"])
     fun handleCheckoutSessionRequest(request: PaymentInitiationRequest, message: Message) {
         val correlationId = message.messageProperties.correlationId
         logger.info { "Received payment request for order ${request.orderId}, dispatching..." }

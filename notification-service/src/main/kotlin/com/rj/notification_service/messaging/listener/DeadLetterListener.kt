@@ -16,7 +16,7 @@ class DeadLetterListener {
      * Listens to the email request Dead-Letter Queue.
      * Messages end up here after all retry attempts have failed.
      */
-    @RabbitListener(queues = ["\${app.rabbitmq.email-request.queue}.dlq"])
+    @RabbitListener(queues = ["\${app.rabbitmq.notificationRequest.queue}.dlq"])
     fun handleDeadLetter(message: Message, channel: Channel) {
         val correlationId = message.messageProperties.correlationId ?: "UNKNOWN"
         logger.error {

@@ -23,8 +23,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@EnableConfigurationProperties(AppProperties::class)
-class RabbitMQConfig {
+class RabbitMQConfig(private val props: AppProperties) {
 
     // --- Email Request Queue, DLX, and DLQ ---
 
@@ -36,13 +35,11 @@ class RabbitMQConfig {
 
     @Bean
     fun notificationRequestDlq(props: AppProperties): Queue {
-        // The DLQ name is derived from the main queue name for consistency
         return Queue("${props.rabbitmq.notificationRequest.queue}.dlq")
     }
 
     @Bean
     fun notificationRequestDlqBinding(props: AppProperties): Binding {
-        // Bind the DLQ to the DLX with the DLQ routing key
         return BindingBuilder.bind(notificationRequestDlq(props))
             .to(notificationRequestDlx(props))
             .with(props.rabbitmq.notificationRequest.dlq!!.routingKey)
@@ -54,7 +51,6 @@ class RabbitMQConfig {
 
     @Bean
     fun notificationRequestQueue(props: AppProperties): Queue {
-        // CORRECT: The main queue is now defined in one place, with its DLQ arguments attached.
         return QueueBuilder.durable(props.rabbitmq.notificationRequest.queue)
             .withArgument("x-dead-letter-exchange", props.rabbitmq.notificationRequest.dlq!!.exchange)
             .withArgument("x-dead-letter-routing-key", props.rabbitmq.notificationRequest.dlq.routingKey)
@@ -66,8 +62,6 @@ class RabbitMQConfig {
         BindingBuilder.bind(notificationRequestQueue(props))
             .to(notificationRequestExchange(props))
             .with(props.rabbitmq.notificationRequest.routingKey)
-
-    // --- Email Receipt Queue (no DLQ needed for this service) ---
 
     @Bean
     fun notificationReceiptExchange(props: AppProperties): TopicExchange =

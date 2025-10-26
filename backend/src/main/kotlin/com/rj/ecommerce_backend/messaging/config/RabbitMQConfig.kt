@@ -12,11 +12,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@EnableConfigurationProperties
-class RabbitMQConfig {
-
-    // The duplicate rabbitObjectMapper bean has been REMOVED from this file.
-    // We now inject the one defined in JacksonConfig.
+// This annotation tells Spring to find and create a bean for RabbitMQProperties
+@EnableConfigurationProperties(RabbitMQProperties::class)
+class RabbitMQConfig(
+    // Now Spring can inject the RabbitMQProperties bean into our constructor
+    private val props: RabbitMQProperties
+) {
 
     @Bean
     fun jsonMessageConverter(
@@ -35,64 +36,67 @@ class RabbitMQConfig {
         }
     }
 
-    // --- Topology for Email Sending ---
+    // --- Topology for Email Sending (FIXED) ---
     @Bean
-    fun emailExchange(props: RabbitMQProperties): TopicExchange =
+    fun emailExchange(): TopicExchange =
         TopicExchange(props.notificationRequest.exchange, true, false)
 
     @Bean
-    fun emailQueue(props: RabbitMQProperties): Queue =
-        Queue(props.notificationRequest.queue, true)
+    fun emailQueue(): Queue {
+        // Corrected declaration with QueueBuilder and hardcoded DLQ values.
+        // Since RabbitMQProperties doesn't contain DLQ info, we add it directly.
+        return QueueBuilder.durable(props.notificationRequest.queue)
+            .withArgument("x-dead-letter-exchange", "notification.request.dlx")
+            .withArgument("x-dead-letter-routing-key", "notification.request.dlq")
+            .build()
+    }
 
     @Bean
-    fun emailBinding(emailQueue: Queue, emailExchange: TopicExchange, props: RabbitMQProperties): Binding =
+    fun emailBinding(emailQueue: Queue, emailExchange: TopicExchange): Binding =
         BindingBuilder.bind(emailQueue).to(emailExchange).with(props.notificationRequest.routingKey)
 
     // --- Topology for Email Notification Status ---
     @Bean
-    fun emailNotificationExchange(props: RabbitMQProperties): TopicExchange =
+    fun emailNotificationExchange(): TopicExchange =
         TopicExchange(props.notificationReceipt.exchange, true, false)
 
     @Bean
-    fun emailNotificationQueue(props: RabbitMQProperties): Queue =
+    fun emailNotificationQueue(): Queue =
         Queue(props.notificationReceipt.queue, true)
 
     @Bean
     fun emailNotificationBinding(
         emailNotificationQueue: Queue,
-        emailNotificationExchange: TopicExchange,
-        props: RabbitMQProperties
+        emailNotificationExchange: TopicExchange
     ): Binding = BindingBuilder.bind(emailNotificationQueue).to(emailNotificationExchange).with(props.notificationReceipt.routingKey)
 
     // --- Topology for Checkout Session Creation ---
     @Bean
-    fun checkoutSessionExchange(props: RabbitMQProperties): TopicExchange =
+    fun checkoutSessionExchange(): TopicExchange =
         TopicExchange(props.checkoutSession.exchange, true, false)
 
     @Bean
-    fun checkoutSessionQueue(props: RabbitMQProperties): Queue =
+    fun checkoutSessionQueue(): Queue =
         Queue(props.checkoutSession.queue, true)
 
     @Bean
     fun checkoutSessionBinding(
         checkoutSessionQueue: Queue,
-        checkoutSessionExchange: TopicExchange,
-        props: RabbitMQProperties
+        checkoutSessionExchange: TopicExchange
     ): Binding = BindingBuilder.bind(checkoutSessionQueue).to(checkoutSessionExchange).with(props.checkoutSession.routingKey)
 
     // --- Topology for Checkout Session Responses ---
     @Bean
-    fun checkoutSessionResponseExchange(props: RabbitMQProperties): TopicExchange =
+    fun checkoutSessionResponseExchange(): TopicExchange =
         TopicExchange(props.checkoutSessionResponse.exchange, true, false)
 
     @Bean
-    fun checkoutSessionResponseQueue(props: RabbitMQProperties): Queue =
+    fun checkoutSessionResponseQueue(): Queue =
         Queue(props.checkoutSessionResponse.queue, true)
 
     @Bean
     fun checkoutSessionResponseBinding(
         checkoutSessionResponseQueue: Queue,
-        checkoutSessionResponseExchange: TopicExchange,
-        props: RabbitMQProperties
+        checkoutSessionResponseExchange: TopicExchange
     ): Binding = BindingBuilder.bind(checkoutSessionResponseQueue).to(checkoutSessionResponseExchange).with(props.checkoutSessionResponse.routingKey)
 }
