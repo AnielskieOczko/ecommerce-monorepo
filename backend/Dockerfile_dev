@@ -1,30 +1,38 @@
-FROM eclipse-temurin:17-jdk
-WORKDIR /app
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-RUN chmod +x mvnw && ./mvnw dependency:go-offline
-RUN mkdir -p /app/product-images && chmod 777 /app/product-images
-CMD ["./mvnw", "spring-boot:run"]
+# backend/Dockerfile_dev (Corrected and with Final Verification)
 
-# Dockerfile_dev
-#FROM eclipse-temurin:17-jdk
-#
-#WORKDIR /app
-#
-## Copy Maven wrapper and pom.xml
-#COPY .mvn/ .mvn/
-#COPY mvnw pom.xml ./
-#RUN chmod +x mvnw && ./mvnw dependency:go-offline
-#
-## Copy your application code (this is the crucial missing step)
-#COPY src/ ./src/  # Or COPY . .  if your Dockerfile is at the project root
-#
-## Create product-images directory (better to do this after COPY to avoid permissions issues)
-#RUN mkdir -p /app/product-images && chmod 777 /app/product-images
-#
-#
-## Build the application inside the container
-#RUN ./mvnw package -DskipTests
-#
-## Use ENTRYPOINT to set JAVA_OPTS and run the jar
-#ENTRYPOINT ["java", "$JAVA_OPTS", "-jar", "target/*.jar"]
+# Build stage
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /app
+
+# Copy the entire monorepo context
+COPY . .
+
+# Make the root mvnw script executable
+RUN chmod +x mvnw
+
+# Build ALL modules using 'install' to ensure dependencies are available
+RUN ./mvnw clean package -DskipTests
+
+# This will show you exactly what is in the target directory
+RUN ls -l /app/backend/target
+
+
+# ---
+
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# Create the directory for product images
+RUN mkdir -p /app/product-images && chmod 777 /app/product-images
+
+# Copy the final JAR using its specific, known name
+COPY --from=build /app/backend/target/ecommerce_backend-0.0.1-SNAPSHOT.jar app.jar
+
+# --- DIAGNOSTIC STEP ---
+# List the contents of the /app directory in the final image to verify the JAR is present.
+# This runs right before the ENTRYPOINT.
+RUN ls -l /app
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "/app/app.jar"]

@@ -1,14 +1,15 @@
 package com.rj.ecommerce_backend.product.service;
 
 import com.rj.ecommerce_backend.product.domain.Category;
-import com.rj.ecommerce_backend.product.dtos.CategoryCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.CategoryResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.CategorySearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.CategoryUpdateDTO;
-import com.rj.ecommerce_backend.product.exceptions.CategoryAlreadyExistsException;
-import com.rj.ecommerce_backend.product.exceptions.CategoryNotFoundException;
-import com.rj.ecommerce_backend.product.exceptions.InvalidCategoryDataException;
+import com.rj.ecommerce_backend.product.filters.CategoryCreateDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryResponseDTO;
+import com.rj.ecommerce_backend.product.search.CategorySearchCriteria;
+import com.rj.ecommerce_backend.product.filters.CategoryUpdateDTO;
+import com.rj.ecommerce_backend.product.exception.CategoryAlreadyExistsException;
+import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException;
+import com.rj.ecommerce_backend.product.exception.InvalidCategoryDataException;
 import com.rj.ecommerce_backend.product.repository.CategoryRepository;
+import com.rj.ecommerce_backend.product.service.category.CategoryServiceImpl;
 import com.rj.ecommerce_backend.testutil.CategoryTestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

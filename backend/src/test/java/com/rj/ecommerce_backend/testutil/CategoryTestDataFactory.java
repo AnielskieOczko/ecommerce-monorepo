@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.testutil;
 
 import com.rj.ecommerce_backend.product.domain.Category;
-import com.rj.ecommerce_backend.product.dtos.CategoryCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.CategoryResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.CategorySearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.CategoryUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryCreateDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryResponseDTO;
+import com.rj.ecommerce_backend.product.search.CategorySearchCriteria;
+import com.rj.ecommerce_backend.product.filters.CategoryUpdateDTO;
 
 import java.time.LocalDateTime;
 

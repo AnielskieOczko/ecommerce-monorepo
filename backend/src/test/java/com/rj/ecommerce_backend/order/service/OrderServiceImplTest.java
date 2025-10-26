@@ -2,21 +2,19 @@ package com.rj.ecommerce_backend.order.service;
 
 import com.rj.ecommerce_backend.cart.dtos.CartDTO;
 import com.rj.ecommerce_backend.cart.dtos.CartItemDTO;
-import com.rj.ecommerce_backend.messaging.email.EmailRequestFactory;
+import com.rj.ecommerce_backend.messaging.email.factory.EmailRequestFactory;
 import com.rj.ecommerce_backend.messaging.email.EmailServiceClient;
-import com.rj.ecommerce_backend.messaging.email.contract.v1.order.OrderEmailRequestDTO;
 import com.rj.ecommerce_backend.messaging.payment.dto.CheckoutSessionResponseDTO;
 import com.rj.ecommerce_backend.order.domain.Order;
-import com.rj.ecommerce_backend.order.domain.OrderItem;
 import com.rj.ecommerce_backend.order.dtos.OrderCreationRequest;
 import com.rj.ecommerce_backend.order.dtos.OrderDTO;
 import com.rj.ecommerce_backend.order.dtos.ShippingAddressDTO;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.enums.PaymentStatus;
 import com.rj.ecommerce_backend.order.enums.ShippingMethod;
-import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException;
-import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException;
+import com.rj.ecommerce_backend.order.exception.OrderCancellationException;
+import com.rj.ecommerce_backend.order.exception.OrderNotFoundException;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
 import com.rj.ecommerce_backend.order.repository.OrderRepository;
 import com.rj.ecommerce_backend.product.domain.Product;
@@ -26,7 +24,7 @@ import com.rj.ecommerce_backend.product.valueobject.CurrencyCode;
 import com.rj.ecommerce_backend.product.valueobject.ProductName;
 import com.rj.ecommerce_backend.product.valueobject.ProductPrice;
 import com.rj.ecommerce_backend.product.valueobject.StockQuantity;
-import com.rj.ecommerce_backend.securityconfig.SecurityContextImpl;
+import com.rj.ecommerce_backend.security.SecurityContextImpl;
 import com.rj.ecommerce_backend.testutil.OrderTestDataFactory;
 import com.rj.ecommerce_backend.user.domain.User;
 import com.rj.ecommerce_backend.user.services.AdminService;
@@ -39,11 +37,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
@@ -98,9 +91,9 @@ class OrderServiceImplTest {
         // Set up test product
         testProduct = new Product();
         testProduct.setId(1L);
-        testProduct.setProductName(new ProductName("Test Product"));
-        testProduct.setStockQuantity(new StockQuantity(100));
-        testProduct.setProductPrice(new ProductPrice(
+        testProduct.setName(new ProductName("Test Product"));
+        testProduct.setQuantityInStock(new StockQuantity(100));
+        testProduct.setUnitPrice(new ProductPrice(
                 new Amount(new BigDecimal("99.99")),
                 new CurrencyCode("USD")
         ));

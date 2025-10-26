@@ -3,10 +3,10 @@ package com.rj.ecommerce_backend.product.mapper;
 import com.rj.ecommerce_backend.product.domain.Category;
 import com.rj.ecommerce_backend.product.domain.Image;
 import com.rj.ecommerce_backend.product.domain.Product;
-import com.rj.ecommerce_backend.product.dtos.CategoryResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ImageDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryResponseDTO;
+import com.rj.ecommerce_backend.product.filters.ImageDTO;
+import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
 import com.rj.ecommerce_backend.product.repository.CategoryRepository;
 import com.rj.ecommerce_backend.product.valueobject.ProductDescription;
 import com.rj.ecommerce_backend.product.valueobject.ProductName;
@@ -21,9 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -61,10 +59,10 @@ class ProductMapperTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(testProductCreateDTO.name(), result.getProductName().value());
-        assertEquals(testProductCreateDTO.description(), result.getProductDescription().value());
-        assertEquals(testProductCreateDTO.price(), result.getProductPrice().amount().value());
-        assertEquals(testProductCreateDTO.quantity(), result.getStockQuantity().value());
+        assertEquals(testProductCreateDTO.name(), result.getName().value);
+        assertEquals(testProductCreateDTO.description(), result.getDescription().value);
+        assertEquals(testProductCreateDTO.price(), result.getUnitPrice().amount.value);
+        assertEquals(testProductCreateDTO.quantity(), result.getQuantityInStock().value);
         assertEquals(1, result.getCategories().size());
         assertEquals(testCategory.getId(), result.getCategories().get(0).getId());
     }
@@ -87,10 +85,10 @@ class ProductMapperTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(dtoWithoutCategories.name(), result.getProductName().value());
-        assertEquals(dtoWithoutCategories.description(), result.getProductDescription().value());
-        assertEquals(dtoWithoutCategories.price(), result.getProductPrice().amount().value());
-        assertEquals(dtoWithoutCategories.quantity(), result.getStockQuantity().value());
+        assertEquals(dtoWithoutCategories.name(), result.getName().value);
+        assertEquals(dtoWithoutCategories.description(), result.getDescription().value);
+        assertEquals(dtoWithoutCategories.price(), result.getUnitPrice().amount.value);
+        assertEquals(dtoWithoutCategories.quantity(), result.getQuantityInStock().value);
         assertTrue(result.getCategories().isEmpty());
         assertTrue(result.getImageList().isEmpty());
     }
@@ -106,10 +104,10 @@ class ProductMapperTest {
         // Then
         assertNotNull(result);
         assertEquals(product.getId(), result.id());
-        assertEquals(product.getProductName().value(), result.name());
-        assertEquals(product.getProductDescription().value(), result.description());
-        assertEquals(product.getProductPrice().amount().value(), result.price());
-        assertEquals(product.getStockQuantity().value(), result.quantity());
+        assertEquals(product.getName().value, result.name());
+        assertEquals(product.getDescription().value, result.description());
+        assertEquals(product.getUnitPrice().amount.value, result.price());
+        assertEquals(product.getQuantityInStock().value, result.quantity());
         assertEquals(1, result.categories().size());
         assertEquals(product.getCategories().get(0).getId(), result.categories().get(0).id());
         assertEquals(product.getCategories().get(0).getName(), result.categories().get(0).name());
@@ -129,10 +127,10 @@ class ProductMapperTest {
         // Then
         assertNotNull(result);
         assertEquals(1L, result.id());
-        assertEquals(product.getProductName().value(), result.name());
-        assertEquals(product.getProductDescription().value(), result.description());
-        assertEquals(product.getProductPrice().amount().value(), result.price());
-        assertEquals(product.getStockQuantity().value(), result.quantity());
+        assertEquals(product.getName().value, result.name());
+        assertEquals(product.getDescription().value, result.description());
+        assertEquals(product.getUnitPrice().amount.value, result.price());
+        assertEquals(product.getQuantityInStock().value, result.quantity());
         assertEquals(1, result.categories().size());
         assertEquals(1, result.imageList().size());
     }

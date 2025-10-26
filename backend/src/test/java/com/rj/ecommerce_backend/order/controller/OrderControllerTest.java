@@ -7,12 +7,12 @@ import com.rj.ecommerce_backend.order.domain.Order;
 import com.rj.ecommerce_backend.order.dtos.OrderCreationRequest;
 import com.rj.ecommerce_backend.order.dtos.OrderDTO;
 import com.rj.ecommerce_backend.order.dtos.ShippingAddressDTO;
-import com.rj.ecommerce_backend.order.enums.OrderStatus;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
 import com.rj.ecommerce_backend.order.enums.ShippingMethod;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria;
-import com.rj.ecommerce_backend.order.service.OrderService;
+import com.rj.ecommerce_backend.order.service.OrderCommandService;
 import com.rj.ecommerce_backend.sorting.OrderSortFilter;
 import com.rj.ecommerce_backend.sorting.SortValidator;
 import com.rj.ecommerce_backend.testutil.OrderTestDataFactory;
@@ -40,7 +40,6 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -59,7 +58,7 @@ class OrderControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private OrderService orderService;
+    private OrderCommandService orderService;
 
     @Mock
     private OrderMapper orderMapper;

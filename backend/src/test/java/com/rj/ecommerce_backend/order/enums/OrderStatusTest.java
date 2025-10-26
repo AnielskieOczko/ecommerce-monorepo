@@ -1,5 +1,6 @@
 package com.rj.ecommerce_backend.order.enums;
 
+import com.rj.ecommerce.api.shared.enums.OrderStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -11,21 +12,21 @@ class OrderStatusTest {
     @Test
     void shouldConvertValidStringToOrderStatus() {
         // Given & When & Then
-        assertEquals(OrderStatus.PENDING, OrderStatus.fromString("PENDING"));
-        assertEquals(OrderStatus.CONFIRMED, OrderStatus.fromString("CONFIRMED"));
-        assertEquals(OrderStatus.PROCESSING, OrderStatus.fromString("PROCESSING"));
-        assertEquals(OrderStatus.SHIPPED, OrderStatus.fromString("SHIPPED"));
-        assertEquals(OrderStatus.DELIVERED, OrderStatus.fromString("DELIVERED"));
-        assertEquals(OrderStatus.CANCELLED, OrderStatus.fromString("CANCELLED"));
-        assertEquals(OrderStatus.REFUNDED, OrderStatus.fromString("REFUNDED"));
-        assertEquals(OrderStatus.FAILED, OrderStatus.fromString("FAILED"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.PENDING, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("PENDING"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.CONFIRMED, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("CONFIRMED"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.PROCESSING, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("PROCESSING"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.SHIPPED, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("SHIPPED"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.DELIVERED, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("DELIVERED"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.CANCELLED, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("CANCELLED"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.REFUNDED, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("REFUNDED"));
+        assertEquals(com.rj.ecommerce.api.shared.enums.OrderStatus.FAILED, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString("FAILED"));
     }
 
     @Test
     void shouldConvertAllEnumValuesToString() {
         // Test all enum values can be converted to string and back
-        for (OrderStatus status : OrderStatus.values()) {
-            assertEquals(status, OrderStatus.fromString(status.name()));
+        for (com.rj.ecommerce.api.shared.enums.OrderStatus status : com.rj.ecommerce.api.shared.enums.OrderStatus.values()) {
+            assertEquals(status, com.rj.ecommerce.api.shared.enums.OrderStatus.fromString(status.name()));
         }
     }
 

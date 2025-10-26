@@ -1,17 +1,16 @@
 package com.rj.ecommerce_backend.order.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rj.ecommerce.api.shared.dto.order.request.OrderCreateRequest;
+import com.rj.ecommerce.api.shared.dto.order.response.OrderDTO;
+import com.rj.ecommerce.api.shared.enums.ShippingMethod;
 import com.rj.ecommerce_backend.cart.dtos.CartDTO;
 import com.rj.ecommerce_backend.cart.dtos.CartItemDTO;
-import com.rj.ecommerce_backend.order.dtos.OrderCreationRequest;
-import com.rj.ecommerce_backend.order.dtos.OrderDTO;
-import com.rj.ecommerce_backend.order.dtos.ShippingAddressDTO;
-import com.rj.ecommerce_backend.order.enums.PaymentMethod;
-import com.rj.ecommerce_backend.order.enums.ShippingMethod;
-import com.rj.ecommerce_backend.order.exceptions.OrderCancellationException;
-import com.rj.ecommerce_backend.order.exceptions.OrderNotFoundException;
+import com.rj.ecommerce.api.shared.enums.PaymentMethod;
+import com.rj.ecommerce_backend.order.exception.OrderCancellationException;
+import com.rj.ecommerce_backend.order.exception.OrderNotFoundException;
 import com.rj.ecommerce_backend.order.mapper.OrderMapper;
-import com.rj.ecommerce_backend.order.service.OrderService;
+import com.rj.ecommerce_backend.order.service.OrderCommandService;
 import com.rj.ecommerce_backend.sorting.SortValidator;
 import com.rj.ecommerce_backend.testutil.OrderTestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +23,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -45,7 +43,7 @@ class OrderControllerExceptionHandlingTest {
     private MockMvc mockMvc;
 
     @Mock
-    private OrderService orderService;
+    private OrderCommandService orderService;
 
     @Mock
     private OrderMapper orderMapper;
@@ -58,7 +56,7 @@ class OrderControllerExceptionHandlingTest {
 
     private ObjectMapper objectMapper;
     private OrderDTO testOrderDTO;
-    private OrderCreationRequest testOrderCreationRequest;
+    private OrderCreateRequest testOrderCreationRequest;
 
     @BeforeEach
     void setUp() {
@@ -83,10 +81,11 @@ class OrderControllerExceptionHandlingTest {
 
         CartDTO cart = new CartDTO(1L, 1L, cartItems, LocalDateTime.now(), LocalDateTime.now());
 
-        testOrderCreationRequest = new OrderCreationRequest(
+        testOrderCreationRequest = new OrderCreateRequest(
+
                 shippingAddress,
                 PaymentMethod.CREDIT_CARD,
-                ShippingMethod.INPOST,
+                ShippingMethod.INPOST.name(),
                 cart
         );
     }
@@ -96,7 +95,7 @@ class OrderControllerExceptionHandlingTest {
         // Given
         Long userId = 1L;
 
-        when(orderService.createOrder(eq(userId), any(OrderCreationRequest.class)))
+        when(orderService.createOrder(eq(userId), any(OrderCreateRequest.class)))
                 .thenThrow(new AccessDeniedException("Access denied"));
 
         // When & Then

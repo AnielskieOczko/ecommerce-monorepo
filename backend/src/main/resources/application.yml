@@ -1,161 +1,192 @@
+# =============================================================================
+# BASE (DEFAULT) PROFILE
+# Defines structure and default values for all properties
+# =============================================================================
 spring:
   application:
     name: ecommerce_backend
-
   servlet:
     multipart:
       max-file-size: 8MB
       max-request-size: 8MB
-
-  # Default profile configuration
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
       hibernate:
-#        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-
-storage:
-  location: ${STORAGE_LOCATION}
-  base-url: ${STORAGE_BASE_URL}
-  cleanup-schedule: ${STORAGE_CLEANUP_SCHEDULE}
-  secret-salt: ${STORAGE_SECRET_SALT}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: prometheus,health,info,metrics # Expose prometheus, health, info, and metrics endpoints over HTTP
-  endpoint:
-    health:
-      show-details: always # Show detailed health information
-server:
-  port: 8080
-
-springdoc:
-  # Swagger UI Configuration
-  swagger-ui:
-    # The path where Swagger UI will be accessible
-    path: /swagger-ui.html
-    # Sort API tags alphabetically
-    tags-sorter: alpha
-    # Sort operations by HTTP method (GET, POST, PUT, DELETE)
-    operations-sorter: method
-    # Sort API groups in ascending order
-    groups-order: asc
-    # Enable Swagger UI interface
-    enabled: true
-
-  # OpenAPI documentation endpoint configuration
-  api-docs:
-    # The path where OpenAPI JSON documentation will be available
-    path: /api-docs
-    # Enable OpenAPI documentation generation
-    enabled: true
-
----
-# Development profile (for local container development)
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${DB_USERNAME:devuser}
-    password: ${DB_PASSWORD}
-  flyway:
-    url: ${SPRING_DATASOURCE_URL}
-    user: ${DB_USERNAME:devuser}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-  logging:
-    level:
-      root: INFO
-      org.springframework: INFO
-      com.rj.ecommerce_backend: DEBUG
-      org.hibernate.SQL: DEBUG
-  jwt:
-    secret: ${JWT_SECRET}
-    expirationMs: 900000  # 15 minutes
-    refresh-token-expiration: 86400000  # 24 hours
+    open-in-view: false
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
-    port: 5672
-  cleanup:
-    cron: "0 0 * * * *"  # Run cleanup every hour
-    batch-size: 1000
-
-storage:
-  location: ${DEV_STORAGE_PATH:/tmp/ecommerce/product-images}
-  cleanup-schedule: "0 0 * * * *"  # Cleanup unused images hourly
-  temp-dir: ${java.io.tmpdir}/ecommerce-uploads
-payment-service:
-  url: ${PAYMENT_SERVICE_URL:http://localhost:8010}
-
----
-# Local profile (for running application locally without containers)
-spring:
-  config:
-    activate:
-      on-profile: local
-  datasource:
-    url: jdbc:mysql://localhost:${DB_PORT:3306}/${DB_NAME:ecommerce_dev}?createDatabaseIfNotExist=true
-    username: ${DB_USERNAME:devuser}
-    password: ${DB_PASSWORD:devpass}
-  flyway:
-    url: ${SPRING_DATASOURCE_URL}
-    user: ${DB_USERNAME:devuser}
-    password: ${DB_PASSWORD:devpass}
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
-  rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:localhost}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
-    port: 5672
     listener:
       simple:
         retry:
           enabled: true
           initial-interval: 1000
           max-attempts: 3
-storage:
-  location: ${user.home}/ecommerce/product-images/local
-  cleanup-schedule: "0 0 * * * *"
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html
+    api-docs:
+      path: /api-docs
+  flyway:
+    default-schema: ecommerce_dev # This is okay if your DB name is consistent
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info,metrics
+
+server:
+  port: 8080
+
+# =============================================================================
+# CUSTOM APPLICATION PROPERTIES
+# =============================================================================
+app:
+  rabbitmq:
+    notification-request:
+      exchange: "notification.request.exchange"
+      queue: "notification.request.queue"
+      routing-key: "notification.request.key"
+      dlq:
+        exchange: "notification.request.dlx"
+        routing-key: "notification.request.dlq"
+
+    notification-receipt:
+      exchange: "notification.receipt.exchange"
+      queue: "notification.receipt.queue"
+      routing-key: "notification.receipt.key"
+
+    checkout-session:
+      exchange: "checkout.session.exchange"
+      queue: "checkout.session.queue"
+      routing-key: "checkout.session.routing.key"
+
+    checkout-session-response:
+      exchange: "checkout.session.response.exchange"
+      queue: "checkout.session.response.queue"
+      routing-key: "checkout.session.response.routing.key"
+
+    payment-options-request:
+      exchange: "payment.events"
+      queue: "payment.options.request.q"
+      routing-key: "payment.options.request"
+
+    payment-options-reply:
+      exchange: "payment.events"
+      queue: "payment.options.reply.q"
+      routing-key: "payment.options.reply"
+  jwt:
+    secret: ${JWT_SECRET}
+  storage:
+    secret-salt: ${STORAGE_SECRET_SALT}
+  payment:
+    method-to-gateway-mapping:
+      CREDIT_CARD: STRIPE_GATEWAY
+      BANK_TRANSFER: STRIPE_GATEWAY
+      BLIK: STRIPE_GATEWAY
+  payment-service:
+    url: ${PAYMENT_SERVICE_URL}
 
 ---
-# CI profile (for GitHub Actions)
+# =============================================================================
+# CONTAINER PROFILE
+# For Docker Compose development environment
+# =============================================================================
+spring:
+  config:
+    activate:
+      on-profile: container
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST}
+    username: ${SPRING_RABBITMQ_USERNAME}
+    password: ${SPRING_RABBITMQ_PASSWORD}
+logging:
+  level:
+    com.rj.ecommerce_backend: DEBUG
+    org.hibernate.SQL: DEBUG
+app:
+  storage:
+    location: /app/product-images # Internal container path
+    base-url: /api/v1/public/products/images # Or the base URL you intend to use
+    cleanup-schedule: "0 0 3 * * *" # A sensible default, e.g., 3 AM daily
+
+---
+# =============================================================================
+# LOCAL PROFILE
+# For running application directly on local machine (no containers)
+# =============================================================================
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:mysql://localhost:3306/ecommerce_dev?createDatabaseIfNotExist=true
+    username: devuser # Hardcoded default for local
+    password: devpass # Hardcoded default for local
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  rabbitmq:
+    host: localhost
+    username: guest
+    password: guest
+app:
+  storage:
+    location: ./storage-local # Relative path for local runs
+    base-url: /api/v1/public/products/images # A sensible default for local dev
+    cleanup-schedule: "0 0 1 * * *" # A standard daily schedule
+
+---
+# =============================================================================
+# CI PROFILE
+# For Continuous Integration (GitHub Actions, etc.)
+# =============================================================================
 spring:
   config:
     activate:
       on-profile: ci
   datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_dev
+    url: jdbc:mysql://localhost:3306/ecommerce_ci
     username: testuser
-    password: ${DATABASE_PASSWORD}
+    password: ${CI_DATABASE_PASSWORD}
   flyway:
-    url: jdbc:mysql://localhost:3306/ecommerce_dev
-    user: testuser
-    password: ${DATABASE_PASSWORD}
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
-storage:
-  location: ${CI_STORAGE_PATH:/tmp/ecommerce/test-images}
-  cleanup-enabled: false  # Disable cleanup for testing
+  rabbitmq:
+    # For CI, you might use an in-memory broker or disable it
+    # This example assumes a broker is available on localhost
+    host: localhost
+app:
+  storage:
+    location: /tmp/ecommerce/test-images-ci
 
 ---
-# Production profile
+# =============================================================================
+# PRODUCTION PROFILE
+# =============================================================================
 spring:
   config:
     activate:
@@ -165,27 +196,22 @@ spring:
     username: ${PROD_DB_USERNAME}
     password: ${PROD_DB_PASSWORD}
   flyway:
-    url: ${PROD_DB_URL}
-    user: ${PROD_DB_USERNAME}
-    password: ${PROD_DB_PASSWORD}
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: false
-  logging:
-    level:
-      root: ERROR
-      org.springframework: WARN
-  jwt:
-    secret: ${JWT_SECRET}
-    expirationMs: 900000  # 15 minutes
-    refresh-token-expiration: 86400000  # 24 hours
-  cleanup:
-    cron: "0 0 * * * *"  # Run cleanup every hour
-    batch-size: 1000
-
-storage:
-  location: ${PROD_STORAGE_PATH}
-  base-url: ${CDN_BASE_URL:/images}  # Optional CDN configuration
-  cleanup-schedule: "0 0 0 * * *"  # Daily cleanup at midnight
-  cleanup-threshold-days: 7  # Remove unused images after 7 days
+  rabbitmq:
+    host: ${PROD_RABBITMQ_HOST}
+    username: ${PROD_RABBITMQ_USERNAME}
+    password: ${PROD_RABBITMQ_PASSWORD}
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+app:
+  storage:
+    location: ${PROD_STORAGE_PATH}
+    base-url: ${CDN_BASE_URL}

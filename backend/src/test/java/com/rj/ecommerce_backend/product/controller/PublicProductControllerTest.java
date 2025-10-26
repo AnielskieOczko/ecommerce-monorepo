@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.product.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductSearchCriteria;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.search.ProductSearchCriteria;
 import com.rj.ecommerce_backend.product.service.FileStorageService;
 import com.rj.ecommerce_backend.product.service.ProductService;
 import com.rj.ecommerce_backend.sorting.ProductSortField;
@@ -21,12 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;

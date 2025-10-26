@@ -1,94 +1,49 @@
+server:
+  port: 8010
 
----
 spring:
   application:
     name: payment-service
-  config:
-    activate:
-      on-profile: ${SPRING_PROFILES_ACTIVE:local}
-  docker:
-    compose:
-      enabled: false
-  logging:
-    level:
-      .web: DEBUG
-      com.rj.payment_service: DEBUG
-  jackson:
-    default-property-inclusion: non_null
   rabbitmq:
-    #    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
     host: ${SPRING_RABBITMQ_HOST:localhost}
     username: ${SPRING_RABBITMQ_USERNAME:guest}
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
-    port: 5672
     template:
-      replay-timeout: 5000
+      reply-timeout: 5000 # 5 seconds
     listener:
       simple:
-        retry:
-          enabled: true
-          initial-interval: 1000ms
-          max-attempts: 3
-          max-interval: 10000ms
-          multiplier: 2.0
-    connection-timeout: 5000
-    publisher-confirm-type: correlated
-    publisher-returns: true
-server:
-  port: 8010
-  error:
-    include-message: always
-    include-binding-errors: always
+        retry: { enabled: true, initial-interval: 1s, max-attempts: 3, max-interval: 10s, multiplier: 2.0 }
 
-stripe:
-  secret:
-    key: ${STRIPE_SECRET_KEY}
-    publishable: ${STRIPE_PUBLISHABLE_KEY}
-  webhook:
-    secret: ${STRIPE_WEBHOOK_SECRET}
+app:
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY}
+    publishable-key: ${STRIPE_PUBLISHABLE_KEY}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+  rabbitmq:
+    # --- THIS IS THE FIX ---
+    checkout-session-request:
+      exchange: "checkout.session.exchange"
+      queue: "checkout.session.queue"
+      routing-key: "checkout.session.routing.key"
+
+    checkout-session-response:
+      exchange: "checkout.session.response.exchange"
+      routing-key: "checkout.session.response.routing.key"
+
+    payment-options-request:
+      exchange: "payment.events"
+      queue: "payment.options.request.q"
+      routing-key: "payment.options.request"
+
+    payment-options-reply:
+      exchange: "payment.events"
+      queue: "payment.options.reply.q"
+      routing-key: "payment.options.reply"
+
 ---
-# dev container profile
 spring:
-  application:
-    name: payment-service
   config:
     activate:
-      on-profile: ${SPRING_PROFILES_ACTIVE:dev}
-  docker:
-    compose:
-      enabled: false
-  logging:
-    level:
-      .web: DEBUG
-      com.rj.payment_service: DEBUG
-  jackson:
-    default-property-inclusion: non_null
+      on-profile: container
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
-    username: ${SPRING_RABBITMQ_USERNAME:guest}
-    password: ${SPRING_RABBITMQ_PASSWORD:guest}
-    port: 5672
-    template:
-      replay-timeout: 5000
-    listener:
-      simple:
-        retry:
-          enabled: true
-          initial-interval: 1000ms
-          max-attempts: 3
-          max-interval: 10000ms
-          multiplier: 2.0
-    connection-timeout: 5000
-    publisher-confirm-type: co
-server:
-  port: 8010
-  error:
-    include-message: always
-    include-binding-errors: always
-
-stripe:
-  secret:
-    key: ${STRIPE_SECRET_KEY}
-    publishable: ${STRIPE_PUBLISHABLE_KEY}
-  webhook:
-    secret: ${STRIPE_WEBHOOK_SECRET}
+    host: rabbitmq

@@ -92,7 +92,7 @@ A comprehensive e-commerce platform built with a microservices architecture. Thi
 
    ```bash
    cd infrastructure
-   cp .env.example .env  # Then edit .env with your settings
+   cp .env_.example .env_  # Then edit .env_ with your settings
    ```
 
    Key environment variables to configure:

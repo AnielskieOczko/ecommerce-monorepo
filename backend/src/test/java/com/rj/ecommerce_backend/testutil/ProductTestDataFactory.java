@@ -3,12 +3,12 @@ package com.rj.ecommerce_backend.testutil;
 import com.rj.ecommerce_backend.product.domain.Category;
 import com.rj.ecommerce_backend.product.domain.Image;
 import com.rj.ecommerce_backend.product.domain.Product;
-import com.rj.ecommerce_backend.product.dtos.CategoryResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ImageDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductCreateDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductResponseDTO;
-import com.rj.ecommerce_backend.product.dtos.ProductSearchCriteria;
-import com.rj.ecommerce_backend.product.dtos.ProductUpdateDTO;
+import com.rj.ecommerce_backend.product.filters.CategoryResponseDTO;
+import com.rj.ecommerce_backend.product.filters.ImageDTO;
+import com.rj.ecommerce_backend.product.filters.ProductCreateDTO;
+import com.rj.ecommerce_backend.product.filters.ProductResponseDTO;
+import com.rj.ecommerce_backend.product.search.ProductSearchCriteria;
+import com.rj.ecommerce_backend.product.filters.ProductUpdateDTO;
 import com.rj.ecommerce_backend.product.valueobject.Amount;
 import com.rj.ecommerce_backend.product.valueobject.CurrencyCode;
 import com.rj.ecommerce_backend.product.valueobject.ProductDescription;
@@ -18,9 +18,7 @@ import com.rj.ecommerce_backend.product.valueobject.StockQuantity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Factory class for creating test product data
