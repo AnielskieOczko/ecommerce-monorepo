@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing Error (Admin)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .alert {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff4f4;
+            border-left: 4px solid #ff6b6b;
+            border-radius: 3px;
+        }
+        .details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚠️ Payment Processing Error</h1>
+    </div>
+    
+    <div class="alert">
+        <p>A payment processing error has occurred that requires attention.</p>
+    </div>
+    
+    <div class="details">
+        <h2>Error Details</h2>
+        <p><strong>Order ID:</strong> <span th:text="${orderId}">ORD-12345</span></p>
+        <p><strong>Payment ID:</strong> <span th:text="${paymentId != null ? paymentId : 'N/A'}">PAY-12345</span></p>
+        <p><strong>Payment Status:</strong> <span th:text="${paymentStatus}">ERROR</span></p>
+        <p><strong>Timestamp:</strong> <span th:text="${#temporals.format(timestamp, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 12:00:00</span></p>
+        
+        <h3>Error Message</h3>
+        <div class="code-block" th:text="${errorMessage != null ? errorMessage : 'No error message provided'}">Error details will appear here</div>
+        
+        <h3>Additional Information</h3>
+        <ul>
+            <li th:each="entry : ${additionalData}" th:if="${!entry.key.equals('errorMessage')}">
+                <strong th:text="${entry.key}">Key</strong>: <span th:text="${entry.value}">Value</span>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated message from your ecommerce system. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>
