@@ -11,7 +11,11 @@ COPY . .
 RUN chmod +x mvnw
 
 # Build ALL modules using 'install' to ensure dependencies are available
-RUN ./mvnw clean install -DskipTests
+RUN ./mvnw clean package -DskipTests
+
+# This will show you exactly what is in the target directory
+RUN ls -l /app/backend/target
+
 
 # ---
 

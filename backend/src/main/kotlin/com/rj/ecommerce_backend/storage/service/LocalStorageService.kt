@@ -23,7 +23,7 @@ import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 @Service
-@Profile("local-storage", "local")
+@Profile("local-storage", "local", "container")
 class LocalStorageService(
     private val storageProperties: StorageProperties
 ) : StorageService {
