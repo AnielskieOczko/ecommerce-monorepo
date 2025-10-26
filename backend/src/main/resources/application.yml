@@ -30,6 +30,10 @@ spring:
       path: /api-docs
   flyway:
     default-schema: ecommerce_dev # This is okay if your DB name is consistent
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
 
 management:
   endpoints:
@@ -44,6 +48,22 @@ server:
 # CUSTOM APPLICATION PROPERTIES
 # =============================================================================
 app:
+  notification:
+    channels:
+      email:
+        activeProvider: "smtp"
+        defaultFrom: "noreply@ecommerce.com"
+      sms:
+        activeProvider: "twilio"
+        defaultFrom: "+15551234567"
+    vendors:
+      smtp:
+        host: ${SPRING_MAIL_HOST:mailhog}
+        port: ${SPRING_MAIL_PORT:1025}
+        protocol: "smtp"
+        properties:
+          mail.smtp.auth: "false"
+          mail.smtp.starttls.enable: "false"
   rabbitmq:
     notification-request:
       exchange: "notification.request.exchange"
@@ -57,37 +77,29 @@ app:
       exchange: "notification.receipt.exchange"
       queue: "notification.receipt.queue"
       routing-key: "notification.receipt.key"
-
-    checkout-session:
-      exchange: "checkout.session.exchange"
-      queue: "checkout.session.queue"
-      routing-key: "checkout.session.routing.key"
-
-    checkout-session-response:
-      exchange: "checkout.session.response.exchange"
-      queue: "checkout.session.response.queue"
-      routing-key: "checkout.session.response.routing.key"
-
-    payment-options-request:
-      exchange: "payment.events"
-      queue: "payment.options.request.q"
-      routing-key: "payment.options.request"
-
-    payment-options-reply:
-      exchange: "payment.events"
-      queue: "payment.options.reply.q"
-      routing-key: "payment.options.reply"
   jwt:
     secret: ${JWT_SECRET}
   storage:
     secret-salt: ${STORAGE_SECRET_SALT}
   payment:
-    method-to-gateway-mapping:
-      CREDIT_CARD: STRIPE_GATEWAY
-      BANK_TRANSFER: STRIPE_GATEWAY
-      BLIK: STRIPE_GATEWAY
-  payment-service:
-    url: ${PAYMENT_SERVICE_URL}
+    providers:
+      stripe:
+        enabled: true
+        display-name: "Credit / Debit Card"
+        api-key: ${STRIPE_SECRET_KEY}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+        supported-methods:
+          - CREDIT_CARD
+          - BLIK
+
+      # --- PayPal Provider (Example for the future) ---
+      paypal:
+        enabled: false # Disabled for now
+        display-name: "PayPal"
+        client-id: ${PAYPAL_CLIENT_ID}
+        client-secret: ${PAYPAL_CLIENT_SECRET}
+        supported-methods:
+          - BANK_TRANSFER
 
 ---
 # =============================================================================
@@ -212,6 +224,24 @@ logging:
     root: INFO
     org.springframework: WARN
 app:
+  notification:
+    channels:
+      email:
+        activeProvider: "sendgrid"
+    vendors:
+      smtp:
+        host: ${PROD_SMTP_HOST}
+        port: ${PROD_SMTP_PORT}
+        username: ${PROD_SMTP_USERNAME}
+        password: ${PROD_SMTP_PASSWORD}
+        properties:
+          mail.smtp.auth: "true"
+          mail.smtp.starttls.enable: "true"
+      sendgrid:
+        apiKey: ${SENDGRID_API_KEY}  # No default - must be provided in prod
+      twilio:
+        accountSid: ${TWILIO_ACCOUNT_SID}
+        authToken: ${TWILIO_AUTH_TOKEN}
   storage:
     location: ${PROD_STORAGE_PATH}
     base-url: ${CDN_BASE_URL}

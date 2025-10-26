@@ -1,4 +1,4 @@
-package com.rj.ecommerce_backend.messaging.config
+package com.rj.ecommerce_backend.config
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.DeserializationFeature
