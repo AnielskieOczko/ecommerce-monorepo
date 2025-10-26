@@ -1,62 +1,49 @@
-# ===================================================================
-# BASE (DEFAULT) PROFILE
-# Contains all common properties. Active when no other profile is set.
-# ===================================================================
 server:
   port: 8010
-  error:
-    include-message: always
-    include-binding-errors: always
 
 spring:
   application:
     name: payment-service
-  jackson:
-    default-property-inclusion: non_null
   rabbitmq:
-    host: localhost # Default for local
+    host: ${SPRING_RABBITMQ_HOST:localhost}
     username: ${SPRING_RABBITMQ_USERNAME:guest}
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
-    port: 5672
     template:
-      replay-timeout: 5000
+      reply-timeout: 5000 # 5 seconds
     listener:
       simple:
-        retry:
-          enabled: true
-          initial-interval: 1000ms
-          max-attempts: 3
-          max-interval: 10000ms
-          multiplier: 2.0
+        retry: { enabled: true, initial-interval: 1s, max-attempts: 3, max-interval: 10s, multiplier: 2.0 }
 
-# All custom application properties are grouped under 'app'
 app:
   stripe:
     secret-key: ${STRIPE_SECRET_KEY}
     publishable-key: ${STRIPE_PUBLISHABLE_KEY}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET}
-
   rabbitmq:
-    checkout-session-queue: "checkout-session-request-queue"
-    checkout-session-exchange: "payment.events"
-    checkout-session-routing-key: "payment.initiate.request"
+    # --- THIS IS THE FIX ---
+    checkout-session-request:
+      exchange: "checkout.session.exchange"
+      queue: "checkout.session.queue"
+      routing-key: "checkout.session.routing.key"
 
-    checkout-session-response-queue: "checkout.session.response.q"
-    checkout-session-response-exchange: "payment.events"
-    checkout-session-response-routing-key: "payment.initiate.reply"
+    checkout-session-response:
+      exchange: "checkout.session.response.exchange"
+      routing-key: "checkout.session.response.routing.key"
 
-    dlq-queue: "payment.dlq.q"
-    dlq-exchange: "payment.dlq.exchange"
-    dlq-routing-key: "payment.dlq.key"
+    payment-options-request:
+      exchange: "payment.events"
+      queue: "payment.options.request.q"
+      routing-key: "payment.options.request"
+
+    payment-options-reply:
+      exchange: "payment.events"
+      queue: "payment.options.reply.q"
+      routing-key: "payment.options.reply"
 
 ---
-# ===================================================================
-# DEVELOPMENT PROFILE (dev)
-# Only overrides what is different from the base profile.
-# ===================================================================
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: container
   rabbitmq:
-    host: rabbitmq # Override for Docker Compose environment
+    host: rabbitmq

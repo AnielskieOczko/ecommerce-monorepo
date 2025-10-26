@@ -1,0 +1,96 @@
+# ===================================================================
+# BASE (DEFAULT - LOCAL) PROFILE
+# ===================================================================
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ecommerce-notification-service
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+# ===================================================================
+# CUSTOM APPLICATION PROPERTIES
+# ===================================================================
+app:
+  rabbitmq:
+    notificationRequest:
+      exchange: "notification.request.exchange"
+      queue: "notification.request.queue"
+      routingKey: "notification.request.key"
+      dlq:
+        exchange: "notification.request.dlx"
+        routingKey: "notification.request.dlq"
+    notificationReceipt:
+      exchange: "notification.receipt.exchange"
+      queue: "notification.receipt.queue"
+      routingKey: "notification.receipt.key"
+
+  notification:
+    channels:
+      email:
+        activeProvider: "smtp"
+        defaultFrom: "noreply@ecommerce.com"
+      sms:
+        activeProvider: "twilio"
+        defaultFrom: "+15551234567"
+    vendors:
+      smtp:
+        host: ${SPRING_MAIL_HOST:mailhog}
+        port: ${SPRING_MAIL_PORT:1025}
+        protocol: "smtp"
+        properties:
+          mail.smtp.auth: "false"
+          mail.smtp.starttls.enable: "false"
+
+  monitoring:
+    enabled: true
+    schedule: "0 */1 * * * *"
+
+---
+# ===================================================================
+# CONTAINER PROFILE
+# ===================================================================
+spring:
+  config:
+    activate:
+      on-profile: container
+
+---
+# ===================================================================
+# PRODUCTION PROFILE
+# ===================================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+  thymeleaf:
+    cache: true
+
+app:
+  notification:
+    channels:
+      email:
+        activeProvider: "sendgrid"
+    vendors:
+      smtp:
+        host: ${PROD_SMTP_HOST}
+        port: ${PROD_SMTP_PORT}
+        username: ${PROD_SMTP_USERNAME}
+        password: ${PROD_SMTP_PASSWORD}
+        properties:
+          mail.smtp.auth: "true"
+          mail.smtp.starttls.enable: "true"
+      sendgrid:
+        apiKey: ${SENDGRID_API_KEY}  # No default - must be provided in prod
+      twilio:
+        accountSid: ${TWILIO_ACCOUNT_SID}
+        authToken: ${TWILIO_AUTH_TOKEN}
