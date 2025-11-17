@@ -10,8 +10,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  JAVA_VERSION: '21'  # Updated to match project
-  MAVEN_VERSION: '3.9'
+  JAVA_VERSION: '21'
 
 jobs:
   # ========================================================================
@@ -37,16 +36,6 @@ jobs:
           project: 'Ecommerce Backend'
           path: 'backend'
           format: 'ALL'
-          args: '--enableRetired --enableExperimental'
-          enableRetired: true
-          enableExperimental: true
-
-      - name: Upload OWASP report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: owasp-dependency-report
-          path: reports/
 
       - name: Quality Gate Check
         id: quality-gate
@@ -91,33 +80,35 @@ jobs:
           cache: maven
 
       - name: Validate Flyway migrations
-        working-directory: backend
         env:
           SPRING_PROFILES_ACTIVE: ci
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
-          mvn flyway:validate -f ../pom.xml
-          mvn flyway:info -f ../pom.xml
+          cd backend
+          mvn flyway:validate
+          mvn flyway:info
 
       - name: Build with Maven
-        working-directory: backend
         env:
           SPRING_PROFILES_ACTIVE: ci
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        run: mvn clean compile -f ../pom.xml -DskipTests
+        run: |
+          cd backend
+          mvn clean compile -DskipTests
 
       - name: Run tests
-        working-directory: backend
         env:
           SPRING_PROFILES_ACTIVE: ci
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        run: mvn test -f ../pom.xml
+        run: |
+          cd backend
+          mvn test
 
       - name: Generate test results summary
         if: always()
