@@ -1,8 +1,10 @@
 # =============================================================================
-# BASE (DEFAULT) PROFILE
+# BASE CONFIGURATION (APPLIES TO ALL PROFILES)
 # Defines structure and default values for all properties
 # =============================================================================
 spring:
+  profiles:
+    active: "@spring.profiles.active@"
   application:
     name: ecommerce_backend
   servlet:
@@ -10,26 +12,27 @@ spring:
       max-file-size: 8MB
       max-request-size: 8MB
   datasource:
+    # Driver is common, but URL/credentials are profile-specific
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
       hibernate:
         format_sql: true
     open-in-view: false
-  rabbitmq:
-    listener:
-      simple:
-        retry:
-          enabled: true
-          initial-interval: 1000
-          max-attempts: 3
+    hibernate:
+      # This is a good default; profiles can override to 'none' for safety
+      ddl-auto: validate
   springdoc:
     swagger-ui:
       path: /swagger-ui.html
     api-docs:
       path: /api-docs
   flyway:
-    default-schema: ecommerce_dev # This is okay if your DB name is consistent
+    default-schema: ecommerce_dev
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
 
 management:
   endpoints:
@@ -41,177 +44,43 @@ server:
   port: 8080
 
 # =============================================================================
-# CUSTOM APPLICATION PROPERTIES
+# CUSTOM APPLICATION PROPERTIES (COMMON DEFAULTS)
 # =============================================================================
 app:
-  rabbitmq:
-    notification-request:
-      exchange: "notification.request.exchange"
-      queue: "notification.request.queue"
-      routing-key: "notification.request.key"
-      dlq:
-        exchange: "notification.request.dlx"
-        routing-key: "notification.request.dlq"
-
-    notification-receipt:
-      exchange: "notification.receipt.exchange"
-      queue: "notification.receipt.queue"
-      routing-key: "notification.receipt.key"
-
-    checkout-session:
-      exchange: "checkout.session.exchange"
-      queue: "checkout.session.queue"
-      routing-key: "checkout.session.routing.key"
-
-    checkout-session-response:
-      exchange: "checkout.session.response.exchange"
-      queue: "checkout.session.response.queue"
-      routing-key: "checkout.session.response.routing.key"
-
-    payment-options-request:
-      exchange: "payment.events"
-      queue: "payment.options.request.q"
-      routing-key: "payment.options.request"
-
-    payment-options-reply:
-      exchange: "payment.events"
-      queue: "payment.options.reply.q"
-      routing-key: "payment.options.reply"
+  notification:
+    channels:
+      email:
+        activeProvider: "smtp"
+        defaultFrom: "noreply@ecommerce.com"
+      sms:
+        activeProvider: "twilio"
+        defaultFrom: "+15551234567"
+    vendors:
+      smtp:
+        host: ${SPRING_MAIL_HOST:mailhog} # Default for local/container dev
+        port: ${SPRING_MAIL_PORT:1025}
+        protocol: "smtp"
+        properties:
+          mail.smtp.auth: "false"
+          mail.smtp.starttls.enable: "false"
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET} # Secret must be provided by the environment
   storage:
-    secret-salt: ${STORAGE_SECRET_SALT}
+    secret-salt: ${STORAGE_SECRET_SALT} # Secret must be provided
   payment:
-    method-to-gateway-mapping:
-      CREDIT_CARD: STRIPE_GATEWAY
-      BANK_TRANSFER: STRIPE_GATEWAY
-      BLIK: STRIPE_GATEWAY
-  payment-service:
-    url: ${PAYMENT_SERVICE_URL}
-
----
-# =============================================================================
-# CONTAINER PROFILE
-# For Docker Compose development environment
-# =============================================================================
-spring:
-  config:
-    activate:
-      on-profile: container
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  flyway:
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-  rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
-    username: ${SPRING_RABBITMQ_USERNAME}
-    password: ${SPRING_RABBITMQ_PASSWORD}
-logging:
-  level:
-    com.rj.ecommerce_backend: DEBUG
-    org.hibernate.SQL: DEBUG
-app:
-  storage:
-    location: /app/product-images # Internal container path
-    base-url: /api/v1/public/products/images # Or the base URL you intend to use
-    cleanup-schedule: "0 0 3 * * *" # A sensible default, e.g., 3 AM daily
-
----
-# =============================================================================
-# LOCAL PROFILE
-# For running application directly on local machine (no containers)
-# =============================================================================
-spring:
-  config:
-    activate:
-      on-profile: local
-  datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_dev?createDatabaseIfNotExist=true
-    username: devuser # Hardcoded default for local
-    password: devpass # Hardcoded default for local
-  flyway:
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
-  rabbitmq:
-    host: localhost
-    username: guest
-    password: guest
-app:
-  storage:
-    location: ./storage-local # Relative path for local runs
-    base-url: /api/v1/public/products/images # A sensible default for local dev
-    cleanup-schedule: "0 0 1 * * *" # A standard daily schedule
-
----
-# =============================================================================
-# CI PROFILE
-# For Continuous Integration (GitHub Actions, etc.)
-# =============================================================================
-spring:
-  config:
-    activate:
-      on-profile: ci
-  datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_ci
-    username: testuser
-    password: ${CI_DATABASE_PASSWORD}
-  flyway:
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-  jpa:
-    hibernate:
-      ddl-auto: none
-  rabbitmq:
-    # For CI, you might use an in-memory broker or disable it
-    # This example assumes a broker is available on localhost
-    host: localhost
-app:
-  storage:
-    location: /tmp/ecommerce/test-images-ci
-
----
-# =============================================================================
-# PRODUCTION PROFILE
-# =============================================================================
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: ${PROD_DB_URL}
-    username: ${PROD_DB_USERNAME}
-    password: ${PROD_DB_PASSWORD}
-  flyway:
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
-  rabbitmq:
-    host: ${PROD_RABBITMQ_HOST}
-    username: ${PROD_RABBITMQ_USERNAME}
-    password: ${PROD_RABBITMQ_PASSWORD}
-logging:
-  level:
-    root: INFO
-    org.springframework: WARN
-app:
-  storage:
-    location: ${PROD_STORAGE_PATH}
-    base-url: ${CDN_BASE_URL}
+    providers:
+      stripe:
+        enabled: true
+        display-name: "Credit / Debit Card"
+        api-key: ${STRIPE_API_KEY}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+        supported-methods:
+          - CREDIT_CARD
+          - BLIK
+      paypal:
+        enabled: false
+        display-name: "PayPal"
+        client-id: ${PAYPAL_CLIENT_ID}
+        client-secret: ${PAYPAL_CLIENT_SECRET}
+        supported-methods:
+          - BANK_TRANSFER

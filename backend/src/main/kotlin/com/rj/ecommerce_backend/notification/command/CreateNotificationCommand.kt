@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.notification.command
 
-import com.rj.ecommerce.api.shared.enums.NotificationChannel
-import com.rj.ecommerce.api.shared.enums.NotificationEntityType
-import com.rj.ecommerce.api.shared.enums.NotificationTemplate
+import com.rj.ecommerce_backend.api.shared.enums.NotificationChannel
+import com.rj.ecommerce_backend.api.shared.enums.NotificationEntityType
+import com.rj.ecommerce_backend.api.shared.enums.NotificationTemplate
 import com.rj.ecommerce_backend.notification.context.NotificationContext
 
 /**

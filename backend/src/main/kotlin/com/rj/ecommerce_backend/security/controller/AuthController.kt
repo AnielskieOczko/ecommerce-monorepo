@@ -1,11 +1,11 @@
 package com.rj.ecommerce_backend.security.controller
 
-import com.rj.ecommerce.api.shared.dto.security.request.LoginRequest
-import com.rj.ecommerce.api.shared.dto.security.request.TokenRefreshRequest
-import com.rj.ecommerce.api.shared.dto.security.response.AuthResponse
-import com.rj.ecommerce.api.shared.dto.security.response.TokenInfoResponse
-import com.rj.ecommerce.api.shared.dto.user.request.UserCreateRequest
-import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
+import com.rj.ecommerce_backend.api.shared.dto.security.request.LoginRequest
+import com.rj.ecommerce_backend.api.shared.dto.security.request.TokenRefreshRequest
+import com.rj.ecommerce_backend.api.shared.dto.security.response.AuthResponse
+import com.rj.ecommerce_backend.api.shared.dto.security.response.TokenInfoResponse
+import com.rj.ecommerce_backend.api.shared.dto.user.request.UserCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.security.service.AuthenticationService
 import com.rj.ecommerce_backend.security.service.JwtBlackListService
 import com.rj.ecommerce_backend.user.service.AdminService

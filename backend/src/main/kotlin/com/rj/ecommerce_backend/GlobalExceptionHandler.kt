@@ -1,16 +1,17 @@
 package com.rj.ecommerce_backend
 
-import com.rj.ecommerce.api.shared.core.ErrorDTO
-import com.rj.ecommerce.api.shared.core.ProblemDetailDTO
+import com.rj.ecommerce_backend.api.shared.core.ProblemDetailDTO
 import com.rj.ecommerce_backend.order.exception.AccessDeniedException
 import com.rj.ecommerce_backend.order.exception.OrderCancellationException
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.exception.OrderServiceException
+import com.rj.ecommerce_backend.payment.exception.PaymentProcessingException
 import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException
 import com.rj.ecommerce_backend.product.exception.InsufficientStockException
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.user.exception.EmailAlreadyExistsException
 import com.rj.ecommerce_backend.user.exception.UserNotFoundException
+import com.stripe.exception.StripeException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import java.net.URI
-import java.time.LocalDateTime
 
 private val logger = KotlinLogging.logger {}
 
@@ -30,30 +30,45 @@ class GlobalExceptionHandler {
     // --- Specific Business Logic Exceptions ---
 
     @ExceptionHandler(EmailAlreadyExistsException::class)
-    fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException): ResponseEntity<ErrorDTO> {
+    fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
         logger.warn(ex) { "Conflict due to existing email: ${ex.message}" }
-        return buildErrorResponse(HttpStatus.CONFLICT, ex.message)
+        return buildProblemDetailResponse(HttpStatus.CONFLICT, "Email In Use", ex.message, request)
     }
 
     @ExceptionHandler(UserNotFoundException::class, ProductNotFoundException::class, OrderNotFoundException::class, CategoryNotFoundException::class)
-    fun handleNotFoundExceptions(ex: RuntimeException): ResponseEntity<ErrorDTO> {
+    fun handleNotFoundExceptions(ex: RuntimeException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
         logger.warn { "Resource not found: ${ex.message}" }
-        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.message)
+        return buildProblemDetailResponse(HttpStatus.NOT_FOUND, "Resource Not Found", ex.message, request)
     }
 
     @ExceptionHandler(InsufficientStockException::class, OrderCancellationException::class)
-    fun handleBadRequestExceptions(ex: RuntimeException): ResponseEntity<ErrorDTO> {
+    fun handleBadRequestExceptions(ex: RuntimeException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
         logger.warn { "Bad request due to business rule violation: ${ex.message}" }
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.message)
+        return buildProblemDetailResponse(HttpStatus.BAD_REQUEST, "Invalid Request", ex.message, request)
     }
 
     @ExceptionHandler(AccessDeniedException::class)
-    fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<ErrorDTO> {
+    fun handleAccessDeniedException(ex: AccessDeniedException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
         logger.warn(ex) { "Access denied: ${ex.message}" }
-        return buildErrorResponse(HttpStatus.FORBIDDEN, "You do not have permission to access this resource.")
+        return buildProblemDetailResponse(HttpStatus.FORBIDDEN, "Access Denied", "You do not have permission to access this resource.", request)
     }
 
-    // --- Validation Error Handler (Using RFC 7807 ProblemDetail) ---
+    // --- MERGED PAYMENT EXCEPTIONS ---
+
+    @ExceptionHandler(PaymentProcessingException::class)
+    fun handlePaymentProcessingException(ex: PaymentProcessingException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
+        logger.error(ex) { "A payment processing error occurred: ${ex.message}" }
+        return buildProblemDetailResponse(HttpStatus.BAD_REQUEST, "Payment Processing Error", ex.message, request)
+    }
+
+    @ExceptionHandler(StripeException::class)
+    fun handleStripeException(ex: StripeException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
+        val httpStatus = HttpStatus.resolve(ex.statusCode) ?: HttpStatus.INTERNAL_SERVER_ERROR
+        logger.error(ex) { "An error occurred while communicating with Stripe: ${ex.message}" }
+        return buildProblemDetailResponse(httpStatus, "Payment Provider Error", "An external error occurred with the payment provider.", request)
+    }
+
+    // --- Validation Error Handler (Already Correct) ---
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(ex: MethodArgumentNotValidException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
@@ -80,28 +95,31 @@ class GlobalExceptionHandler {
     // --- Generic and Service-Level Exceptions ---
 
     @ExceptionHandler(OrderServiceException::class)
-    fun handleOrderServiceException(ex: OrderServiceException): ResponseEntity<ErrorDTO> {
+    fun handleOrderServiceException(ex: OrderServiceException, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
         logger.error(ex) { "A critical error occurred in the order service: ${ex.message}" }
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while processing the order.")
+        return buildProblemDetailResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Service Error", "An error occurred while processing the order.", request)
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleGlobalException(ex: Exception, request: WebRequest): ResponseEntity<ErrorDTO> {
+    fun handleGlobalException(ex: Exception, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
         logger.error(ex) { "An unexpected error occurred for request: ${request.getDescription(false)}" }
-        return buildErrorResponse(
+        return buildProblemDetailResponse(
             HttpStatus.INTERNAL_SERVER_ERROR,
-            "An unexpected error occurred. Please try again later."
+            "Internal Server Error",
+            "An unexpected error occurred. Please try again later.",
+            request
         )
     }
 
-    // --- Helper Function ---
+    // --- Reusable Helper Function for ProblemDetailDTO ---
 
-    private fun buildErrorResponse(status: HttpStatus, message: String?): ResponseEntity<ErrorDTO> {
-        val errorDTO = ErrorDTO(
+    private fun buildProblemDetailResponse(status: HttpStatus, title: String, detail: String?, request: WebRequest): ResponseEntity<ProblemDetailDTO> {
+        val problemDetail = ProblemDetailDTO(
+            title = title,
             status = status.value(),
-            message = message,
-            timestamp = LocalDateTime.now()
+            detail = detail,
+            instance = URI.create(request.getDescription(false))
         )
-        return ResponseEntity(errorDTO, status)
+        return ResponseEntity(problemDetail, status)
     }
 }

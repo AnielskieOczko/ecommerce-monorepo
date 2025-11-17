@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.order.controller
 
-import com.rj.ecommerce.api.shared.dto.order.request.OrderCreateRequest
-import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
+import com.rj.ecommerce_backend.api.shared.dto.order.request.OrderCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.order.response.OrderResponse
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.search.OrderSearchCriteria
 import com.rj.ecommerce_backend.order.service.OrderCommandService

@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.core.ImageInfo
-import com.rj.ecommerce.api.shared.dto.product.request.ProductCreateRequest
-import com.rj.ecommerce.api.shared.dto.product.request.ProductUpdateRequest
-import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
+import com.rj.ecommerce_backend.api.shared.core.ImageInfo
+import com.rj.ecommerce_backend.api.shared.dto.product.request.ProductCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.product.request.ProductUpdateRequest
+import com.rj.ecommerce_backend.api.shared.dto.product.response.ProductResponse
 
 // Backend components
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException

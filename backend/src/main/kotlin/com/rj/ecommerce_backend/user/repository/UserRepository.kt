@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.user.repository
 
-import com.rj.ecommerce.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Email
 import com.rj.ecommerce_backend.user.domain.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

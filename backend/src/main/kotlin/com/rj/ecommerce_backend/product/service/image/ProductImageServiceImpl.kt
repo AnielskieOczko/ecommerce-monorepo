@@ -1,7 +1,7 @@
 // File: backend/src/main/kotlin/com/rj/ecommerce_backend/product/service/ProductImageServiceImpl.kt
 package com.rj.ecommerce_backend.product.service.image
 
-import com.rj.ecommerce.api.shared.core.ImageInfo
+import com.rj.ecommerce_backend.api.shared.core.ImageInfo
 import com.rj.ecommerce_backend.product.domain.Image
 import com.rj.ecommerce_backend.product.domain.Product
 import com.rj.ecommerce_backend.product.exception.FileStorageException

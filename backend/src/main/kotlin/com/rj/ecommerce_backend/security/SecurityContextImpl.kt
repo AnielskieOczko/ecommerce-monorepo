@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.security
 
-import com.rj.ecommerce.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Email
 import com.rj.ecommerce_backend.user.domain.User
 import com.rj.ecommerce_backend.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging

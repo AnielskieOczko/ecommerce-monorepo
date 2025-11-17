@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.cart.controller
 
-import com.rj.ecommerce.api.shared.dto.cart.request.AddItemToCartRequest
-import com.rj.ecommerce.api.shared.dto.cart.request.UpdateCartItemQuantityRequest
-import com.rj.ecommerce.api.shared.dto.cart.response.CartResponse
+import com.rj.ecommerce_backend.api.shared.dto.cart.request.AddItemToCartRequest
+import com.rj.ecommerce_backend.api.shared.dto.cart.request.UpdateCartItemQuantityRequest
+import com.rj.ecommerce_backend.api.shared.dto.cart.response.CartResponse
 import com.rj.ecommerce_backend.cart.service.CartService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation

@@ -1,11 +1,11 @@
 package com.rj.ecommerce_backend.user.mapper
 
-import com.rj.ecommerce.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Email
 
-import com.rj.ecommerce.api.shared.dto.user.request.UserUpdateDetailsRequest
-import com.rj.ecommerce.api.shared.dto.user.common.UserBaseDetails
-import com.rj.ecommerce.api.shared.dto.user.request.AdminUpdateUserRequest
-import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
+import com.rj.ecommerce_backend.api.shared.dto.user.request.UserUpdateDetailsRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.common.UserBaseDetails
+import com.rj.ecommerce_backend.api.shared.dto.user.request.AdminUpdateUserRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.user.domain.User
 import com.rj.ecommerce_backend.user.repository.UserRepository
 import org.springframework.stereotype.Component

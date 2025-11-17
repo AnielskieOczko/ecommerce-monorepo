@@ -1,0 +1,26 @@
+package com.rj.ecommerce_backend.api.shared.dto.product.request
+
+import com.rj.ecommerce_backend.api.shared.core.Money
+import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.Size
+
+@Schema(description = "Request to update an existing product. All fields are optional.")
+data class ProductUpdateRequest(
+    @field:Schema(description = "Updated product name.", example = "Premium Wireless Keyboard v2")
+    @field:Size(min = 3, max = 255)
+    val name: String? = null,
+
+    @field:Schema(description = "Updated product description.", example = "Now with improved battery life.")
+    val description: String? = null,
+
+    @field:Schema(description = "Updated product price.")
+    val unitPrice: Money? = null,
+
+    @field:Schema(description = "Updated product stock quantity.", example = "200")
+    @field:Min(0)
+    val quantityInStock: Int? = null,
+
+    @field:Schema(description = "Updated list of category IDs. Replaces the existing list.")
+    val categoryIds: List<Long>? = null
+)

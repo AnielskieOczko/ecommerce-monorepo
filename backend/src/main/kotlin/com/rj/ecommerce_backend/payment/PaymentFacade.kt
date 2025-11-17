@@ -1,14 +1,14 @@
 package com.rj.ecommerce_backend.payment
 
-import com.rj.ecommerce.api.shared.dto.payment.response.PaymentSessionResponse
-import com.rj.ecommerce.api.shared.dto.payment.response.PaymentStatusResponse
-import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce_backend.messaging.payment.producer.PaymentMessageProducer
+import com.rj.ecommerce_backend.api.shared.dto.payment.response.PaymentSessionResponse
+import com.rj.ecommerce_backend.api.shared.dto.payment.response.PaymentStatusResponse
+import com.rj.ecommerce_backend.api.shared.enums.CanonicalPaymentStatus
+import com.rj.ecommerce_backend.api.shared.enums.PaymentMethod
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.exception.OrderNotFoundException
 import com.rj.ecommerce_backend.order.service.OrderCommandService
 import com.rj.ecommerce_backend.order.service.OrderQueryService
-import com.rj.ecommerce_backend.payment.gateway.PaymentGatewayResolver
+import com.rj.ecommerce_backend.payment.provider.PaymentProviderResolver
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.security.exception.UserAuthenticationException
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -24,25 +24,23 @@ class PaymentFacade(
     private val securityContext: SecurityContext,
     private val orderCommandService: OrderCommandService,
     private val orderQueryService: OrderQueryService,
-    private val paymentMessageProducer: PaymentMessageProducer,
-    private val gatewayResolver: PaymentGatewayResolver
+    private val paymentProviderResolver: PaymentProviderResolver
 ) {
 
     /**
      * Creates or retrieves a payment session for a given order.
      *
-     * This method has two paths:
+     * This method operates synchronously and has two main paths:
      * 1.  **Existing Valid Session:** If the order already has a valid, unexpired payment session URL,
-     *     it returns the existing session details immediately.
-     * 2.  **New Session:** If no valid session exists, it initiates a new one by sending an
-     *     asynchronous request to the payment service. It then **synchronously returns a PENDING response**.
-     *     The client must then poll the `getOrderPaymentStatus` endpoint to get the actual session URL
-     *     once it has been processed.
+     *     it returns the existing session details immediately without contacting the payment provider.
+     * 2.  **New Session Creation:** If no valid session exists, it directly calls the configured payment
+     *     provider (e.g., Stripe) to create a new checkout session. It then saves the session details
+     *     (ID, URL, expiration) to the order and returns the complete response to the client in a single call.
      *
      * @param orderId The ID of the order to pay for.
      * @param successUrl The client-side URL to redirect to on successful payment.
      * @param cancelUrl The client-side URL to redirect to on payment cancellation.
-     * @return A [PaymentSessionResponse] containing either the existing session details or a pending status.
+     * @return A complete [PaymentSessionResponse] containing the checkout session URL.
      */
     fun createCheckoutSession(
         orderId: Long,
@@ -66,25 +64,25 @@ class PaymentFacade(
             )
         }
 
-        val orderPaymentMethod = requireNotNull(order.paymentMethod) {
+        val orderPaymentMethod: PaymentMethod = requireNotNull(order.paymentMethod) {
             "Order ID ${order.id} does not have a payment method selected."
         }
 
-        val gateway = gatewayResolver.resolve(orderPaymentMethod)
-        val paymentRequestDTO = gateway.buildPaymentRequest(order, successUrl, cancelUrl)
+        val provider = paymentProviderResolver.resolve(orderPaymentMethod)
+        val sessionDetails = provider.initiatePayment(order, successUrl, cancelUrl)
 
-        orderCommandService.updatePaymentDetailsOnInitiation(order)
-        paymentMessageProducer.sendCheckoutSessionRequest(paymentRequestDTO, order.id.toString())
+        orderCommandService.updateOrderWithPaymentSession(
+            order,
+            sessionDetails.sessionId,
+            sessionDetails.sessionUrl,
+            sessionDetails.expiresAt)
 
-        // REFACTOR: Return the correct PENDING response DTO to the client.
-        // The client understands that sessionId and sessionUrl will be null initially
-        // and will poll for the updated status.
         return PaymentSessionResponse(
             orderId = order.id!!,
             paymentStatus = order.paymentStatus,
-            sessionId = null, // Will be populated asynchronously
-            sessionUrl = null, // Will be populated asynchronously
-            expiresAt = null
+            sessionId = sessionDetails.sessionId,
+            sessionUrl = sessionDetails.sessionUrl,
+            expiresAt = sessionDetails.expiresAt
         )
     }
 
@@ -99,7 +97,6 @@ class PaymentFacade(
         val currentUserId = securityContext.getCurrentUser().id
             ?: throw UserAuthenticationException("Authenticated user ID could not be determined.")
 
-        // REFACTOR: This logic was already correct, but we confirm it uses the new DTO.
         val order = orderQueryService.getOrderEntityByIdForUser(currentUserId, orderId)
             ?: throw OrderNotFoundException("Order not found with ID: $orderId, or access denied.")
 

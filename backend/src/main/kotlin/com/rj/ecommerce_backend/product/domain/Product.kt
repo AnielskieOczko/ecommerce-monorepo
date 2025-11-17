@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.product.domain
 
-import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.core.ProductDescription
-import com.rj.ecommerce.api.shared.core.ProductName
-import com.rj.ecommerce.api.shared.core.QuantityInStock
+import com.rj.ecommerce_backend.api.shared.core.Money
+import com.rj.ecommerce_backend.api.shared.core.ProductDescription
+import com.rj.ecommerce_backend.api.shared.core.ProductName
+import com.rj.ecommerce_backend.api.shared.core.QuantityInStock
 import jakarta.persistence.*
 import jakarta.validation.Valid
 import org.hibernate.annotations.BatchSize

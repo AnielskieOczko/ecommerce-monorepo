@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.order.search
 
-import com.rj.ecommerce.api.shared.core.Email
-import com.rj.ecommerce.api.shared.enums.OrderStatus
-import com.rj.ecommerce.api.shared.enums.PaymentMethod
+import com.rj.ecommerce_backend.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.enums.OrderStatus
+import com.rj.ecommerce_backend.api.shared.enums.PaymentMethod
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.user.domain.User
 import io.github.oshai.kotlinlogging.KotlinLogging

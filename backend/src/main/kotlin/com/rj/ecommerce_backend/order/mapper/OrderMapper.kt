@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.order.mapper
 
-import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
-import com.rj.ecommerce.api.shared.dto.order.response.OrderItemDetails
-import com.rj.ecommerce.api.shared.dto.product.common.ProductSummary
+import com.rj.ecommerce_backend.api.shared.core.Money
+import com.rj.ecommerce_backend.api.shared.dto.order.response.OrderResponse
+import com.rj.ecommerce_backend.api.shared.dto.order.response.OrderItemDetails
+import com.rj.ecommerce_backend.api.shared.dto.product.common.ProductSummary
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.product.domain.Product

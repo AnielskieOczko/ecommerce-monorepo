@@ -1,14 +1,14 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.core.Email
-import com.rj.ecommerce.api.shared.core.Password
-import com.rj.ecommerce.api.shared.core.ZipCode
-import com.rj.ecommerce.api.shared.dto.user.request.ChangeAccountStatusRequest
-import com.rj.ecommerce.api.shared.dto.user.request.AdminChangeUserAuthorityRequest
-import com.rj.ecommerce.api.shared.dto.user.request.AdminUpdateUserRequest
-import com.rj.ecommerce.api.shared.dto.user.request.UserCreateRequest
-import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
+import com.rj.ecommerce_backend.api.shared.core.Address
+import com.rj.ecommerce_backend.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Password
+import com.rj.ecommerce_backend.api.shared.core.ZipCode
+import com.rj.ecommerce_backend.api.shared.dto.user.request.ChangeAccountStatusRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.AdminChangeUserAuthorityRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.AdminUpdateUserRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.UserCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.user.domain.Authority
 import com.rj.ecommerce_backend.user.domain.User

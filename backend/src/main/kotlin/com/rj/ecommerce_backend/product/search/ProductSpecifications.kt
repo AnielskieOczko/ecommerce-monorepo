@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.product.search
 
-import com.rj.ecommerce.api.shared.core.ProductName
-import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.core.QuantityInStock
+import com.rj.ecommerce_backend.api.shared.core.ProductName
+import com.rj.ecommerce_backend.api.shared.core.Money
+import com.rj.ecommerce_backend.api.shared.core.QuantityInStock
 import com.rj.ecommerce_backend.product.domain.Category
 import com.rj.ecommerce_backend.product.domain.Product
 import io.github.oshai.kotlinlogging.KotlinLogging

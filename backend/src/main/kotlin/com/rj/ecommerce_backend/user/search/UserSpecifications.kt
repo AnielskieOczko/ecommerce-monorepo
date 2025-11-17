@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.user.search
 
-import com.rj.ecommerce.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Email
 import com.rj.ecommerce_backend.user.domain.Authority
 import com.rj.ecommerce_backend.user.domain.User
 import io.github.oshai.kotlinlogging.KotlinLogging
