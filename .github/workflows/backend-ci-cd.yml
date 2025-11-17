@@ -24,20 +24,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21 # This step is still needed for other Maven commands, but its JAVA_HOME won't directly affect the Docker action.
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: maven
 
-#      - name: Set JAVA_HOME (for OWASP Dependency Check)
-#        run: |
-#          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-#          echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
+      # The previously removed "Set JAVA_HOME (for OWASP Dependency Check)" step is still correctly removed.
 
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
+        env: # Add this 'env' block
+          JAVA_HOME: /opt/jdk # Set JAVA_HOME specifically for the Docker container
         with:
           project: 'Ecommerce Backend'
           path: 'backend'
