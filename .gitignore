@@ -40,3 +40,9 @@ Thumbs.db
 
 # Docker
 .docker/
+
+# Claude
+.claude
+
+# Other
+/docs
