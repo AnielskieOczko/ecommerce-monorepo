@@ -135,11 +135,10 @@ jobs:
           path: backend/target/surefire-reports/
 
       - name: Upload JAR artifact
-        working-directory: backend
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
-          path: target/*.jar
+          path: backend/target/*.jar
 
   # ========================================================================
   # CONTAINER BUILD
