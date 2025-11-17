@@ -96,22 +96,43 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Wait for MySQL to be ready # <--- ADD THIS NEW STEP
+      - name: Wait for MySQL to be ready # <--- MODIFIED STEP
         env:
-          MYSQL_PWD: ${{ secrets.DATABASE_PASSWORD }} # Use MYSQL_PWD for password with mysql client
+          MYSQL_ROOT_PASSWORD_ENV: ${{ secrets.MYSQL_ROOT_PASSWORD }} # Used for root connection check
+          MYSQL_TESTUSER_PASSWORD_ENV: ${{ secrets.DATABASE_PASSWORD }} # Used for testuser connection check
         run: |
-          echo "Waiting for MySQL to start..."
-          for i in `seq 1 30`; do # Try for up to 30 seconds
-            mysql -h mysql -u testuser -p"${{ secrets.DATABASE_PASSWORD }}" -e "SELECT 1" &>/dev/null
-            if [ $? -eq 0 ]; then
-              echo "MySQL is ready!"
-              exit 0
+          echo "Starting MySQL readiness checks..."
+
+          # --- Stage 1: Check if MySQL server is responsive as root ---
+          echo "Waiting for MySQL server to be responsive as root..."
+          for i in `seq 1 60`; do # Allow up to 60 seconds for the server to come up
+            if mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD_ENV" -e "SELECT 1" &>/dev/null; then
+              echo "MySQL server is responsive as root. Moving to user/database check."
+              break
             fi
+            echo "Attempt $i: MySQL server not yet responsive as root..."
             sleep 1
+            if [ $i -eq 60 ]; then
+              echo "Error: MySQL server did not become responsive as root after 60 seconds."
+              exit 1
+            fi
           done
-          echo "MySQL did not start in time."
-          exit 1
-        continue-on-error: false # Fail the job if MySQL doesn't start
+
+          # --- Stage 2: Check if 'ecommerce_ci' database is ready for 'testuser' ---
+          echo "Waiting for 'ecommerce_ci' database to be ready for 'testuser'..."
+          for i in `seq 1 60`; do # Allow up to 60 seconds for database/user setup
+            if mysql -h mysql -u testuser -p"$MYSQL_TESTUSER_PASSWORD_ENV" -D ecommerce_ci -e "SELECT 1" &>/dev/null; then
+              echo "MySQL database 'ecommerce_ci' is ready for 'testuser'!"
+              exit 0 # Exit successfully if both checks pass
+            fi
+            echo "Attempt $i: 'ecommerce_ci' database not yet ready for 'testuser'..."
+            sleep 1
+            if [ $i -eq 60 ]; then
+              echo "Error: 'ecommerce_ci' database not ready for 'testuser' after 60 seconds."
+              exit 1
+            fi
+          done
+        continue-on-error: false # This step MUST succeed for the pipeline to continue
 
       - name: Validate Flyway migrations
         env:
