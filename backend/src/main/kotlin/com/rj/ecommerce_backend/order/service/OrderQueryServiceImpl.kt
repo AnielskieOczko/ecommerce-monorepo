@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.order.service
 
-import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
+import com.rj.ecommerce_backend.api.shared.dto.order.response.OrderResponse
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.exception.AccessDeniedException
 import com.rj.ecommerce_backend.order.mapper.OrderMapper

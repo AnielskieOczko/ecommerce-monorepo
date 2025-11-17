@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.api.shared.dto.order.request
 
-import com.rj.ecommerce.api.shared.enums.OrderStatus
+import com.rj.ecommerce_backend.api.shared.enums.OrderStatus
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "Request to update the status of an existing order.")

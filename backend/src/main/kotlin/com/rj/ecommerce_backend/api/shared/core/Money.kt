@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.api.shared.core
 
-import com.rj.ecommerce.api.shared.enums.Currency
+import com.rj.ecommerce_backend.api.shared.enums.Currency
 import jakarta.persistence.Embeddable
 import java.math.BigDecimal
 

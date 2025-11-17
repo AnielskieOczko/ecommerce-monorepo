@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.user.domain
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.core.Email
-import com.rj.ecommerce.api.shared.core.Password
-import com.rj.ecommerce.api.shared.core.PhoneNumber
+import com.rj.ecommerce_backend.api.shared.core.Address
+import com.rj.ecommerce_backend.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Password
+import com.rj.ecommerce_backend.api.shared.core.PhoneNumber
 import com.rj.ecommerce_backend.cart.domain.Cart
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp

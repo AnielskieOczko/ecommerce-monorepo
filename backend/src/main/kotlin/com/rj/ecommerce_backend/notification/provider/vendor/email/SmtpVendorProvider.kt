@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.notification.provider.vendor.email
 
-import com.rj.notification_service.config.AppProperties
-import com.rj.notification_service.model.EmailModel
+import com.rj.ecommerce_backend.notification.config.AppProperties
+import com.rj.ecommerce_backend.notification.model.EmailModel
 import jakarta.annotation.PostConstruct
 import jakarta.mail.internet.MimeMessage
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty

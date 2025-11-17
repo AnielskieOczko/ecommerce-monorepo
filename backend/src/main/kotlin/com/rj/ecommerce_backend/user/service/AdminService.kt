@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.dto.user.request.ChangeAccountStatusRequest
-import com.rj.ecommerce.api.shared.dto.user.request.AdminChangeUserAuthorityRequest
-import com.rj.ecommerce.api.shared.dto.user.request.AdminUpdateUserRequest
-import com.rj.ecommerce.api.shared.dto.user.request.UserCreateRequest
-import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
+import com.rj.ecommerce_backend.api.shared.dto.user.request.ChangeAccountStatusRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.AdminChangeUserAuthorityRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.AdminUpdateUserRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.UserCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.user.domain.User
 import com.rj.ecommerce_backend.user.search.UserSearchCriteria
 import org.springframework.data.domain.Page

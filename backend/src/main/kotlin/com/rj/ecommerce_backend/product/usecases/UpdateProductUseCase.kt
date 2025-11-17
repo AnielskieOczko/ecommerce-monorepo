@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.product.usecases
 
-import com.rj.ecommerce.api.shared.dto.product.request.ProductUpdateRequest
-import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
+import com.rj.ecommerce_backend.api.shared.dto.product.request.ProductUpdateRequest
+import com.rj.ecommerce_backend.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.exception.CategoryNotFoundException
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.product.mapper.ProductMapper

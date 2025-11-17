@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.notification.service
 
-import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
-import com.rj.notification_service.provider.ChannelProviderFactory
+import com.rj.ecommerce_backend.notification.command.CreateNotificationCommand
+import com.rj.ecommerce_backend.notification.provider.ChannelProviderFactory
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 
@@ -11,25 +11,18 @@ private val logger = KotlinLogging.logger {}
 class NotificationOrchestrator(
     private val channelProviderFactory: ChannelProviderFactory
 ) {
-    fun process(request: NotificationRequest<Any>) {
-        val envelope = request.envelope
-        logger.info { "Processing multi-channel request for correlationId: ${envelope.correlationId}, channels: ${envelope.channels}" }
+    fun process(command: CreateNotificationCommand) {
+        logger.info { "Processing command for recipient: ${command.recipient}, channels: ${command.channels}" }
 
-        // Iterate over the set of channels from the envelope.
-        envelope.channels.forEach { channel ->
+        command.channels.forEach { channel ->
             try {
-                // Get the specific provider for the current channel in the loop.
                 val channelProvider = channelProviderFactory.getProvider(channel)
-
-                // Delegate the entire request to that provider.
-                // The provider will know how to handle the payload for its specific channel.
-                channelProvider.process(request)
-
-                logger.info { "Successfully delegated request to ${channel.name} provider for correlationId: ${envelope.correlationId}" }
+                // Delegate the entire command to the provider.
+                channelProvider.process(command)
+                logger.info { "Successfully delegated to ${channel.name} provider." }
             } catch (e: Exception) {
-                // Log the error for the failed channel but continue the loop to try others.
-                // This makes the system resilient; a failure in SMS shouldn't stop the email from sending.
-                logger.error(e) { "Failed to process channel ${channel.name} for correlationId: ${envelope.correlationId}. Other channels may still succeed." }
+                // Log and continue, making the system resilient.
+                logger.error(e) { "Failed to process channel ${channel.name}. Other channels may still succeed." }
             }
         }
     }

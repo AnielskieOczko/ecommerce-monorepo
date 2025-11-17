@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.notification.provider.vendor.email
 
-import com.rj.notification_service.model.EmailModel
+import com.rj.ecommerce_backend.notification.model.EmailModel
 
 /**
  * Defines the contract for a specific email delivery vendor (e.g., SMTP, SendGrid, AWS SES).

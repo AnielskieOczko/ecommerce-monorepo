@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.api.shared.dto.user.request
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.core.PhoneNumber
+import com.rj.ecommerce_backend.api.shared.core.Address
+import com.rj.ecommerce_backend.api.shared.core.PhoneNumber
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 

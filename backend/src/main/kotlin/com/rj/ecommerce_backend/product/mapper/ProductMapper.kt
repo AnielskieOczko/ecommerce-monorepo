@@ -1,14 +1,14 @@
 package com.rj.ecommerce_backend.product.mapper
 
-import com.rj.ecommerce.api.shared.core.ImageInfo
-import com.rj.ecommerce.api.shared.core.ProductDescription
-import com.rj.ecommerce.api.shared.core.ProductName
-import com.rj.ecommerce.api.shared.core.QuantityInStock
-import com.rj.ecommerce.api.shared.dto.product.common.CategoryDetails
-import com.rj.ecommerce.api.shared.dto.product.common.ProductBase
-import com.rj.ecommerce.api.shared.dto.product.request.ProductCreateRequest
-import com.rj.ecommerce.api.shared.dto.product.request.ProductUpdateRequest
-import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
+import com.rj.ecommerce_backend.api.shared.core.ImageInfo
+import com.rj.ecommerce_backend.api.shared.core.ProductDescription
+import com.rj.ecommerce_backend.api.shared.core.ProductName
+import com.rj.ecommerce_backend.api.shared.core.QuantityInStock
+import com.rj.ecommerce_backend.api.shared.dto.product.common.CategoryDetails
+import com.rj.ecommerce_backend.api.shared.dto.product.common.ProductBase
+import com.rj.ecommerce_backend.api.shared.dto.product.request.ProductCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.product.request.ProductUpdateRequest
+import com.rj.ecommerce_backend.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.domain.Category
 import com.rj.ecommerce_backend.product.domain.Product
 import org.springframework.stereotype.Component

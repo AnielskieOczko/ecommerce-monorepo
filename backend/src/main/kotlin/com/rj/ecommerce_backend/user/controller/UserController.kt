@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.user.controller
 
-import com.rj.ecommerce.api.shared.dto.security.response.AuthResponse
-import com.rj.ecommerce.api.shared.dto.user.request.ChangeEmailRequest
-import com.rj.ecommerce.api.shared.dto.user.request.PasswordChangeRequest
-import com.rj.ecommerce.api.shared.dto.user.request.UserUpdateDetailsRequest
-import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
+import com.rj.ecommerce_backend.api.shared.dto.security.response.AuthResponse
+import com.rj.ecommerce_backend.api.shared.dto.user.request.ChangeEmailRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.PasswordChangeRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.UserUpdateDetailsRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.user.service.UserService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest

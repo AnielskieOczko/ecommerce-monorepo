@@ -1,13 +1,13 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.core.Email
-import com.rj.ecommerce.api.shared.core.Password
-import com.rj.ecommerce.api.shared.dto.security.response.AuthResponse
-import com.rj.ecommerce.api.shared.dto.user.request.ChangeAccountStatusRequest
-import com.rj.ecommerce.api.shared.dto.user.request.ChangeEmailRequest
-import com.rj.ecommerce.api.shared.dto.user.request.PasswordChangeRequest
-import com.rj.ecommerce.api.shared.dto.user.request.UserUpdateDetailsRequest
-import com.rj.ecommerce.api.shared.dto.user.response.UserResponse
+import com.rj.ecommerce_backend.api.shared.core.Email
+import com.rj.ecommerce_backend.api.shared.core.Password
+import com.rj.ecommerce_backend.api.shared.dto.security.response.AuthResponse
+import com.rj.ecommerce_backend.api.shared.dto.user.request.ChangeAccountStatusRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.ChangeEmailRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.PasswordChangeRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.request.UserUpdateDetailsRequest
+import com.rj.ecommerce_backend.api.shared.dto.user.response.UserResponse
 import com.rj.ecommerce_backend.security.SecurityContext
 import com.rj.ecommerce_backend.security.repository.RefreshTokenRepository
 import com.rj.ecommerce_backend.security.service.AuthenticationService

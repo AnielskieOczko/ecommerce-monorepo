@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.notification.provider
 
-import com.rj.ecommerce.api.shared.enums.NotificationChannel
+import com.rj.ecommerce_backend.api.shared.enums.NotificationChannel
 import org.springframework.stereotype.Component
 
 @Component

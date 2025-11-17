@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.api.shared.dto.cart.response
 
-import com.rj.ecommerce.api.shared.dto.product.common.ProductSummary
+import com.rj.ecommerce_backend.api.shared.dto.product.common.ProductSummary
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 

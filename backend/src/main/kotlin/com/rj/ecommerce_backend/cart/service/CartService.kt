@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.cart.service
 
-import com.rj.ecommerce.api.shared.dto.cart.response.CartResponse
+import com.rj.ecommerce_backend.api.shared.dto.cart.response.CartResponse
 
 
 interface CartService {

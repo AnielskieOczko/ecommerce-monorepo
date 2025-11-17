@@ -1,11 +1,11 @@
 package com.rj.ecommerce_backend.order.domain
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce.api.shared.enums.Currency
-import com.rj.ecommerce.api.shared.enums.OrderStatus
-import com.rj.ecommerce.api.shared.enums.PaymentMethod
-import com.rj.ecommerce.api.shared.enums.ShippingMethod
+import com.rj.ecommerce_backend.api.shared.core.Address
+import com.rj.ecommerce_backend.api.shared.enums.CanonicalPaymentStatus
+import com.rj.ecommerce_backend.api.shared.enums.Currency
+import com.rj.ecommerce_backend.api.shared.enums.OrderStatus
+import com.rj.ecommerce_backend.api.shared.enums.PaymentMethod
+import com.rj.ecommerce_backend.api.shared.enums.ShippingMethod
 import com.rj.ecommerce_backend.user.domain.User
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp

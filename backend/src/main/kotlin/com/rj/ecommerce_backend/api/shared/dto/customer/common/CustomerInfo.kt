@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.api.shared.dto.customer.common
 
-import com.rj.ecommerce.api.shared.core.PhoneNumber
+import com.rj.ecommerce_backend.api.shared.core.PhoneNumber
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "A reusable component containing basic information about a customer.")

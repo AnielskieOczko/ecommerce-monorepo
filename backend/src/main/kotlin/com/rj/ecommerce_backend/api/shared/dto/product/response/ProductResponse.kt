@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.api.shared.dto.product.response
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
-import com.rj.ecommerce.api.shared.core.ImageInfo
-import com.rj.ecommerce.api.shared.dto.product.common.CategoryDetails
-import com.rj.ecommerce.api.shared.dto.product.common.ProductBase
+import com.rj.ecommerce_backend.api.shared.core.ImageInfo
+import com.rj.ecommerce_backend.api.shared.dto.product.common.CategoryDetails
+import com.rj.ecommerce_backend.api.shared.dto.product.common.ProductBase
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "Detailed representation of a product for API responses.")

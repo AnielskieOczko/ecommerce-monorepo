@@ -1,14 +1,18 @@
 package com.rj.ecommerce_backend.payment.config
 
 import com.rj.ecommerce_backend.api.shared.enums.PaymentMethod
+import jakarta.validation.constraints.NotBlank
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.validation.annotation.Validated
 
-@ConfigurationProperties(prefix = "payment")
+@ConfigurationProperties(prefix = "app.payment")
+@Validated
 data class PaymentProperties(
-    // The key of the map will be the provider name (e.g., "stripe", "paypal")
+
     val providers: Map<String, ProviderConfig> = emptyMap()
 )
 
+@Validated
 data class ProviderConfig(
     val enabled: Boolean = false,
     val displayName: String = "",

@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.user.service
 
-import com.rj.ecommerce.api.shared.dto.user.common.AuthorityDetails
+import com.rj.ecommerce_backend.api.shared.dto.user.common.AuthorityDetails
 import com.rj.ecommerce_backend.user.domain.Authority
 
 interface AuthorityService {

@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.notification.provider.vendor.email
 
-import com.rj.notification_service.config.AppProperties
+import com.rj.ecommerce_backend.notification.config.AppProperties
 import org.springframework.stereotype.Component
 
 // This factory should be a Spring component to be injectable

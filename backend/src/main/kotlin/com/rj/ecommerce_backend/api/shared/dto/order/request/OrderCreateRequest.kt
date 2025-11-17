@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.api.shared.dto.order.request
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.enums.PaymentMethod
-import com.rj.ecommerce.api.shared.enums.ShippingMethod
+import com.rj.ecommerce_backend.api.shared.core.Address
+import com.rj.ecommerce_backend.api.shared.enums.PaymentMethod
+import com.rj.ecommerce_backend.api.shared.enums.ShippingMethod
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min

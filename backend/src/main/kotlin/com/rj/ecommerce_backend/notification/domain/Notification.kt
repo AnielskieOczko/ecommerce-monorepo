@@ -1,9 +1,9 @@
 package com.rj.ecommerce_backend.notification.domain
 
-import com.rj.ecommerce.api.shared.enums.NotificationChannel
-import com.rj.ecommerce.api.shared.enums.NotificationDispatchStatus
-import com.rj.ecommerce.api.shared.enums.NotificationEntityType
-import com.rj.ecommerce.api.shared.enums.NotificationTemplate
+import com.rj.ecommerce_backend.api.shared.enums.NotificationChannel
+import com.rj.ecommerce_backend.api.shared.enums.NotificationDispatchStatus
+import com.rj.ecommerce_backend.api.shared.enums.NotificationEntityType
+import com.rj.ecommerce_backend.api.shared.enums.NotificationTemplate
 import com.rj.ecommerce_backend.notification.context.NotificationContext
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -26,8 +26,6 @@ import java.util.UUID
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "notifications")
-// Using a data class is often ideal for entities, giving you equals, hashCode, etc. for free.
-// All properties are now in the primary constructor.
 data class Notification(
 
     @Id
@@ -60,7 +58,7 @@ data class Notification(
     @Transient
     val context: NotificationContext = NotificationContext.EmptyContext,
 
-    // --- Auditing fields (managed by Spring Data JPA, should be var) ---
+    // --- Auditing fields
     @CreationTimestamp
     @Column(updatable = false)
     var createdAt: LocalDateTime? = null,

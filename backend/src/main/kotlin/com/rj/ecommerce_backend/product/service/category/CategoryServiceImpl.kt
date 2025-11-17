@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.service.category
 
-import com.rj.ecommerce.api.shared.dto.product.common.CategoryDetails
+import com.rj.ecommerce_backend.api.shared.dto.product.common.CategoryDetails
 import com.rj.ecommerce_backend.product.domain.Category
 import com.rj.ecommerce_backend.product.exception.CategoryAlreadyExistsException
 import com.rj.ecommerce_backend.product.exception.CategoryInUseException

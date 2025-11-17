@@ -1,10 +1,10 @@
 package com.rj.ecommerce_backend.testdata
 //
-//import com.rj.ecommerce.api.shared.core.*
-//import com.rj.ecommerce.api.shared.dto.user.common.AuthorityDetails
-//import com.rj.ecommerce.api.shared.dto.user.common.UserBaseDetails
-//import com.rj.ecommerce.api.shared.dto.user.request.UserCreateRequest
-//import com.rj.ecommerce.api.shared.enums.Currency
+//import com.rj.ecommerce_backend.api.shared.core.*
+//import com.rj.ecommerce_backend.api.shared.dto.user.common.AuthorityDetails
+//import com.rj.ecommerce_backend.api.shared.dto.user.common.UserBaseDetails
+//import com.rj.ecommerce_backend.api.shared.dto.user.request.UserCreateRequest
+//import com.rj.ecommerce_backend.api.shared.enums.Currency
 //import com.rj.ecommerce_backend.product.domain.Category
 //import com.rj.ecommerce_backend.product.domain.Product
 //import com.rj.ecommerce_backend.product.repository.CategoryRepository

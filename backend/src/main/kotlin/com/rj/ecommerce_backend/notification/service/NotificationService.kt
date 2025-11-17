@@ -1,7 +1,6 @@
 package com.rj.ecommerce_backend.notification.service
 
 import com.rj.ecommerce_backend.notification.command.CreateNotificationCommand
-import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationDeliveryReceipt
 import com.rj.ecommerce_backend.notification.domain.Notification
 
 /**
@@ -17,13 +16,6 @@ interface NotificationService {
      * @return The persisted Notification entity, now including its database ID and generated correlationId.
      */
     fun dispatch(command: CreateNotificationCommand): List<Notification>
-
-    /**
-     * Updates the status of a notification based on a delivery receipt from a provider.
-     *
-     * @param receipt The delivery receipt DTO containing the correlation ID and new status.
-     */
-    fun updateStatusFromReceipt(receipt: NotificationDeliveryReceipt)
 
     /**
      * Finds a notification by its unique correlation ID.

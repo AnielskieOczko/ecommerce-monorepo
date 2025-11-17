@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.service.category
 
-import com.rj.ecommerce.api.shared.dto.product.common.CategoryDetails
+import com.rj.ecommerce_backend.api.shared.dto.product.common.CategoryDetails
 import com.rj.ecommerce_backend.product.search.CategorySearchCriteria
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

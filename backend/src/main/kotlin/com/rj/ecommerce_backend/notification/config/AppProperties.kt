@@ -10,26 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  */
 @ConfigurationProperties(prefix = "app")
 data class AppProperties(
-    val rabbitmq: RabbitMQProperties,
     val notification: NotificationConfig,
-    val monitoring: MonitoringProperties = MonitoringProperties()
 ) {
-    data class RabbitMQProperties(
-        val notificationRequest: TopicConfig,
-        val notificationReceipt: TopicConfig
-    )
-
-    data class TopicConfig(
-        val exchange: String,
-        val queue: String,
-        val routingKey: String,
-        val dlq: DlqConfig? = null
-    )
-
-    data class DlqConfig(
-        val exchange: String,
-        val routingKey: String
-    )
 
     data class NotificationConfig(
         val channels: Map<String, ChannelConfig>,

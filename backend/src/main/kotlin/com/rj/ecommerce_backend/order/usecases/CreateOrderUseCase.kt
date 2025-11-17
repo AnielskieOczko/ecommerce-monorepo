@@ -1,9 +1,11 @@
 package com.rj.ecommerce_backend.order.usecases
 
-import com.rj.ecommerce.api.shared.dto.order.request.OrderCreateRequest
-import com.rj.ecommerce.api.shared.dto.order.request.OrderItemCreateRequest
-import com.rj.ecommerce.api.shared.dto.order.response.OrderResponse
-import com.rj.ecommerce.api.shared.enums.*
+import com.rj.ecommerce_backend.api.shared.dto.order.request.OrderCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.order.request.OrderItemCreateRequest
+import com.rj.ecommerce_backend.api.shared.dto.order.response.OrderResponse
+import com.rj.ecommerce_backend.api.shared.enums.CanonicalPaymentStatus
+import com.rj.ecommerce_backend.api.shared.enums.Currency
+import com.rj.ecommerce_backend.api.shared.enums.OrderStatus
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.domain.OrderItem
 import com.rj.ecommerce_backend.events.order.OrderCreatedEvent
@@ -36,7 +38,7 @@ class CreateOrderUseCase(
 ) {
 
     @Transactional
-    fun execute(userId: Long, request: OrderCreateRequest): OrderResponse { // <-- ACCEPTS NEW REQUEST DTO
+    fun execute(userId: Long, request: OrderCreateRequest): OrderResponse {
         try {
             val order = createInitialOrder(userId, request)
             eventPublisher.publishEvent(OrderCreatedEvent(this, order))
@@ -99,7 +101,7 @@ class CreateOrderUseCase(
 
             // Validate stock and reduce it
             if (product.quantityInStock.value < itemRequest.quantity) {
-                throw InsufficientStockException("Insufficient stock for product: ${product.name.value}")
+                throw InsufficientStockException("Insufficient stock for product: ${product.name}")
             }
             productCommandService.reduceProductQuantity(product.id!!, itemRequest.quantity)
 

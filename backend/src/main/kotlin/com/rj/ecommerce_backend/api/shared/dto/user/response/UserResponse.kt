@@ -1,7 +1,7 @@
 package com.rj.ecommerce_backend.api.shared.dto.user.response
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
-import com.rj.ecommerce.api.shared.dto.user.common.UserBaseDetails
+import com.rj.ecommerce_backend.api.shared.dto.user.common.UserBaseDetails
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email

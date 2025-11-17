@@ -1,12 +1,12 @@
 package com.rj.ecommerce_backend.api.shared.dto.order.response
 
-import com.rj.ecommerce.api.shared.core.Address
-import com.rj.ecommerce.api.shared.core.Money
-import com.rj.ecommerce.api.shared.dto.product.common.ProductSummary
-import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce.api.shared.enums.OrderStatus
-import com.rj.ecommerce.api.shared.enums.PaymentMethod
-import com.rj.ecommerce.api.shared.enums.ShippingMethod
+import com.rj.ecommerce_backend.api.shared.core.Address
+import com.rj.ecommerce_backend.api.shared.core.Money
+import com.rj.ecommerce_backend.api.shared.dto.product.common.ProductSummary
+import com.rj.ecommerce_backend.api.shared.enums.CanonicalPaymentStatus
+import com.rj.ecommerce_backend.api.shared.enums.OrderStatus
+import com.rj.ecommerce_backend.api.shared.enums.PaymentMethod
+import com.rj.ecommerce_backend.api.shared.enums.ShippingMethod
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 

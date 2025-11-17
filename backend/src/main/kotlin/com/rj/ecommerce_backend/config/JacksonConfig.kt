@@ -1,12 +1,9 @@
 package com.rj.ecommerce_backend.config
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -37,27 +34,4 @@ class JacksonConfig {
         }
     }
 
-    /**
-     * Defines a specialized ObjectMapper for RabbitMQ serialization.
-     * This mapper is intended to be injected specifically where needed for messaging.
-     *
-     * It is configured for polymorphic deserialization:
-     * - Enables `activateDefaultTyping` to include class information (@class property) in the
-     *   JSON payload. This is essential for correctly deserializing interfaces (like
-     *   `EcommerceEmailRequest`) into their concrete implementations on the consumer side.
-     */
-    @Bean
-    @Qualifier("rabbitObjectMapper")
-    fun rabbitObjectMapper(): ObjectMapper {
-        return ObjectMapper().apply {
-            registerModule(JavaTimeModule())
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-            activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-            )
-        }
-    }
 }

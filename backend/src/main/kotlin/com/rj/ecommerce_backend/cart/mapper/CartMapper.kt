@@ -1,8 +1,8 @@
 package com.rj.ecommerce_backend.cart.mapper
 
-import com.rj.ecommerce.api.shared.dto.cart.response.CartItemDetails
-import com.rj.ecommerce.api.shared.dto.cart.response.CartResponse
-import com.rj.ecommerce.api.shared.dto.product.common.ProductSummary
+import com.rj.ecommerce_backend.api.shared.dto.cart.response.CartItemDetails
+import com.rj.ecommerce_backend.api.shared.dto.cart.response.CartResponse
+import com.rj.ecommerce_backend.api.shared.dto.product.common.ProductSummary
 import com.rj.ecommerce_backend.cart.domain.Cart
 import com.rj.ecommerce_backend.cart.domain.CartItem
 import com.rj.ecommerce_backend.product.domain.Product

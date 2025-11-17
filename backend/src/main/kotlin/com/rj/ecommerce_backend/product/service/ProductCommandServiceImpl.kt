@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.service
 
-import com.rj.ecommerce.api.shared.core.QuantityInStock
+import com.rj.ecommerce_backend.api.shared.core.QuantityInStock
 import com.rj.ecommerce_backend.product.exception.InsufficientStockException
 import com.rj.ecommerce_backend.product.exception.ProductNotFoundException
 import com.rj.ecommerce_backend.product.repository.ProductRepository

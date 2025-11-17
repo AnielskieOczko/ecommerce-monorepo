@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.repository
 
-import com.rj.ecommerce.api.shared.core.QuantityInStock
+import com.rj.ecommerce_backend.api.shared.core.QuantityInStock
 import com.rj.ecommerce_backend.product.domain.Product
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

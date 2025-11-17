@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.api.shared.dto.payment.response
 
-import com.rj.ecommerce.api.shared.enums.CanonicalPaymentStatus
+import com.rj.ecommerce_backend.api.shared.enums.CanonicalPaymentStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 

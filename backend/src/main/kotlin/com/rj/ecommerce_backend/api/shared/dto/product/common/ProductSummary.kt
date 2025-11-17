@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.api.shared.dto.product.common
 
-import com.rj.ecommerce.api.shared.core.Money
+import com.rj.ecommerce_backend.api.shared.core.Money
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "A concise summary of a product, used for listings and nested representations.")

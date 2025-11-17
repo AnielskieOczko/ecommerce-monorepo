@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.controller
 
-import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
+import com.rj.ecommerce_backend.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria
 import com.rj.ecommerce_backend.product.service.ProductQueryService
 import com.rj.ecommerce_backend.sorting.ProductSortField

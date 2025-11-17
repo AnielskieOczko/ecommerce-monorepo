@@ -1,6 +1,6 @@
 package com.rj.ecommerce_backend.product.service
 
-import com.rj.ecommerce.api.shared.dto.product.response.ProductResponse
+import com.rj.ecommerce_backend.api.shared.dto.product.response.ProductResponse
 import com.rj.ecommerce_backend.product.domain.Product
 import com.rj.ecommerce_backend.product.search.ProductSearchCriteria
 import org.springframework.data.domain.Page

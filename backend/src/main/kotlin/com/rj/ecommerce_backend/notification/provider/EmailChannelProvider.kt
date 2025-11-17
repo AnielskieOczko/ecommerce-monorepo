@@ -1,12 +1,12 @@
 package com.rj.ecommerce_backend.notification.provider
 
-import com.rj.ecommerce.api.shared.enums.NotificationChannel
-import com.rj.ecommerce.api.shared.messaging.notification.common.NotificationRequest
-import com.rj.notification_service.config.AppProperties
-import com.rj.notification_service.model.EmailModel
-import com.rj.notification_service.provider.vendor.email.EmailVendorProvider
-import com.rj.notification_service.provider.vendor.email.EmailVendorProviderFactory
-import com.rj.notification_service.service.TemplateService
+import com.rj.ecommerce_backend.api.shared.enums.NotificationChannel
+import com.rj.ecommerce_backend.notification.command.CreateNotificationCommand
+import com.rj.ecommerce_backend.notification.config.AppProperties
+import com.rj.ecommerce_backend.notification.model.EmailModel
+import com.rj.ecommerce_backend.notification.provider.vendor.email.EmailVendorProvider
+import com.rj.ecommerce_backend.notification.provider.vendor.email.EmailVendorProviderFactory
+import com.rj.ecommerce_backend.notification.service.TemplateService
 import org.springframework.stereotype.Component
 
 @Component
@@ -20,22 +20,23 @@ class EmailChannelProvider(
     // This channel provider has its own internal factory to manage email vendors (SMTP, SendGrid, etc.)
     private val vendorFactory = EmailVendorProviderFactory(
         emailVendorProviders,
-        appProperties)
+        appProperties
+    )
 
     override fun getChannelType(): NotificationChannel = NotificationChannel.EMAIL
 
-    override fun process(request: NotificationRequest<Any>) {
+    override fun process(command: CreateNotificationCommand) {
         // 1. Render the HTML body using the generic payload.
-        val htmlBody = templateService.renderHtml(request.envelope.template, request.payload)
+        val htmlBody = templateService.renderHtml(command.template, command.context)
 
         val emailChannelConfig = appProperties.notification.channels["email"]
             ?: throw IllegalStateException("Configuration for the 'email' channel is missing in application.yml.")
 
         // 2. Create the specific model required for this channel.
         val emailModel = EmailModel(
-            to = request.envelope.to,
+            to = command.recipient,
             from = emailChannelConfig.defaultFrom,
-            subject = request.envelope.subject,
+            subject = command.subject,
             htmlBody = htmlBody
         )
 
