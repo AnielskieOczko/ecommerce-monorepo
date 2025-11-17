@@ -96,6 +96,23 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Wait for MySQL to be ready # <--- ADD THIS NEW STEP
+        env:
+          MYSQL_PWD: ${{ secrets.DATABASE_PASSWORD }} # Use MYSQL_PWD for password with mysql client
+        run: |
+          echo "Waiting for MySQL to start..."
+          for i in `seq 1 30`; do # Try for up to 30 seconds
+            mysql -h mysql -u testuser -p"${{ secrets.DATABASE_PASSWORD }}" -e "SELECT 1" &>/dev/null
+            if [ $? -eq 0 ]; then
+              echo "MySQL is ready!"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "MySQL did not start in time."
+          exit 1
+        continue-on-error: false # Fail the job if MySQL doesn't start
+
       - name: Validate Flyway migrations
         env:
           SPRING_PROFILES_ACTIVE: ci
