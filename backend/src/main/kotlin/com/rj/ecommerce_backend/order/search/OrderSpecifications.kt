@@ -82,7 +82,6 @@ object OrderSpecifications {
 
                 minTotalAmount != null -> cb.greaterThanOrEqualTo(totalAmountPath, minTotalAmount)
                 maxTotalAmount != null -> cb.lessThanOrEqualTo(totalAmountPath, maxTotalAmount)
-                else -> null
             }
 
             cb.lessThanOrEqualTo(totalAmountPath, maxTotalAmount)
