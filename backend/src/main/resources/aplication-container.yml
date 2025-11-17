@@ -1,0 +1,28 @@
+# =============================================================================
+# CONTAINER PROFILE OVERRIDES
+# For the Docker Compose development environment
+# =============================================================================
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none # ddl-auto should be 'none' when Flyway is managing the schema
+
+logging:
+  level:
+    com.rj.ecommerce_backend: DEBUG
+    org.hibernate.SQL: DEBUG
+
+app:
+  storage:
+    location: /app/product-images # The internal path inside the container
+    base-url: /api/v1/public/products/images
+    cleanup-schedule: "0 0 3 * * *" # Daily at 3 AM
