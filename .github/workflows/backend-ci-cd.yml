@@ -122,7 +122,7 @@ jobs:
       - name: Run tests
         env:
           SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/ecommerce_ci
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
