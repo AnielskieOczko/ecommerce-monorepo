@@ -139,7 +139,7 @@ jobs:
           SPRING_PROFILES_ACTIVE: ci
           SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           cd backend
           mvn flyway:validate
@@ -151,7 +151,7 @@ jobs:
           SPRING_PROFILES_ACTIVE: ci
           SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           cd backend
           mvn clean compile -DskipTests
@@ -162,7 +162,7 @@ jobs:
           SPRING_PROFILES_ACTIVE: ci
           SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           cd backend
           mvn test
