@@ -66,9 +66,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # packages: write # REMOVED: Not needed for building JARs
 
-    # Unified Environment Variables for this Job
+    # Job-level variables (Available to all steps as standard Env Vars)
     env:
       SPRING_PROFILES_ACTIVE: ci
       SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
@@ -79,7 +78,6 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          # These variables automatically create the user and grant privileges
           MYSQL_DATABASE: ecommerce_ci
           MYSQL_USER: testuser
           MYSQL_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
@@ -104,13 +102,17 @@ jobs:
           cache: maven
 
       - name: Validate Flyway migrations
+        # FIX: Explicitly map Spring variables to Flyway variables
+        env:
+          FLYWAY_URL: ${{ env.SPRING_DATASOURCE_URL }}
+          FLYWAY_USER: ${{ env.SPRING_DATASOURCE_USERNAME }}
+          FLYWAY_PASSWORD: ${{ env.SPRING_DATASOURCE_PASSWORD }}
         run: |
           cd backend
           mvn flyway:validate flyway:info
 
       - name: Build and Test
-        # 'package' runs unit tests and builds the JAR.
-        # If tests fail, the build fails here.
+        # 'package' runs unit tests (which use the SPRING_* env vars automatically)
         run: |
           cd backend
           mvn clean package
