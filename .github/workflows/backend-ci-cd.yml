@@ -22,7 +22,7 @@ jobs:
       quality-gate-passed: ${{ steps.quality-gate.outputs.passed }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
