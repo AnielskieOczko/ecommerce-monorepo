@@ -96,56 +96,48 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+
+      - name: Install MySQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-client
+
       - name: Wait for MySQL to be ready # <--- MODIFIED STEP
         env:
           MYSQL_ROOT_PASSWORD_ENV: ${{ secrets.MYSQL_ROOT_PASSWORD }} # Used for root connection check
           MYSQL_TESTUSER_PASSWORD_ENV: ${{ secrets.DATABASE_PASSWORD }} # Used for testuser connection check
         run: |
-          echo "Starting MySQL readiness checks..."
-
-          # --- Stage 1: Wait for MySQL server to be responsive as root ---
-          echo "Waiting for MySQL server to be responsive as root..."
-          for i in `seq 1 60`; do
-            if mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD_ENV" -e "SELECT 1" &>/dev/null; then
-              echo "MySQL server is responsive as root."
+          echo "Waiting for MySQL to be ready..."
+          
+          # Wait for MySQL to be responsive
+          for i in {1..30}; do
+            if mysql -h 127.0.0.1 -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD_ENV" -e "SELECT 1" &>/dev/null; then
+              echo "MySQL is ready!"
               break
             fi
-            echo "Attempt $i: MySQL server not yet responsive as root..."
-            sleep 1
-            if [ $i -eq 60 ]; then
-              echo "Error: MySQL server did not become responsive as root after 60 seconds."
+            echo "Attempt $i: Waiting for MySQL..."
+            sleep 2
+            if [ $i -eq 30 ]; then
+              echo "Error: MySQL not ready after 60 seconds"
               exit 1
             fi
           done
 
-          # --- Stage 2: Grant permissions to testuser ---
-          echo "Granting permissions to testuser on ecommerce_ci database..."
-          mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD_ENV" <<-EOSQL
+          # Grant permissions to testuser
+          echo "Granting permissions to testuser..."
+          mysql -h 127.0.0.1 -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD_ENV" <<-EOSQL
             GRANT ALL PRIVILEGES ON ecommerce_ci.* TO 'testuser'@'%';
             FLUSH PRIVILEGES;
-            EOSQL
-            
-            if [ $? -eq 0 ]; then
-            echo "Permissions granted successfully!"
-            else
-          echo "Error: Failed to grant permissions to testuser."
-            exit 1
-            fi
-            
-            # --- Stage 3: Verify testuser can access the database ---
-            echo "Verifying testuser can access ecommerce_ci database..."
-            for i in `seq 1 10`; do
-            if mysql -h mysql -u testuser -p"$MYSQL_TESTUSER_PASSWORD_ENV" -D ecommerce_ci -e "SELECT 1" &>/dev/null; then
-            echo "MySQL database 'ecommerce_ci' is ready for 'testuser'!"
-            exit 0
-            fi
-          echo "Attempt $i: Verifying access..."
-            sleep 1
-            if [ $i -eq 10 ]; then
-          echo "Error: testuser still cannot access ecommerce_ci after granting permissions."
-            exit 1
-            fi
-            done
+          EOSQL
+          
+          # Verify testuser access
+          echo "Verifying testuser access..."
+          if mysql -h 127.0.0.1 -P 3306 -u testuser -p"$MYSQL_TESTUSER_PASSWORD_ENV" -D ecommerce_ci -e "SELECT 1" &>/dev/null; then
+          echo "✅ Database ready for testuser!"
+          else
+          echo "❌ Failed to verify testuser access"
+          exit 1
+          fi
         continue-on-error: false
 
       - name: Validate Flyway migrations
