@@ -143,7 +143,7 @@ jobs:
       - name: Validate Flyway migrations
         env:
           SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
@@ -155,7 +155,7 @@ jobs:
       - name: Build with Maven
         env:
           SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
@@ -166,7 +166,7 @@ jobs:
       - name: Run tests
         env:
           SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ecommerce_ci
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
           SPRING_DATASOURCE_USERNAME: testuser
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
