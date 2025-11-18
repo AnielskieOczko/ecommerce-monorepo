@@ -24,19 +24,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21 # This step is still needed for other Maven commands, but its JAVA_HOME won't directly affect the Docker action.
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: maven
 
-      # The previously removed "Set JAVA_HOME (for OWASP Dependency Check)" step is still correctly removed.
-
       - name: Run OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        env: # Add this 'env' block
-          JAVA_HOME: /opt/jdk # Set JAVA_HOME specifically for the Docker container
+        uses: dependency-check/Dependency-Check_Action@v4 # Pinned version for stability
+        env:
+          JAVA_HOME: /opt/jdk
         with:
           project: 'Ecommerce Backend'
           path: 'backend'
@@ -67,12 +65,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      # packages: write # REMOVED: Not needed for building JARs
+
+    # Unified Environment Variables for this Job
+    env:
+      SPRING_PROFILES_ACTIVE: ci
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
+      SPRING_DATASOURCE_USERNAME: testuser
+      SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
     services:
       mysql:
         image: mysql:8.0
         env:
+          # These variables automatically create the user and grant privileges
           MYSQL_DATABASE: ecommerce_ci
           MYSQL_USER: testuser
           MYSQL_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
@@ -96,83 +102,17 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-
-      - name: Install MySQL Client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mysql-client
-
-      - name: Wait for MySQL to be ready # <--- MODIFIED STEP
-        env:
-          MYSQL_ROOT_PASSWORD_ENV: ${{ secrets.MYSQL_ROOT_PASSWORD }} # Used for root connection check
-          MYSQL_TESTUSER_PASSWORD_ENV: ${{ secrets.DATABASE_PASSWORD }} # Used for testuser connection check
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          
-          # Wait for MySQL to be responsive
-          for i in {1..30}; do
-            if mysql -h 127.0.0.1 -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD_ENV" -e "SELECT 1" &>/dev/null; then
-              echo "MySQL is ready!"
-              break
-            fi
-            echo "Attempt $i: Waiting for MySQL..."
-            sleep 2
-            if [ $i -eq 30 ]; then
-              echo "Error: MySQL not ready after 60 seconds"
-              exit 1
-            fi
-          done
-
-          # Grant permissions to testuser
-          echo "Granting permissions to testuser..."
-          mysql -h 127.0.0.1 -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD_ENV" <<-EOSQL
-            GRANT ALL PRIVILEGES ON ecommerce_ci.* TO 'testuser'@'%';
-            FLUSH PRIVILEGES;
-          EOSQL
-          
-          # Verify testuser access
-          echo "Verifying testuser access..."
-          if mysql -h 127.0.0.1 -P 3306 -u testuser -p"$MYSQL_TESTUSER_PASSWORD_ENV" -D ecommerce_ci -e "SELECT 1" &>/dev/null; then
-          echo "✅ Database ready for testuser!"
-          else
-          echo "❌ Failed to verify testuser access"
-          exit 1
-          fi
-        continue-on-error: false
-
       - name: Validate Flyway migrations
-        env:
-          SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
-          SPRING_DATASOURCE_USERNAME: testuser
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         run: |
           cd backend
-          mvn flyway:validate
-          mvn flyway:info
-        continue-on-error: false
+          mvn flyway:validate flyway:info
 
-      - name: Build with Maven
-        env:
-          SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
-          SPRING_DATASOURCE_USERNAME: testuser
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      - name: Build and Test
+        # 'package' runs unit tests and builds the JAR.
+        # If tests fail, the build fails here.
         run: |
           cd backend
-          mvn clean compile -DskipTests
-        continue-on-error: false
-
-      - name: Run tests
-        env:
-          SPRING_PROFILES_ACTIVE: ci
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/ecommerce_ci
-          SPRING_DATASOURCE_USERNAME: testuser
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        run: |
-          cd backend
-          mvn test
-        continue-on-error: false
+          mvn clean package
 
       - name: Generate test results summary
         if: always()
@@ -202,6 +142,9 @@ jobs:
     needs: [quality-gate, build-and-test]
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write # Write permission needed here to push to GHCR
 
     steps:
       - name: Checkout repository
@@ -248,6 +191,9 @@ jobs:
     needs: container-build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: read
+      security-events: write # Required to upload SARIF results
 
     steps:
       - name: Checkout repository
@@ -260,17 +206,8 @@ jobs:
           VERSION=${VERSION#v}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Pull image to scan
-        env:
-          REGISTRY: ghcr.io
-          IMAGE_NAME: ${{ github.repository }}
-        run: |
-          IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          echo "Scanning image: $IMAGE_REF"
-          docker pull $IMAGE_REF
-
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.29.0 # Pinned version
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           format: 'sarif'
@@ -278,12 +215,12 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3 # Updated to v3
         with:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Trivy (readable report)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           format: 'table'
