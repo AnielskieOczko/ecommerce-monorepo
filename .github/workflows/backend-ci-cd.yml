@@ -109,7 +109,7 @@ jobs:
           FLYWAY_PASSWORD: ${{ env.SPRING_DATASOURCE_PASSWORD }}
         run: |
           cd backend
-          mvn flyway:validate flyway:info
+          mvn flyway:migrate flyway:info
 
       - name: Build and Test
         # 'package' runs unit tests (which use the SPRING_* env vars automatically)
