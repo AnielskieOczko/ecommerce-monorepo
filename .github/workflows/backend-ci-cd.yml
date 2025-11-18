@@ -103,11 +103,11 @@ jobs:
         run: |
           echo "Starting MySQL readiness checks..."
 
-          # --- Stage 1: Check if MySQL server is responsive as root ---
+          # --- Stage 1: Wait for MySQL server to be responsive as root ---
           echo "Waiting for MySQL server to be responsive as root..."
-          for i in `seq 1 60`; do # Allow up to 60 seconds for the server to come up
+          for i in `seq 1 60`; do
             if mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD_ENV" -e "SELECT 1" &>/dev/null; then
-              echo "MySQL server is responsive as root. Moving to user/database check."
+              echo "MySQL server is responsive as root."
               break
             fi
             echo "Attempt $i: MySQL server not yet responsive as root..."
@@ -118,21 +118,35 @@ jobs:
             fi
           done
 
-          # --- Stage 2: Check if 'ecommerce_ci' database is ready for 'testuser' ---
-          echo "Waiting for 'ecommerce_ci' database to be ready for 'testuser'..."
-          for i in `seq 1 60`; do # Allow up to 60 seconds for database/user setup
+          # --- Stage 2: Grant permissions to testuser ---
+          echo "Granting permissions to testuser on ecommerce_ci database..."
+          mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD_ENV" <<-EOSQL
+            GRANT ALL PRIVILEGES ON ecommerce_ci.* TO 'testuser'@'%';
+            FLUSH PRIVILEGES;
+            EOSQL
+            
+            if [ $? -eq 0 ]; then
+            echo "Permissions granted successfully!"
+            else
+          echo "Error: Failed to grant permissions to testuser."
+            exit 1
+            fi
+            
+            # --- Stage 3: Verify testuser can access the database ---
+            echo "Verifying testuser can access ecommerce_ci database..."
+            for i in `seq 1 10`; do
             if mysql -h mysql -u testuser -p"$MYSQL_TESTUSER_PASSWORD_ENV" -D ecommerce_ci -e "SELECT 1" &>/dev/null; then
-              echo "MySQL database 'ecommerce_ci' is ready for 'testuser'!"
-              exit 0 # Exit successfully if both checks pass
+            echo "MySQL database 'ecommerce_ci' is ready for 'testuser'!"
+            exit 0
             fi
-            echo "Attempt $i: 'ecommerce_ci' database not yet ready for 'testuser'..."
+          echo "Attempt $i: Verifying access..."
             sleep 1
-            if [ $i -eq 60 ]; then
-              echo "Error: 'ecommerce_ci' database not ready for 'testuser' after 60 seconds."
-              exit 1
+            if [ $i -eq 10 ]; then
+          echo "Error: testuser still cannot access ecommerce_ci after granting permissions."
+            exit 1
             fi
-          done
-        continue-on-error: false # This step MUST succeed for the pipeline to continue
+            done
+        continue-on-error: false
 
       - name: Validate Flyway migrations
         env:
