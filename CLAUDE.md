@@ -399,3 +399,4 @@ Configure on `main` branch:
 5. Set up CDN for production file storage
 
 When in doubt, check the most recent commits to understand current architecture decisions.
+- Pom-files-update: I updated a pom files, improved strucuture, fixed all warnings, improved versions of dependencies.
