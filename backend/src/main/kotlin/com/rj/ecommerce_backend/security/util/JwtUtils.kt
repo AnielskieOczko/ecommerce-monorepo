@@ -6,7 +6,6 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
@@ -17,8 +16,8 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
-import java.security.Key
 import java.util.Date
+import javax.crypto.SecretKey
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,7 +28,7 @@ class JwtUtils(
 
     private val jwtSecret: String get() = jwtConfig.secret
     private val jwtTokenExpirationMs: Int get() = jwtConfig.expirationMs
-    private val signingKey: Key by lazy {
+    private val signingKey: SecretKey by lazy {
         Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret))
     }
 
@@ -47,21 +46,21 @@ class JwtUtils(
         val expiryDate = Date(now.time + jwtTokenExpirationMs)
 
         return Jwts.builder()
-            .setSubject(userPrincipal.id.toString())
+            .subject(userPrincipal.id.toString())
             .claim("username", userPrincipal.username)
             .claim("authorities", authorities)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(signingKey, SignatureAlgorithm.HS512)
+            .issuedAt(now)
+            .expiration(expiryDate)
+            .signWith(signingKey)
             .compact()
     }
 
     fun getTokenClaims(token: String): Claims {
-        return Jwts.parserBuilder()
-            .setSigningKey(signingKey)
+        return Jwts.parser()
+            .verifyWith(signingKey)
             .build()
-            .parseClaimsJws(token)
-            .body
+            .parseSignedClaims(token)
+            .payload
     }
 
     fun getUsernameFromJwtToken(token: String): String? {
@@ -96,10 +95,10 @@ class JwtUtils(
             return false
         }
         try {
-            Jwts.parserBuilder()
-                .setSigningKey(signingKey)
+            Jwts.parser()
+                .verifyWith(signingKey)
                 .build()
-                .parseClaimsJws(authToken)
+                .parseSignedClaims(authToken)
             return true
         } catch (e: SecurityException) {
             logger.warn { "Invalid JWT signature: ${e.message}" }
