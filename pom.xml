@@ -4,67 +4,160 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Using Spring Boot Starter Parent for common dependency management -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version> <!-- Use the version consistent with your modules -->
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>3.5.8</version>
+        <relativePath/>
     </parent>
 
     <groupId>com.rj</groupId>
     <artifactId>ecommerce-monorepo</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging> <!-- Essential for a multi-module parent -->
+    <packaging>pom</packaging>
 
     <name>Ecommerce Monorepo</name>
     <description>Parent project for the Ecommerce Application</description>
 
-    <properties>
-        <!-- Keep Java and Kotlin versions consistent -->
-        <java.version>21</java.version>
-        <kotlin.version>1.9.25</kotlin.version>
-        <!-- Define the version for your own modules -->
-        <revision>${project.version}</revision>
-    </properties>
-
     <modules>
+        <!-- These must match your folder names on disk -->
         <module>backend</module>
         <module>ai-agent-service</module>
     </modules>
 
+    <properties>
+        <java.version>21</java.version>
+        <kotlin.version>1.9.25</kotlin.version>
+        <revision>${project.version}</revision>
+        <spring.boot.version>3.5.8</spring.boot.version>
+
+        <!-- Dependency Versions -->
+        <springdoc.version>2.6.0</springdoc.version>
+        <jjwt.version>0.12.6</jjwt.version>
+        <stripe.version>28.1.0</stripe.version>
+        <mysql.version>9.1.0</mysql.version>
+        <!-- SECURITY FIX: Overrides vulnerable protobuf inside mysql-connector -->
+        <protobuf.version>4.28.2</protobuf.version>
+        <kotlin-logging.version>7.0.0</kotlin-logging.version>
+        <thumbnailator.version>0.4.20</thumbnailator.version>
+        <lombok.version>1.18.34</lombok.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version> <!-- SECURITY FIX CVE-2025-48924 -->
+    </properties>
+
     <dependencyManagement>
         <dependencies>
-            <!-- Manage your internal project dependencies -->
+            <!-- Internal Modules -->
             <dependency>
                 <groupId>com.rj</groupId>
                 <artifactId>shared-api</artifactId>
                 <version>${revision}</version>
             </dependency>
-            <!-- Add other shared dependencies to manage versions centrally if needed -->
+
+            <!-- SECURITY FIX: CVE-2024-7254 -->
             <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib</artifactId>
-                <version>${kotlin.version}</version>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+
+            <!-- SECURITY FIX: CVE-2025-48924 (Transitive from SpringDoc) -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+
+            <!-- Database -->
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+
+            <!-- Utilities -->
+            <dependency>
+                <groupId>io.github.oshai</groupId>
+                <artifactId>kotlin-logging-jvm</artifactId>
+                <version>${kotlin-logging.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-reflect</artifactId>
-                <version>${kotlin.version}</version>
+                <groupId>net.coobird</groupId>
+                <artifactId>thumbnailator</artifactId>
+                <version>${thumbnailator.version}</version>
+            </dependency>
+
+            <!-- Third Party -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.stripe</groupId>
+                <artifactId>stripe-java</artifactId>
+                <version>${stripe.version}</version>
+            </dependency>
+
+            <!-- JWT (0.12.x requires updated code from 0.11.x) -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <!-- Global Dependencies -->
+    <dependencies>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+
+        <!-- Lombok (Global provided scope) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Central management for Spring Boot plugin -->
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <!-- Version is inherited from spring-boot-starter-parent -->
-                </plugin>
-                <!-- Central management for Kotlin plugin -->
+                <!-- Centralized Kotlin Configuration -->
                 <plugin>
                     <groupId>org.jetbrains.kotlin</groupId>
                     <artifactId>kotlin-maven-plugin</artifactId>
@@ -76,6 +169,7 @@
                         </args>
                         <compilerPlugins>
                             <plugin>spring</plugin>
+                            <plugin>jpa</plugin>
                         </compilerPlugins>
                     </configuration>
                     <dependencies>
@@ -84,28 +178,51 @@
                             <artifactId>kotlin-maven-allopen</artifactId>
                             <version>${kotlin.version}</version>
                         </dependency>
+                        <dependency>
+                            <groupId>org.jetbrains.kotlin</groupId>
+                            <artifactId>kotlin-maven-noarg</artifactId>
+                            <version>${kotlin.version}</version>
+                        </dependency>
                     </dependencies>
                     <executions>
                         <execution>
                             <id>compile</id>
                             <phase>compile</phase>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
+                            <goals><goal>compile</goal></goals>
                         </execution>
                         <execution>
                             <id>test-compile</id>
                             <phase>test-compile</phase>
-                            <goals>
-                                <goal>test-compile</goal>
-                            </goals>
+                            <goals><goal>test-compile</goal></goals>
                         </execution>
                     </executions>
                 </plugin>
+                <!-- Annotation Processors (Lombok/Spring) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.springframework.boot</groupId>
+                                <artifactId>spring-boot-configuration-processor</artifactId>
+                                <version>${spring.boot.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
+
         <plugins>
-            <!-- Apply Kotlin plugin by default to all modules -->
+            <!-- Enable Kotlin plugin globally -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -113,45 +230,20 @@
         </plugins>
     </build>
 
+    <!-- Profiles for Environment Management -->
     <profiles>
         <profile>
-            <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
-            </properties>
-        </profile>
-        <profile>
             <id>local</id>
-            <properties>
-                <spring.profiles.active>local</spring.profiles.active>
-            </properties>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <properties><spring.profiles.active>local</spring.profiles.active></properties>
         </profile>
         <profile>
-            <id>container</id>
-            <properties>
-                <spring.profiles.active>container</spring.profiles.active>
-            </properties>
+            <id>dev</id>
+            <properties><spring.profiles.active>dev</spring.profiles.active></properties>
         </profile>
         <profile>
             <id>prod</id>
-            <properties>
-                <spring.profiles.active>prod</spring.profiles.active>
-            </properties>
+            <properties><spring.profiles.active>prod</spring.profiles.active></properties>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>spring-releases</id>
-            <url>https://repo.spring.io/release</url>
-        </repository>
-        <repository>
-            <id>maven-central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-    </repositories>
-
 </project>
