@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Preferences
+
+**Commit Messages:**
+- Do NOT add "🤖 Generated with [Claude Code]" footer to commits
+- Use clear, concise commit messages describing the changes
+- Follow conventional commit format when possible
+
 ## Project Overview
 
 This is an e-commerce platform built as a **Spring Boot monolith** using Kotlin. The architecture has been migrated from a microservices setup (payment-service, notification-service) into a single backend application for better performance and reduced complexity.
