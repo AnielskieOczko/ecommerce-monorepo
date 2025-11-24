@@ -41,12 +41,10 @@ class SecurityConfig(
 
     @Bean
     fun authenticationProvider(): DaoAuthenticationProvider {
-        return DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService)
+        return DaoAuthenticationProvider(userDetailsService).apply {
             setPasswordEncoder(passwordEncoder())
         }
     }
-
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
