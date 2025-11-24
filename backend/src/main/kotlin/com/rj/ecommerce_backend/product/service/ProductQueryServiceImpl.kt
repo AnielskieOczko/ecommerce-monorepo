@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-private val logger = KotlinLogging.logger { ProductQueryServiceImpl::class }
+private val logger = KotlinLogging.logger {}
 
 @Service
 @Transactional(readOnly = true)

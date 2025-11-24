@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
-private val logger = KotlinLogging.logger { PaymentFacade::class }
+private val logger = KotlinLogging.logger {}
 
 @Service
 @Transactional
