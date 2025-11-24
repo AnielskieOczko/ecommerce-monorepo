@@ -16,7 +16,7 @@ data class CategorySearchCriteria(
     fun toSpecification(): Specification<Category> {
         logger.debug { "Building category specification with criteria: search='${search}', name='${name}'" }
 
-        return Specification
-            .where(CategorySpecifications.withSearchCriteria(search))
+        return Specification.unrestricted<Category>()
+            .and(CategorySpecifications.withSearchCriteria(search))
     }
 }

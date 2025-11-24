@@ -14,8 +14,9 @@ data class UserSearchCriteria(
     }
 
     fun toSpecification(): Specification<User> {
-        return Specification
-            .where(UserSpecifications.withSearchCriteria(search))
+        logger.info { "Creating user search criteria with following params: search: $search, isActive: $isActive, authority: $authority" }
+        return Specification.unrestricted<User>()
+            .and(UserSpecifications.withSearchCriteria(search))
             .and(UserSpecifications.withActiveStatus(isActive))
             .and(UserSpecifications.withRole(authority))
     }

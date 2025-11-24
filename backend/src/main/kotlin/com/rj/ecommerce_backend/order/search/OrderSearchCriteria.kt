@@ -26,8 +26,8 @@ data class OrderSearchCriteria(
 
     fun toSpecification(): Specification<Order> {
         logger.debug {  }
-        return Specification
-            .where(OrderSpecifications.withSearchCriteria(search))
+        return Specification.unrestricted<Order>()
+            .and(OrderSpecifications.withSearchCriteria(search))
             .and(OrderSpecifications.withStatus(status))
             .and(OrderSpecifications.withTotalAmountRange(minAmount, maxAmount))
             .and(OrderSpecifications.createdBetween(startDate, endDate))
@@ -35,7 +35,6 @@ data class OrderSearchCriteria(
             .and(OrderSpecifications.withPaymentMethod(paymentMethod))
             .and(OrderSpecifications.hasTransactionId(hasTransactionId))
 
-
-
     }
+
 }

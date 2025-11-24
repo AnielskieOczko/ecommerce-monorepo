@@ -1,8 +1,6 @@
 package com.rj.ecommerce_backend.payment.provider
 
-// Imports from both old classes
 import com.rj.ecommerce_backend.api.shared.enums.CanonicalPaymentStatus
-import com.rj.ecommerce_backend.api.shared.enums.OrderStatus
 import com.rj.ecommerce_backend.order.domain.Order
 import com.rj.ecommerce_backend.order.service.OrderCommandService
 import com.rj.ecommerce_backend.payment.config.PaymentProperties
@@ -11,7 +9,6 @@ import com.rj.ecommerce_backend.payment.exception.PaymentLineItemCreationExcepti
 import com.rj.ecommerce_backend.payment.exception.PaymentProcessingException
 import com.rj.ecommerce_backend.payment.model.PaymentSessionDetails
 import com.stripe.exception.StripeException
-import com.stripe.model.LineItem
 import com.stripe.model.checkout.Session
 import com.stripe.param.checkout.SessionCreateParams
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -22,10 +19,9 @@ import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import kotlin.collections.isNotEmpty
 import kotlin.collections.map
 
-private val logger = KotlinLogging.logger { StripePaymentProvider::class }
+private val logger = KotlinLogging.logger { }
 
 @Component
 class StripePaymentProvider(

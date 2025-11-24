@@ -8,7 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 
 
-private val logger = KotlinLogging.logger { ProductCommandServiceImpl::class }
+private val logger = KotlinLogging.logger { }
 
 @Service
 class ProductCommandServiceImpl(

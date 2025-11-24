@@ -22,7 +22,7 @@ class TemplateService(
      * Renders an HTML string from a given template and payload.
      *
      * @param template The NotificationTemplate enum constant, which provides the template file name.
-     * @param payload The data payload (e.g., OrderPayload, WelcomePayload) containing the context for the template.
+     * @param context The notificationContext representing possible data contexts
      * @return A String containing the rendered HTML.
      * @throws TemplateProcessingException if the template rendering fails.
      */
