@@ -6,7 +6,6 @@ import org.springframework.data.jpa.domain.Specification
 import java.math.BigDecimal
 
 
-
 data class ProductSearchCriteria(
     val search: String?,
     val categoryId: String?,
@@ -24,8 +23,8 @@ data class ProductSearchCriteria(
             "Building specification with criteria: search='${search}', categoryId=${categoryId}, " +
                     "price=(${minPrice} - ${maxPrice}), stock=(${minStockQuantity} - ${maxStockQuantity})"
         }
-        return Specification
-            .where(ProductSpecifications.withSearchCriteria(search))
+        return Specification.unrestricted<Product>()
+            .and(ProductSpecifications.withSearchCriteria(search))
             .and(
                 ProductSpecifications.withCategory(categoryId)
                     ?.and(ProductSpecifications.withPriceRange(minPrice, maxPrice))
