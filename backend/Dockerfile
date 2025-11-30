@@ -25,7 +25,7 @@ WORKDIR /app
 RUN mkdir -p /app/product-images && chmod 777 /app/product-images
 
 # Copy the JAR from build stage
-COPY --from=build /app/backend/target/ecommerce_backend-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/backend/target/backend-0.0.1-SNAPSHOT.jar app.jar
 
 # Verify JAR is present
 RUN ls -l /app
