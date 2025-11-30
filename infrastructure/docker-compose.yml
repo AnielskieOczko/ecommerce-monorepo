@@ -64,7 +64,7 @@ services:
   app_backend:
     build:
       context: ..
-      dockerfile: backend/Dockerfile_dev
+      dockerfile: backend/Dockerfile
     container_name: ecommerce_backend
     restart: unless-stopped
     ports:
@@ -74,8 +74,6 @@ services:
       - ../ecommerce-monorepo/storage-local:/app/product-images
     depends_on:
       mysql:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -89,44 +87,6 @@ services:
     networks:
       - backend_network
       - frontend_network
-
-  app_notification_service:
-    build:
-      context: ..
-      dockerfile: notification-service/Dockerfile_dev
-    container_name: ecommerce_notification_service
-    restart: unless-stopped
-    ports:
-      - "8081:8081" # Use a different host port
-      - "5006:5005" # Remote debugging
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: container
-      SPRING_MAIL_HOST: mailhog
-      SPRING_MAIL_PORT: 1025
-    networks:
-      - backend_network
-
-  app_payment_service:
-    build:
-      context: ..
-      dockerfile: payment-service/Dockerfile_dev
-    container_name: ecommerce_payment_service
-    restart: unless-stopped
-    ports:
-      - "8010:8010"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: container
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-    networks:
-      - backend_network
 
   # ===========================================================================
   # MONITORING SERVICES
