@@ -75,8 +75,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SPRING_DATASOURCE_URL: ${BACKEND_DATASOURCE_URL}
@@ -99,9 +97,6 @@ services:
     ports:
       - "8081:8081" # Use a different host port
       - "5006:5005" # Remote debugging
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: container
       SPRING_MAIL_HOST: mailhog
@@ -117,9 +112,6 @@ services:
     restart: unless-stopped
     ports:
       - "8010:8010"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: container
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
