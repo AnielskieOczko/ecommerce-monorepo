@@ -1,37 +1,33 @@
-# backend/Dockerfile (Corrected and with Final Verification)
+# backend/Dockerfile
 
 # Build stage
 FROM eclipse-temurin:21-jdk-alpine AS build
+
+# Install Maven directly (avoids wrapper complexity)
+RUN apk add --no-cache maven
+
 WORKDIR /app
 
 # Copy the entire monorepo context
 COPY . .
 
-# Make the root mvnw script executable
-RUN chmod +x mvnw
+# Build all modules
+RUN mvn clean package -DskipTests
 
-# Build ALL modules using 'install' to ensure dependencies are available
-RUN ./mvnw clean package -DskipTests
-
-# This will show you exactly what is in the target directory
+# Verify build output
 RUN ls -l /app/backend/target
-
-
-# ---
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Create the directory for product images
+# Create directory for product images
 RUN mkdir -p /app/product-images && chmod 777 /app/product-images
 
-# Copy the final JAR using its specific, known name
+# Copy the JAR from build stage
 COPY --from=build /app/backend/target/ecommerce_backend-0.0.1-SNAPSHOT.jar app.jar
 
-# --- DIAGNOSTIC STEP ---
-# List the contents of the /app directory in the final image to verify the JAR is present.
-# This runs right before the ENTRYPOINT.
+# Verify JAR is present
 RUN ls -l /app
 
 EXPOSE 8080
