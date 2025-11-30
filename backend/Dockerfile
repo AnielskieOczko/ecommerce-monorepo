@@ -1,4 +1,4 @@
-# backend/Dockerfile_dev (Corrected and with Final Verification)
+# backend/Dockerfile (Corrected and with Final Verification)
 
 # Build stage
 FROM eclipse-temurin:21-jdk-alpine AS build
